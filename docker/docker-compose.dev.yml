@@ -17,6 +17,7 @@ services:
       # Mount host agent configs — same paths as outside the container
       - ~/.claude:/home/${USER}/.claude
       - ~/.copilot:/home/${USER}/.copilot
+      - ~/.github:/home/${USER}/.github
       - ~/.opencode:/home/${USER}/.opencode
       - ~/.config/opencode:/home/${USER}/.config/opencode
       - ~/.vscode:/home/${USER}/.vscode

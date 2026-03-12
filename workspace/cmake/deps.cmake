@@ -75,7 +75,9 @@ if(NOT TARGET Crow::Crow)
 endif()
 
 # ---------------------------------------------------------------------------
-# OSQP v0.6.3 — Embedded QP solver (control/mpc, multi_robot/dmpc)
+# OSQP v0.6.3 — Embedded QP solver (multi_robot/dmpc, general QP needs)
+# Note: MPC uses acados (see below) for NMPC. OSQP retained for simpler QP
+# problems (DMPC per-robot subproblems, trajectory optimization QPs).
 # ---------------------------------------------------------------------------
 if(NOT TARGET osqp::osqp)
     FetchContent_Declare(osqp
@@ -176,4 +178,29 @@ endif()
 #     set(G2O_BUILD_APPS     OFF CACHE BOOL "" FORCE)
 #     set(G2O_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 #     FetchContent_MakeAvailable(g2o)
+# endif()
+
+# ---------------------------------------------------------------------------
+# acados — real-time NMPC solver (control/mpc)
+#
+# acados uses CASAdi internally for OCP specification and HPIPM for QP solving.
+# The workflow: define OCP in Python (CASAdi + acados API) → generate C solver
+# code → link generated code into C++ module.
+#
+# Requires: Python 3 + pip install acados (for code generation only; runtime is pure C)
+# The generated C code is committed to src/generated/ so building does NOT
+# require Python.
+#
+# Uncomment this block when beginning MPC implementation (M3):
+# ---------------------------------------------------------------------------
+# if(NOT TARGET acados)
+#     FetchContent_Declare(acados
+#         GIT_REPOSITORY https://github.com/acados/acados.git
+#         GIT_TAG        v0.4.1
+#         GIT_SHALLOW    TRUE
+#     )
+#     set(ACADOS_WITH_QPOASES  OFF CACHE BOOL "" FORCE)
+#     set(ACADOS_WITH_HPIPM    ON  CACHE BOOL "" FORCE)
+#     set(BLASFEO_TARGET       GENERIC CACHE STRING "" FORCE)
+#     FetchContent_MakeAvailable(acados)
 # endif()

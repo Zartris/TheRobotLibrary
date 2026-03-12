@@ -91,10 +91,11 @@ Each domain contains sub-modules — copy only what you need.
 
 | Domain              | Sub-module                  | Description                                              |
 |---------------------|-----------------------------|----------------------------------------------------------|
-| `common`            | *(flat)*                    | `Pose2D`, `Twist`, `Transform2D`, math utils, interfaces |
+| `common`            | *(flat)*                    | `Pose2D`, `Twist`, `Transform2D`, math utils, map types, interfaces |
+|                     | `kinematics/`               | `IKinematicModel`, differential-drive, unicycle, Ackermann, swerve   |
 | `control`           | `pid/`                      | Discrete PID with anti-windup and derivative kick fix    |
 |                     | `pure_pursuit/`             | Geometric path tracker; adaptive lookahead               |
-|                     | `mpc/`                      | Receding-horizon QP controller for diff-drive            |
+|                     | `mpc/`                      | Receding-horizon NMPC via acados; diff-drive/Ackermann/swerve       |
 | `perception`        | `lidar_processing/`         | Scan filtering, DBSCAN segmentation, RANSAC lines        |
 |                     | `occupancy_grid/`           | Binary Bayes grid, log-odds update, inflation            |
 |                     | `ray_casting/`              | Bresenham / DDA ray traversal, noise injection           |
@@ -103,6 +104,7 @@ Each domain contains sub-modules — copy only what you need.
 |                     | `particle_filter/`          | Monte Carlo Localization (MCL / AMCL)                    |
 |                     | `ekf_slam/`                 | Augmented-state EKF-SLAM with landmark management        |
 |                     | `lidar_slam/`               | ICP/NDT scan matching, pose-graph SLAM                   |
+|                     | `visual_slam/`              | Feature-based visual SLAM (ORB features, loop closure)   |
 | `motion_planning`   | `global_planning/astar/`    | A\* on 2D grid; octile heuristic; weighted A\*           |
 |                     | `global_planning/dijkstra/` | Dijkstra; multi-source distance maps                     |
 |                     | `global_planning/rrt/`      | RRT and RRT\* for continuous C-space                     |
@@ -175,15 +177,22 @@ State message schema:
 - **Base URL:** `http://<host>:8080/api/`
 - All request and response bodies are JSON
 
-| Method | Endpoint               | Description                              |
-|--------|------------------------|------------------------------------------|
-| POST   | `/api/sim/start`       | Start or resume the simulation           |
-| POST   | `/api/sim/stop`        | Pause the simulation                     |
-| POST   | `/api/sim/reset`       | Reset world to initial state             |
-| PUT    | `/api/sim/speed`       | Set simulation speed multiplier          |
-| POST   | `/api/robot/cmd_vel`   | Send velocity command `{linear, angular}`|
-| GET    | `/api/scenario/list`   | List available scenario names            |
-| POST   | `/api/scenario/load`   | Load a scenario `{"name": "..."}`        |
+| Method | Endpoint                    | Description                                          |
+|--------|-----------------------------|------------------------------------------------------|
+| POST   | `/api/sim/start`            | Start or resume the simulation                       |
+| POST   | `/api/sim/stop`             | Pause the simulation                                 |
+| POST   | `/api/sim/reset`            | Reset world to initial state                         |
+| POST   | `/api/sim/step`             | Advance simulation by one tick (only while paused)   |
+| PUT    | `/api/sim/speed`            | Set simulation speed multiplier                      |
+| POST   | `/api/robot/cmd_vel`        | Send velocity command `{linear, angular}`            |
+| GET    | `/api/robot/pipeline`       | Get current module selections for each pipeline slot |
+| PUT    | `/api/robot/controller`     | Switch controller `{"type": "pid"}`                  |
+| PUT    | `/api/robot/global_planner` | Switch global planner `{"type": "astar"}`            |
+| PUT    | `/api/robot/local_planner`  | Switch local planner `{"type": "dwa"}`               |
+| PUT    | `/api/robot/estimator`      | Switch state estimator `{"type": "ekf"}`             |
+| PUT    | `/api/robot/kinematics`     | Switch kinematic model `{"type": "differential_drive"}`|
+| GET    | `/api/scenario/list`        | List available scenario names                        |
+| POST   | `/api/scenario/load`        | Load a scenario `{"name": "..."}`                    |
 
 ### Simulation directory layout
 
