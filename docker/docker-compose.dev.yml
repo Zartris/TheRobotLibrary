@@ -1,0 +1,31 @@
+services:
+  sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        USERNAME: ${USER}
+        USER_UID: ${UID:-1000}
+        USER_GID: ${GID:-1000}
+    image: TheRobotLibrary
+    container_name: TheRobotLibrary-sandbox
+    volumes:
+      # Mount project files — changes sync both ways
+      - .:/workspace
+      # Isolate node_modules from host
+      - sandbox_node_modules:/workspace/node_modules
+      # Mount host agent configs — same paths as outside the container
+      - ~/.claude:/home/${USER}/.claude
+      - ~/.copilot:/home/${USER}/.copilot
+      - ~/.opencode:/home/${USER}/.opencode
+      - ~/.config/opencode:/home/${USER}/.config/opencode
+      - ~/.vscode:/home/${USER}/.vscode
+      # Persist npm global installs between sessions
+      - sandbox_npm_global:/home/${USER}/.npm-global
+    stdin_open: true
+    tty: true
+    working_dir: /workspace
+
+volumes:
+  sandbox_node_modules:
+  sandbox_npm_global:

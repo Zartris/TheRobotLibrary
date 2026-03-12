@@ -1,0 +1,52 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Build args to match host user — avoids permission mismatches and path differences
+ARG USERNAME=zartris
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+# Install system dependencies + Node.js 22 via NodeSource
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    wget \
+    ca-certificates \
+    build-essential \
+    python3 \
+    python3-pip \
+    sudo \
+    vim \
+    nano \
+    procps \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Rename the existing UID/GID 1000 user/group to match the host username
+RUN EXISTING_USER=$(getent passwd $USER_UID | cut -d: -f1) \
+    && EXISTING_GROUP=$(getent group $USER_GID | cut -d: -f1) \
+    && groupmod -n $USERNAME $EXISTING_GROUP \
+    && usermod -l $USERNAME -d /home/$USERNAME -m $EXISTING_USER \
+    && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+USER $USERNAME
+WORKDIR /workspace
+
+# Set up npm global dir and ensure ~/.local/bin is in PATH for curl-installed tools
+ENV NPM_CONFIG_PREFIX=/home/$USERNAME/.npm-global
+ENV PATH=/home/$USERNAME/.npm-global/bin:/home/$USERNAME/.local/bin:$PATH
+
+RUN mkdir -p /home/$USERNAME/.npm-global /home/$USERNAME/.local/bin
+
+# Install Claude Code
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
+# Install GitHub Copilot CLI
+RUN curl -fsSL https://gh.io/copilot-install | bash
+
+# Install OpenCode
+RUN curl -fsSL https://opencode.ai/install | bash
+
+CMD ["/bin/bash"]
