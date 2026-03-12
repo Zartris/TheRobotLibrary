@@ -1,0 +1,5 @@
+# motion_planning domain aggregator
+add_subdirectory(global_planning)
+add_subdirectory(local_planning)
+add_subdirectory(trajectory_planning)
+add_subdirectory(multi_robot)

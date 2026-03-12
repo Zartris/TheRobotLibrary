@@ -1,0 +1,5 @@
+# state_estimation domain aggregator
+add_subdirectory(ekf)
+add_subdirectory(particle_filter)
+add_subdirectory(ekf_slam)
+add_subdirectory(lidar_slam)
