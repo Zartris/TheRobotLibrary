@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "git diff --name-only --diff-filter=M HEAD 2>/dev/null | grep -E '\\.(cpp|h|hpp)$' | while read f; do clang-format -i --style=file:workspace/.clang-format \"$f\" 2>/dev/null; done; true",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "if git diff --name-only 2>/dev/null | grep -q 'cmake/deps.cmake'; then echo 'BLOCK: cmake/deps.cmake has uncommitted changes. Confirm explicitly before editing this protected file.' && exit 2; fi; true",
+        "cwd": ".",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

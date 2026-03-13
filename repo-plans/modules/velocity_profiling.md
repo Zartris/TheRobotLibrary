@@ -27,6 +27,23 @@
 
 - [ ] All tests pass
 
+### Phase 4.5 — Observability
+
+> **This phase gates module completion.** Both human developers and AI agents must be able
+> to verify correct behavior through logs and metrics — not just frontend visuals.
+
+- [ ] `ILogger` injected into module constructor via `common::getLogger("velocity_profiling")` (mockable in tests)
+- [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths)
+- [ ] Hot-loop performance metrics logged at `TRACE` level (cycle time per iteration in µs, iteration count)
+- [ ] At least one test asserts expected log lines appear via stdout capture
+- [ ] Zero `ERROR`-level log entries during all nominal test runs
+
+```bash
+# Confirm logging output during tests:
+cmake --build build --target velocity_profiling_tests
+cd build && ctest -R velocity_profiling --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
+```
+
 ### Phase 5 — Simulation Integration
 
 - [ ] Called in pipeline between A* and DWA: A* produces a global `Path`, velocity profiler converts it to a `TimedPath`, DWA receives the `Path` portion and uses `TimedPath` velocity hints for its cost function (M1-K)

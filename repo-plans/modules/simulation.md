@@ -39,6 +39,23 @@
 - [ ] Integration test: robot reaches goal within 60 sim seconds
 - [ ] Module swap via REST doesn't crash
 
+### Phase 4.5 — Observability
+
+> **This phase gates module completion.** Both human developers and AI agents must be able
+> to verify correct behavior through logs and metrics — not just frontend visuals.
+
+- [ ] `ILogger` injected into module constructor via `common::getLogger("simulation")` (mockable in tests)
+- [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths)
+- [ ] Hot-loop performance metrics logged at `TRACE` level (cycle time per iteration in µs, iteration count)
+- [ ] At least one test asserts expected log lines appear via stdout capture
+- [ ] Zero `ERROR`-level log entries during all nominal test runs
+
+```bash
+# Confirm logging output during tests:
+cmake --build build --target simulation_tests
+cd build && ctest -R simulation --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
+```
+
 ### Phase 5 — Smoke Test
 
 ```bash

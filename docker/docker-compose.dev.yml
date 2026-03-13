@@ -7,26 +7,23 @@ services:
         USERNAME: ${USER}
         USER_UID: ${UID:-1000}
         USER_GID: ${GID:-1000}
-    image: TheRobotLibrary
-    container_name: TheRobotLibrary-sandbox
+    image: therobotlibrary
+    container_name: therobotlibrary-sandbox
     volumes:
       # Mount project files — changes sync both ways
-      - .:/workspace
-      # Isolate node_modules from host
-      - sandbox_node_modules:/workspace/node_modules
-      # Mount host agent configs — same paths as outside the container
-      - ~/.claude:/home/${USER}/.claude
-      - ~/.copilot:/home/${USER}/.copilot
-      - ~/.github:/home/${USER}/.github
-      - ~/.opencode:/home/${USER}/.opencode
-      - ~/.config/opencode:/home/${USER}/.config/opencode
-      - ~/.vscode:/home/${USER}/.vscode
-      # Persist npm global installs between sessions
-      - sandbox_npm_global:/home/${USER}/.npm-global
+      - ..:/repo
+      # Mount repo-level (local/project) configs
+      - ../.claude:/repo/.claude
+      - ../.github:/repo/.github
+      - ../.opencode:/repo/.opencode
+      - ../.vscode:/repo/.vscode
+      # Mount global-level (user) configs
+      - ${HOME}/.claude:/home/${USER}/.claude
+      - ${HOME}/.copilot:/home/${USER}/.copilot
+      - ${HOME}/.github:/home/${USER}/.github
+      - ${HOME}/.opencode:/home/${USER}/.opencode
+      - ${HOME}/.config/opencode:/home/${USER}/.config/opencode
+      - ${HOME}/.vscode:/home/${USER}/.vscode
     stdin_open: true
     tty: true
-    working_dir: /workspace
-
-volumes:
-  sandbox_node_modules:
-  sandbox_npm_global:
+    working_dir: /repo

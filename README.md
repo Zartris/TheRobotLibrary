@@ -60,8 +60,8 @@ TheRobotLibrary/
 
 ```bash
 cd docker
-docker compose -f docker-compose.dev.yml up -d
-docker exec -it TheRobotLibrary bash
+docker compose -f docker-compose.dev.yml up -d --build
+docker exec -it therobotlibrary-sandbox bash
 ```
 
 ### Using a robotics module in your own project
