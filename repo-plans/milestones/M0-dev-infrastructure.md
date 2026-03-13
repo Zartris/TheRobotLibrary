@@ -37,7 +37,13 @@ Every line of code written after this milestone benefits from CI, linting, AI ag
 ### Planning Artifacts
 
 - [ ] `repo-plans/module-task-template.md` — Standard per-module workflow
-- [ ] `repo-plans/milestones/M0-M10` — Skeleton milestone docs (this set of files)
+- [ ] `repo-plans/milestones/M0-M12` — Skeleton milestone docs (this set of files)
+
+### Fleet Management Scaffold
+
+- [ ] `workspace/robotics/fleet_management/` directory tree created (CMakeLists.txt stubs + READMEs + theory.md for all 4 sub-modules)
+- [ ] Added to `workspace/robotics/CMakeLists.txt` via `add_subdirectory(fleet_management)`
+- [ ] All fleet_management sub-modules build as INTERFACE targets (no source files yet)
 
 ---
 
@@ -48,6 +54,8 @@ Every line of code written after this milestone benefits from CI, linting, AI ag
 3. `pre-commit run --all-files` passes
 4. AI agent instructions exist and reference `architecture.md` + naming conventions
 5. All milestone doc skeletons exist in `repo-plans/milestones/`
+6. Fleet management scaffold builds cleanly as INTERFACE targets
+7. `common/logging/` scaffold exists (`ILogger`, `SpdlogLogger`, `getLogger()` stubs, `docs/theory.md`); all modules build with logging sub-target present
 
 ---
 

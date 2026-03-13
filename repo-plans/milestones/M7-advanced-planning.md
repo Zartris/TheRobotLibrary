@@ -105,6 +105,7 @@ Time-optimal trajectory generation (TOPP-RA / minimum-snap).
 2. Swap via REST without crash
 3. TEB produces smoother/faster paths than A* + trapezoidal
 4. All unit tests pass
+5. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
 
 ## NOT IN
 

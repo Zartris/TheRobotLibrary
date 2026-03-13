@@ -71,6 +71,7 @@ The project is portfolio-ready: live documentation site, demo GIFs, standalone e
 4. All CI checks green, coverage ≥ 80%
 5. Web demo accessible via URL
 6. A new developer can go from zero to running demo in < 10 minutes
+7. All modules pass Phase 4.5 — Observability gate (confirmed during M1–M10 delivery; verified in CI)
 
 ## NOT IN
 

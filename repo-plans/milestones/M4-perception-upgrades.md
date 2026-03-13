@@ -71,6 +71,7 @@ Expand obstacles by robot radius for collision-safe planning.
 2. Detected obstacles tracked across frames with stable IDs
 3. Inflation layer prevents close-to-wall path planning
 4. All unit tests pass, CI green
+5. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
 
 ## NOT IN
 

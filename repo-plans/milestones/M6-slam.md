@@ -118,6 +118,7 @@ Feature-based visual SLAM. Monocular or RGB-D depending on camera sim chosen.
 3. Lidar-SLAM trajectory error ≤ 0.5m over 100m traverse
 4. Visual SLAM tracks features and builds consistent landmark map
 5. All unit tests pass
+6. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
 
 ## NOT IN
 

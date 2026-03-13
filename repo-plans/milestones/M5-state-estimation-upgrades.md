@@ -53,6 +53,7 @@ Monte Carlo Localization (MCL) for known-map localization.
 2. Swap EKF ↔ particle_filter mid-run without crash
 3. All unit tests pass
 4. Visual difference clear in frontend (ellipse vs particle cloud)
+5. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
 
 ## NOT IN
 

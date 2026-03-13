@@ -28,6 +28,8 @@ Geometric path follower for differential-drive. Adaptive lookahead distance (spe
 - [ ] Sim integration: selectable via `PUT /api/robot/controller {"type": "pure_pursuit"}`
 - [ ] Frontend: render lookahead point + lookahead circle
 
+### 
+
 ### mpc
 
 Receding-horizon NMPC via **acados** (with CASAdi for OCP specification). Nonlinear kinematic model — works with any `IKinematicModel`.
@@ -69,24 +71,45 @@ Expand the kinematic model set in `common/kinematics/`. All implement `IKinemati
 
 ---
 
+### cbf
+
+Control Barrier Function safety filter. Decorator wrapping any `IController` — filters the
+nominal command through a QP that guarantees collision-free velocity within defined safe sets.
+
+- [ ] `include/cbf/cbf_safety_filter.hpp` — `CbfSafetyFilter : IController`, `CbfConfig`
+- [ ] `src/cbf_safety_filter.cpp` — Eigen-based QP (no external solver needed)
+- [ ] `tests/test_cbf_safety_filter.cpp`:
+  - No obstacles: CBF output equals nominal command
+  - Single obstacle on heading: CBF deflects velocity to maintain safe distance
+  - Multiple obstacles: all safety constraints satisfied simultaneously
+  - Safety radius = 0: same behavior as bare nominal controller
+- [ ] Sim integration: `PUT /api/robot/controller {"type":"cbf","wraps":"pid"}` — CBF wraps the specified nominal controller
+- [ ] Frontend: render safety circle (r_safe) around robot when CBF active
+
+---
+
 ## Deliverables
 
 - [ ] pure_pursuit module: interface, implementation, tests, sim integration
 - [ ] mpc module: interface, implementation, tests, sim integration
+- [ ] cbf module: interface, implementation, tests, sim integration
 - [ ] 3 additional kinematic models (unicycle, Ackermann, swerve): tests, sim integration
 - [ ] Controller hot-swap works mid-run without crash
 - [ ] Kinematics hot-swap works mid-run without crash
+- [ ] CBF wrapping any controller works mid-run without crash
 - [ ] Frontend shows controller-specific and kinematics-specific visualization
-- [ ] Mini-demo: compare tracking quality PID → pure_pursuit → MPC on same path; compare kinematics on same scenario
+- [ ] Mini-demo: compare tracking quality PID → pure_pursuit → MPC on same path; compare kinematics on same scenario; show CBF preventing collision on near-miss obstacle
 
 ## Exit Criteria
 
-1. All three controllers navigate the same scenarios successfully
-2. All four kinematic models work with PID (at minimum)
-3. Unit tests pass for all new modules
-4. REST swap mid-run without crash (controller + kinematics independently)
-5. Visual difference apparent in frontend (PID oscillates, pure_pursuit smooth, MPC optimal; Ackermann has turning radius constraints, swerve can strafe)
+1. All three controllers (PID, pure_pursuit, MPC) navigate the same scenarios successfully
+2. CBF wrapping PID prevents collision on a scenario where bare PID would fail
+3. All four kinematic models work with PID (at minimum)
+4. Unit tests pass for all new modules
+5. REST swap mid-run without crash (controller + kinematics independently)
+6. Visual difference apparent in frontend (PID oscillates, pure_pursuit smooth, MPC optimal; Ackermann has turning radius constraints, swerve can strafe; CBF shows safety circle)
+7. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
 
 ## NOT IN
 
-Changes to planners, estimators, or perception.
+Adaptive control, Frenet controller (M11). Changes to planners, estimators, or perception.

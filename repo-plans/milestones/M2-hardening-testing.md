@@ -51,6 +51,7 @@ Make the M1 codebase rock-solid before adding new features. Stabilize interfaces
 2. All 3+ integration scenarios pass in CI
 3. Zero known bugs
 4. Interfaces documented and frozen
+5. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
 
 ---
 

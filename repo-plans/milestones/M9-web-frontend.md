@@ -61,6 +61,7 @@ A browser-based frontend with the same visual elements and controls as the nativ
 3. Lighthouse performance ≥ 90
 4. Static build deploys successfully
 5. Feature parity with native frontend (for features implemented so far)
+6. WebSocket connection errors and reconnection events logged to browser console at structured format (for AI agent verification)
 
 ## NOT IN
 

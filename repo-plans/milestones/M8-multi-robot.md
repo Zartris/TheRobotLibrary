@@ -107,6 +107,7 @@ MADER: decentralized asynchronous replanning. Shared committed trajectory segmen
 2. All unit tests pass
 3. Algorithm switching visible in frontend
 4. CBS finds provably optimal solution on small instances
+5. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
 
 ## NOT IN
 

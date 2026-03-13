@@ -93,9 +93,14 @@ Each domain contains sub-modules — copy only what you need.
 |---------------------|-----------------------------|----------------------------------------------------------|
 | `common`            | *(flat)*                    | `Pose2D`, `Twist`, `Transform2D`, math utils, map types, interfaces |
 |                     | `kinematics/`               | `IKinematicModel`, differential-drive, unicycle, Ackermann, swerve   |
+|                     | `logging/`                  | `ILogger`, `SpdlogLogger`, `getLogger()` — observability for all modules |
 | `control`           | `pid/`                      | Discrete PID with anti-windup and derivative kick fix    |
 |                     | `pure_pursuit/`             | Geometric path tracker; adaptive lookahead               |
 |                     | `mpc/`                      | Receding-horizon NMPC via acados; diff-drive/Ackermann/swerve       |
+|                     | `cbf/`                      | CBF safety filter — decorator wrapping any IController   |
+|                     | `adaptive/gain_scheduling/` | Adaptive PID — online gain adjustment from tracking error|
+|                     | `adaptive/rls/`             | Recursive Least Squares parameter estimator              |
+|                     | `frenet/`                   | Frenet-Serret frame path following controller            |
 | `perception`        | `lidar_processing/`         | Scan filtering, DBSCAN segmentation, RANSAC lines        |
 |                     | `occupancy_grid/`           | Binary Bayes grid, log-odds update, inflation            |
 |                     | `ray_casting/`              | Bresenham / DDA ray traversal, noise injection           |
@@ -118,6 +123,10 @@ Each domain contains sub-modules — copy only what you need.
 |                     | `multi_robot/cbs/`          | Conflict-Based Search (optimal MAPF)                 |
 |                     | `multi_robot/dmpc/`         | Distributed MPC with inter-robot trajectory constraints |
 |                     | `multi_robot/mader/`        | MADER: decentralized async replanning (MIT ACL)       |
+| `fleet_management`  | `vda5050/`                  | VDA 5050 v2.0 message types + nlohmann/json serialization|
+|                     | `task_allocation/`          | `ITaskAllocator` + greedy/auction allocators             |
+|                     | `fleet_monitor/`            | `IFleetMonitor` — per-robot state aggregation            |
+|                     | `battery_management/`       | `IBatteryManager` — charge tracking + route-to-charger   |
 
 ### Dependency graph between modules
 
@@ -126,6 +135,7 @@ common  ←  control
 common  ←  perception
 common  ←  state_estimation
 common  ←  motion_planning
+common  ←  fleet_management
 ```
 
 No module other than `common` may depend on another domain module. If cross-domain shared
@@ -191,8 +201,11 @@ State message schema:
 | PUT    | `/api/robot/local_planner`  | Switch local planner `{"type": "dwa"}`               |
 | PUT    | `/api/robot/estimator`      | Switch state estimator `{"type": "ekf"}`             |
 | PUT    | `/api/robot/kinematics`     | Switch kinematic model `{"type": "differential_drive"}`|
-| GET    | `/api/scenario/list`        | List available scenario names                        |
-| POST   | `/api/scenario/load`        | Load a scenario `{"name": "..."}`                    |
+| GET    | `/api/fleet/state`          | Return full fleet state (all robots + chargers)              |
+| POST   | `/api/fleet/task`           | Submit VDA 5050 Order for task allocation                    |
+| POST   | `/api/fleet/instant_action` | Send instant action to a specific robot                      |
+| GET    | `/api/fleet/allocator`      | Get current task allocator type                              |
+| PUT    | `/api/fleet/allocator`      | Switch task allocator `{"type": "greedy"|"auction"}`         |
 
 ### Simulation directory layout
 

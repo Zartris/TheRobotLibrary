@@ -20,7 +20,7 @@ A robot navigates from start to goal in a 2D room: perceiving via lidar, localiz
 | Perception | `ray_casting` | Bresenham ray cast on OccupancyGrid |
 | Perception | `occupancy_grid` | Binary grid with log-odds update from laser scans |
 | Perception | `lidar_processing` | Range clipping + optional median filter |
-| State Est. | `ekf` | 2D EKF: odometry prediction + landmark update |
+| State Est. | `ekf` | 3D EKF: IMU, twist, pose updates. odometry prediction + landmark update |
 | Control | `pid` | Discrete PID with anti-windup for heading/speed |
 | Planning | `astar` | A* on occupancy grid, octile heuristic, 8-connected |
 | Planning | `dwa` | Basic DWA: velocity sampling, trajectory rollout, obstacle/goal scoring |
@@ -237,7 +237,7 @@ Trapezoidal velocity profile along a path.
 
 ### M1-J: Simulation Server
 
-World model, diff-drive kinematics, simulated lidar, Crow WS+REST, scenario loader.
+World model, kinematics, simulated lidar, [Crow](https://github.com/CrowCpp/Crow) WS+REST, scenario loader.
 
 - [ ] `include/simulation/world.hpp` — `WorldModel` (grid map, robot state, landmarks)
 - [ ] `include/simulation/robot.hpp` — `Robot` (pose, velocity, uses `IKinematicModel` for `step()`)
@@ -313,3 +313,4 @@ SDL2 + ImGui desktop app connected to sim via WS + REST.
 8. All visible in ImGui frontend: grid, robot, lidar, path, EKF ellipse
 9. All unit tests pass, CI green
 10. Module swapping via REST works (controller at minimum)
+11. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
