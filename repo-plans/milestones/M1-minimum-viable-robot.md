@@ -17,6 +17,7 @@ A robot navigates from start to goal in a 2D room: perceiving via lidar, localiz
 | Domain | Module | Scope |
 |--------|--------|-------|
 | Common | `common` | Pose2D, Twist, Transform2D, OccupancyGrid, LaserScan, Path, geometry utils, kinematics models, map types, swappable interfaces |
+| Common | `common/transforms` | SE2, SE3, SO3 rigid-body types (header-only INTERFACE; extends Transform2D for 3D use in M6+) |
 | Perception | `ray_casting` | Bresenham ray cast on OccupancyGrid |
 | Perception | `occupancy_grid` | Binary grid with log-odds update from laser scans |
 | Perception | `lidar_processing` | Range clipping + optional median filter |
