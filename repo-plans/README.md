@@ -16,7 +16,8 @@ Get the simplest version of every layer running end-to-end first (M1), then upgr
 | **M3** | [Control Upgrades](milestones/M3-control-upgrades.md) | pure_pursuit, MPC (acados), CBF safety filter, additional kinematics | Not Started |
 | **M4** | [Perception Upgrades](milestones/M4-perception-upgrades.md) | obstacle_detection, RANSAC, inflation, dynamic obstacles | Not Started |
 | **M5** | [State Estimation Upgrades](milestones/M5-state-estimation-upgrades.md) | Particle filter (MCL) as EKF alternative | Not Started |
-| **M6** | [SLAM](milestones/M6-slam.md) | EKF-SLAM + lidar SLAM + camera-based visual SLAM | Not Started |
+| **M6** | [Visual Perception Building Blocks](milestones/M6-visual-perception.md) | `common/camera.hpp`, `feature_extraction`, `visual_odometry`, 2.5D sim renderer | Not Started |
+| **M6.5** | [SLAM](milestones/M6.5-slam.md) | EKF-SLAM + lidar SLAM + camera-based visual SLAM | Not Started |
 | **M7** | [Advanced Planning](milestones/M7-advanced-planning.md) | Dijkstra, RRT*, spline fitting, TEB, time-optimal | Not Started |
 | **M8** | [Multi-Robot](milestones/M8-multi-robot.md) | N-robot sim + ORCA → priority → CBS → DMPC → MADER | Not Started |
 | **M9** | [Web Frontend](milestones/M9-web-frontend.md) | TypeScript/React Canvas 2D app, deployable static site | Not Started |
@@ -28,19 +29,21 @@ Get the simplest version of every layer running end-to-end first (M1), then upgr
 
 ```
 M0 (infra)
- └→ M1 (minimum viable robot)
+ └→ M1 (minimum viable robot + common/transforms)
       └→ M2 (hardening & testing)
-           ├→ M3 (control upgrades) → M11 (advanced control)
+           ├→ M3 (control upgrades)          → M11 (advanced control)
            ├→ M4 (perception upgrades)
+           │    └→ M6 (visual perception)
+           │         └→ M6.5 (SLAM) ←── M5
            ├→ M5 (state estimation upgrades)
-           │    └→ M6 (SLAM) ←── M4
+           │    └→ M6.5 (SLAM)
            ├→ M7 (advanced planning) ←── M4
-           ├→ M8 (multi-robot) ←── M3, M7 → M12 (fleet management)
+           ├→ M8 (multi-robot) ←── M3, M7    → M12 (fleet management)
            ├→ M9 (web frontend)
            └→ M10 (polish & showcase) ←── M8, M9
 ```
 
-After M2, milestones M3–M5 and M9 can be developed **in parallel** since they touch independent domains. M7 can start after M4 (needs costmaps). M8 needs M3 + M7. M11 requires M3 (stable control interfaces). M12 requires M8 (N-robot sim infrastructure). M10 can begin partially after M8; full completion requires all milestones.
+After M2, milestones M3–M5 and M9 can be developed **in parallel** since they touch independent domains. M6 (visual perception) requires M4 (occupancy grid + ray casting for the 2.5D camera renderer). M6.5 (SLAM) requires both M5 (state estimation interfaces) and M6 (feature extraction + visual odometry + camera types). M7 can start after M4 (needs costmaps). M8 needs M3 + M7. M11 requires M3 (stable control interfaces). M12 requires M8 (N-robot sim infrastructure). M10 can begin partially after M8; full completion requires all milestones.
 
 ## Folder Structure
 
