@@ -118,6 +118,7 @@ All prior planning docs (M0–M10) were complete. This session added 3 new modul
 
 ### Phase 3: Milestone Planning
 - Brainstorm → plan → execute → review workflow
+- During brainstorm, when asking questions always have a recommended answer ready to guide the response and why that is recommended (don't leave it open-ended).
 - Created all milestone docs (M0-M10), 11 per-module task files
 - Review found 16 issues (3 critical, 7 important, 6 minor) — all fixed
 

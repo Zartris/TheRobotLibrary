@@ -24,6 +24,10 @@ TheRobotLibrary is a modular C++20 robotics library with three strictly separate
 - **Testing**: Catch2 v3 (`TEST_CASE`, `REQUIRE`, `CHECK`)
 - **Logging**: All modules must use `common/logging/` (`ILogger` + `SpdlogLogger`) — this is mandatory before a module is considered complete
 
+### Workflow
+- Use superpower workflow: Brainstorm → plan → execute → review for all new features, modules, and milestones.
+- During brainstorm, when asking questions always have a recommended answer ready to guide the response and why that is recommended (don't leave it open-ended).
+
 ## Module Template
 
 Every module follows this layout:

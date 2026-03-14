@@ -31,6 +31,10 @@ TheRobotLibrary is a modular C++20 robotics library with three strictly separate
 - `workspace/cmake/deps.cmake` is protected — do not edit without explicit intent
 - Format: `clang-format -i --style=file:workspace/.clang-format <file>`
 
+### Workflow
+- Use superpower workflow: Brainstorm → plan → execute → review for all new features, modules, and milestones.
+- During brainstorm, when asking questions always have a recommended answer ready to guide the response and why that is recommended (don't leave it open-ended).
+
 ## Module Template
 
 ```

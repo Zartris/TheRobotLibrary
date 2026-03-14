@@ -58,6 +58,9 @@ Robotics modules → only depend on common
 Simulation       → may depend on robotics modules
 Frontends        → network API only (no library links)
 ```
+### Workflow
+- Use superpower workflow: Brainstorm → plan → execute → review for all new features, modules, and milestones.
+- During brainstorm, when asking questions always have a recommended answer ready to guide the response and why that is recommended (don't leave it open-ended).
 
 ## Module Template
 
