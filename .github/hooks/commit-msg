@@ -1,0 +1,9 @@
+#!/bin/sh
+# Reject commits that contain AI co-authorship trailers.
+# These should never appear in this repository's history.
+
+if grep -qi "^Co-Authored-By:.*claude\|^Co-Authored-By:.*anthropic\|^Co-Authored-By:.*openai\|^Co-Authored-By:.*gemini\|^Co-Authored-By:.*copilot" "$1"; then
+    echo "ERROR: AI Co-Authored-By trailer detected in commit message."
+    echo "Remove the 'Co-Authored-By:' line and retry."
+    exit 1
+fi
