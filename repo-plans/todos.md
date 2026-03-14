@@ -131,98 +131,57 @@ Fleshed out todo list:
   - [ ] Tests: synthetic stereo pair with known disparity → depth error < tolerance
 - **✅ Resolution (2026-03-14):** Scaffolded in M17 — Camera Perception II. `workspace/robotics/perception/stereo_depth/` created; `repo-plans/modules/stereo_depth.md` created; wired into `perception/CMakeLists.txt`.
 
-### [P5] control/mppi — Model Predictive Path Integral
+### ✅ [P5] control/mppi — Model Predictive Path Integral
 - **Domain:** `control/mppi`
-- **Why missing:** MPPI is the modern stochastic MPC variant — handles non-convex costs, used in aggressive autonomous driving. Academic hotspot. No mention in any milestone.
-- **Scope:**
-  - [ ] Scaffold `workspace/robotics/control/mppi/`
-  - [ ] `MPPIController : IController` — Monte Carlo rollouts, importance-weighted cost averaging
-  - [ ] Configurable: N rollouts, horizon H, temperature λ, noise covariance Σ
-  - [ ] Tests: navigate around obstacle → sampled distribution clusters around valid trajectories
+- **✅ Resolution (2026-03-14):** Scaffolded in M18 — Advanced Nonlinear Control. `workspace/robotics/control/mppi/` created; `repo-plans/modules/mppi.md` created; wired into `control/CMakeLists.txt`.
 
-### [P5] motion_planning/local_planning/potential_field — Artificial potential field planner
+### ✅ [P5] motion_planning/local_planning/potential_field — Artificial potential field planner
 - **Domain:** `motion_planning/local_planning/potential_field`
-- **Why missing:** Potential fields are the simplest reactive planner and a key teaching tool (attractive + repulsive field, local minima, oscillation). Not covered by DWA or TEB.
-- **Scope:**
-  - [ ] Scaffold `workspace/robotics/motion_planning/local_planning/potential_field/`
-  - [ ] `PotentialFieldPlanner` — goal attractive field + obstacle repulsive fields
-  - [ ] Local minima escape: random perturbation or wavefront fallback
-  - [ ] Tests: clear path → reaches goal; obstacle → deflects; local minimum → escape triggered
+- **✅ Resolution (2026-03-14):** Scaffolded in M20 — Planning Upgrades III. `workspace/robotics/motion_planning/local_planning/potential_field/` created; `repo-plans/modules/potential_field.md` created; wired into `local_planning/CMakeLists.txt`.
 
-### [P5] state_estimation/factor_graph — Factor graph SLAM backend (lightweight g2o-style)
+### ✅ [P5] state_estimation/factor_graph — Factor graph SLAM backend (lightweight g2o-style)
 - **Domain:** `state_estimation/factor_graph`
-- **Why missing:** M6's NOT-IN explicitly excludes GTSAM/g2o but long-term a reusable factor graph (Eigen-only) enables consistent backends for lidar SLAM, visual SLAM, and VIO. Foundational for M13+ if the library grows.
-- **Scope:**
-  - [ ] Scaffold `workspace/robotics/state_estimation/factor_graph/`
-  - [ ] Variable nodes (pose, landmark, bias) + factor types (odometry, observation, prior)
-  - [ ] Gauss-Newton optimizer with sparse Cholesky (Eigen)
-  - [ ] Tests: 2-node odometry chain → correct; 4-node loop closure → optimized
+- **✅ Resolution (2026-03-14):** Scaffolded in M21 — Estimation & Test Foundations. `workspace/robotics/state_estimation/factor_graph/` created; `repo-plans/modules/factor_graph.md` created; wired into `state_estimation/CMakeLists.txt`.
 
-### [P6] perception/depth_camera — RGB-D / structured light camera model
+### ✅ [P6] perception/depth_camera — RGB-D / structured light camera model
 - **Domain:** `perception/depth_camera`
-- **Why missing:** RGB-D cameras (Kinect, RealSense) are ubiquitous but there is no module for handling their output (depth image → point cloud, invalid pixel filtering, hole filling). Required for RGB-D SLAM.
-- **Scope:**
-  - [ ] Scaffold `workspace/robotics/perception/depth_camera/`
-  - [ ] `DepthImageProcessor` — depth → point cloud, hole filling, outlier removal, frustum filtering
-  - [ ] `RgbdCamera` type wrapping RGB + aligned depth
-  - [ ] Tests: depth image with holes → filled output; known depth → correct point cloud
+- **✅ Resolution (2026-03-14):** Scaffolded in M19 — Depth Perception & 3D Understanding. `workspace/robotics/perception/depth_camera/` created; `repo-plans/modules/depth_camera.md` created; wired into `perception/CMakeLists.txt`.
 
-### [P6] control/feedback_linearization — Nonlinear control via state/input transformation
+### ✅ [P6] control/feedback_linearization — Nonlinear control via state/input transformation
 - **Domain:** `control/feedback_linearization`
-- **Why missing:** Feedback linearization (exact linearization via diffeomorphism) is a key nonlinear control technique taught in every advanced robotics course. Pairs well with LQR (apply LQR to linearized system).
-- **Scope:**
-  - [ ] Scaffold `workspace/robotics/control/feedback_linearization/`
-  - [ ] Input-output linearization for differential-drive (chained form)
-  - [ ] Tests: nonlinear system tracks linear reference; numerical check of Lie derivatives
+- **✅ Resolution (2026-03-14):** Scaffolded in M18 — Advanced Nonlinear Control. `workspace/robotics/control/feedback_linearization/` created; `repo-plans/modules/feedback_linearization.md` created; wired into `control/CMakeLists.txt`.
 
-### [P7] perception/object_detection_3d — 3D bounding box detection from point clouds
+### ✅ [P7] perception/object_detection_3d — 3D bounding box detection from point clouds
 - **Domain:** `perception/object_detection_3d`
-- **Why missing:** `obstacle_detection` (M4) does 2D DBSCAN clustering. True 3D object detection (oriented bounding boxes from 3D lidar) is absent and needed for environments with varied-height obstacles.
-- **Scope:**
-  - [ ] `ObjectDetector3D` — 3D DBSCAN + oriented bounding box fitting (PCA-based)
-  - [ ] Object classification placeholder (size-based: person / car / unknown)
+- **✅ Resolution (2026-03-14):** Scaffolded in M19 — Depth Perception & 3D Understanding. `workspace/robotics/perception/object_detection_3d/` created; `repo-plans/modules/object_detection_3d.md` created; wired into `perception/CMakeLists.txt`.
 
-### [P7] motion_planning/global_planning/informed_rrt_star — Informed RRT*
+### ✅ [P7] motion_planning/global_planning/informed_rrt_star — Informed RRT*
 - **Domain:** `motion_planning/global_planning/informed_rrt_star`
-- **Why missing:** Informed RRT* focuses sampling inside the ellipsoidal heuristic region once a solution is found — orders-of-magnitude faster convergence than vanilla RRT*. Natural incremental upgrade.
-- **Scope:**
-  - [ ] `InformedRRTStar` — extends RRT* with prolate hyperspheroid sampling after first solution
+- **✅ Resolution (2026-03-14):** Scaffolded in M20 — Planning Upgrades III. `workspace/robotics/motion_planning/global_planning/informed_rrt_star/` created; `repo-plans/modules/informed_rrt_star.md` created; wired into `global_planning/CMakeLists.txt`.
 
-### [P8] perception/lane_detection — Lane marking extraction (automotive / structured environments)
+### ✅ [P8] perception/lane_detection — Lane marking extraction (automotive / structured environments)
 - **Domain:** `perception/lane_detection`
-- **Why missing:** Useful for autonomous vehicle scenarios (Ackermann kinematics + lane following), but very application-specific.
-- **Scope:**
-  - [ ] `LaneDetector` — Hough transform on binary edge image, lane polynomial fitting, left/right lane assignment
+- **✅ Resolution (2026-03-14):** Scaffolded in M22 — Optimal Output Feedback & Automotive Perception. `workspace/robotics/perception/lane_detection/` created; `repo-plans/modules/lane_detection.md` created; wired into `perception/CMakeLists.txt`.
 
-### [P8] control/lqg — Linear Quadratic Gaussian (LQR + Kalman observer)
+### ✅ [P8] control/lqg — Linear Quadratic Gaussian (LQR + Kalman observer)
 - **Domain:** `control/lqg`
-- **Why missing:** LQG = LQR + Kalman filter — the complete optimal output-feedback controller. Natural extension once LQR (P2) is implemented.
-- **Scope:**
-  - [ ] `LQGController : IController` — LQR state feedback + internal EKF state observer
-  - [ ] Tests: output-only measurements → converges; separation principle holds
+- **✅ Resolution (2026-03-14):** Scaffolded in M22 — Optimal Output Feedback & Automotive Perception. `workspace/robotics/control/lqg/` created; `repo-plans/modules/lqg.md` created; wired into `control/CMakeLists.txt`.
 
-### [P9] perception/semantic_segmentation — Pixel-level scene classification
+### ✅ [P9] perception/semantic_segmentation — Pixel-level scene classification
 - **Domain:** `perception/semantic_segmentation`
-- **Why missing:** Semantic understanding (free space / obstacle / road) from camera. Computationally heavy; out of scope for a C++ CPU library without GPU/DL framework but worth tracking.
-- **Note:** Likely requires a DL backend (ONNX Runtime or TensorRT) — dependency decision needed.
+- **✅ Resolution (2026-03-14):** Scaffolded in M23 — Lattice Planning & Semantic Vision. Stub-only scope (no DL inference); `ISemanticSegmenter` + `StubSemanticSegmenter` + `PluginSemanticSegmenter` (std::function DL plugin point). `workspace/robotics/perception/semantic_segmentation/` created; `repo-plans/modules/semantic_segmentation.md` created; wired into `perception/CMakeLists.txt`.
 
-### [P9] motion_planning/global_planning/lattice_planner — State lattice planner
+### ✅ [P9] motion_planning/global_planning/lattice_planner — State lattice planner
 - **Domain:** `motion_planning/global_planning/lattice_planner`
-- **Why missing:** Lattice planners generate pre-computed motion primitives over a discrete state lattice — very effective for structured environments and Ackermann vehicles. More principled than RRT for on-road driving.
-- **Scope:**
-  - [ ] `LatticePlanner` — pre-computed motion primitives + graph search (Dijkstra/A*)
+- **✅ Resolution (2026-03-14):** Scaffolded in M23 — Lattice Planning & Semantic Vision. `workspace/robotics/motion_planning/global_planning/lattice_planner/` created; `repo-plans/modules/lattice_planner.md` created; wired into `global_planning/CMakeLists.txt`.
 
-### [P10] fleet_management/charging_station — Charging station assignment and queuing
+### ✅ [P10] fleet_management/charging_station — Charging station assignment and queuing
 - **Domain:** `fleet_management/charging_station`
-- **Why missing:** `battery_management` tracks battery state but there is no module for assigning robots to charging stations, managing queues, or predicting charge completion time.
-- **Scope:**
-  - [ ] `ChargingStationManager` — station registry, charge queue, priority-based assignment
+- **✅ Resolution (2026-03-14):** Scaffolded in M24 — Fleet Operations. `workspace/robotics/fleet_management/charging_station/` created; `repo-plans/modules/charging_station.md` created; wired into `fleet_management/CMakeLists.txt`.
 
-### [P10] common/noise_models — Sensor noise and perturbation models
+### ✅ [P10] common/noise_models — Sensor noise and perturbation models
 - **Domain:** `common/noise_models`
-- **Why missing:** Gaussian noise, outliers, and systematic bias are generated ad hoc in tests. A shared noise model library keeps tests reproducible and matches real sensor specs.
-- **Scope:**
-  - [ ] `GaussianNoise<T>`, `UniformNoise<T>`, `OutlierInjector` — seeded RNG wrappers
+- **✅ Resolution (2026-03-14):** Scaffolded in M21 — Estimation & Test Foundations. Header-only INTERFACE library. `workspace/robotics/common/noise_models/` created; `repo-plans/modules/noise_models.md` created; wired into `common/CMakeLists.txt`.
 
 ---
 

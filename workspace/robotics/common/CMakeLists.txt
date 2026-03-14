@@ -41,6 +41,7 @@ add_library(robotlib::common ALIAS common)
 # ── Sub-modules ──────────────────────────────────────────────────────────────
 add_subdirectory(logging)
 add_subdirectory(transforms)
+add_subdirectory(noise_models)
 
 # ── Tests ────────────────────────────────────────────────────────────────────
 if(BUILD_TESTING AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")

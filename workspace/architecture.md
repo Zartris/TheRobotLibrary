@@ -94,6 +94,7 @@ Each domain contains sub-modules — copy only what you need.
 | `common`            | *(flat)*                    | `Pose2D`, `Twist`, `Transform2D`, math utils, map types, interfaces |
 |                     | `kinematics/`               | `IKinematicModel`, differential-drive, unicycle, Ackermann, swerve   |
 |                     | `logging/`                  | `ILogger`, `SpdlogLogger`, `getLogger()` — observability for all modules |
+|                     | `noise_models/`             | `GaussianNoise<T>`, `UniformNoise<T>`, `OutlierInjector<T>` — seeded, reproducible (header-only) |
 | `control`           | `pid/`                      | Discrete PID with anti-windup and derivative kick fix    |
 |                     | `pure_pursuit/`             | Geometric path tracker; adaptive lookahead               |
 |                     | `mpc/`                      | Receding-horizon NMPC via acados; diff-drive/Ackermann/swerve       |
@@ -103,6 +104,9 @@ Each domain contains sub-modules — copy only what you need.
 |                     | `frenet/`                   | Frenet-Serret frame path following controller            |
 |                     | `lqr/`                      | Discrete-time infinite-horizon LQR; DARE solver via Eigen |
 |                     | `stanley/`                  | Stanley geometric path tracker; heading + speed-norm CTE  |
+|                     | `mppi/`                     | Model Predictive Path Integral; N Monte Carlo rollouts, importance-weighted update |
+|                     | `feedback_linearization/`   | Input-output linearization for diff-drive (chained form); Lie derivative check |
+|                     | `lqg/`                      | LQG controller = LQR feedback + internal EKF observer; output-only measurements |
 | `perception`        | `lidar_processing/`         | Scan filtering, DBSCAN segmentation, RANSAC lines        |
 |                     | `occupancy_grid/`           | Binary Bayes grid, log-odds update, inflation            |
 |                     | `ray_casting/`              | Bresenham / DDA ray traversal, noise injection           |
@@ -112,6 +116,10 @@ Each domain contains sub-modules — copy only what you need.
 |                     | `imu_processing/`           | Complementary filter, bias estimation, IMU pre-integration |
 |                     | `place_recognition/`        | Descriptor-based place DB; loop closure detection        |
 |                     | `stereo_depth/`             | Block-matching disparity, StereoRectifier, depth map     |
+|                     | `depth_camera/`             | RGB-D processing: depth→pointcloud, hole fill, outlier removal, `RgbdCamera` |
+|                     | `object_detection_3d/`      | 3D DBSCAN + PCA oriented bounding box; size-based classification (PERSON/CAR/UNKNOWN) |
+|                     | `lane_detection/`           | Hough on binary edge image, lane polynomial fitting (degree-2), left/right assignment |
+|                     | `semantic_segmentation/`    | `ISemanticSegmenter` + stub + `PluginSemanticSegmenter` (`std::function` DL plugin point) |
 | `state_estimation`  | `ekf/`                      | Extended Kalman Filter for diff-drive + range-bearing    |
 |                     | `particle_filter/`          | Monte Carlo Localization (MCL / AMCL)                    |
 |                     | `ekf_slam/`                 | Augmented-state EKF-SLAM with landmark management        |
@@ -120,11 +128,15 @@ Each domain contains sub-modules — copy only what you need.
 |                     | `ukf/`                      | Unscented Kalman Filter; Merwe scaled sigma points       |
 |                     | `pose_graph/`               | Gauss-Newton / LM SE2 pose graph optimizer (loop closure backend) |
 |                     | `visual_inertial_odometry/` | Loosely-coupled VIO: IMU pre-integration + VO fusion     |
+|                     | `factor_graph/`             | General factor graph: heterogeneous variables + factors, GN + Eigen `SimplicialLDLT` |
 | `motion_planning`   | `global_planning/astar/`    | A\* on 2D grid; octile heuristic; weighted A\*           |
 |                     | `global_planning/dijkstra/` | Dijkstra; multi-source distance maps                     |
 |                     | `global_planning/rrt/`      | RRT and RRT\* for continuous C-space                     |
 |                     | `global_planning/prm/`      | Probabilistic Roadmap; multi-query; Dijkstra query phase |
+|                     | `global_planning/informed_rrt_star/` | Informed RRT*: prolate hyperspheroid sampling after first solution |
+|                     | `global_planning/lattice_planner/`   | Pre-computed motion primitives, state lattice graph, A*/Dijkstra query |
 |                     | `local_planning/dwa/`       | Dynamic Window Approach; velocity sampling               |
+|                     | `local_planning/potential_field/`    | Attractive + repulsive fields; local minima escape via random perturbation |
 |                     | `trajectory_planning/velocity_profiling/` | Trapezoidal / S-curve profiles; curvature-aware speed |
 |                     | `trajectory_planning/spline_fitting/`     | Cubic spline, Catmull-Rom, B-spline path smoothing    |
 |                     | `trajectory_planning/teb/`               | Timed Elastic Band: joint path + timing optimization  |
@@ -139,6 +151,7 @@ Each domain contains sub-modules — copy only what you need.
 |                     | `task_allocation/`          | `ITaskAllocator` + greedy/auction allocators             |
 |                     | `fleet_monitor/`            | `IFleetMonitor` — per-robot state aggregation            |
 |                     | `battery_management/`       | `IBatteryManager` — charge tracking + route-to-charger   |
+|                     | `charging_station/`         | `ChargingStationManager` — station registry, priority charge queue, linear completion prediction |
 
 ### Dependency graph between modules
 
