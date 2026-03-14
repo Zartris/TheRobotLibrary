@@ -12,26 +12,13 @@ Fleshed out todo list:
 
 ---
 
-### [P1] visual_slam — Full Visual SLAM pipeline
+### ✅ [P1] visual_slam — Full Visual SLAM pipeline
 - **Domain:** `state_estimation/visual_slam`
-- **Why missing:** M6 has a complete spec (`visual_slam.hpp`, ORB features, essential-matrix VO, bag-of-words loop closure) but **no workspace directory exists**. User explicitly wants more visual SLAM coverage.
-- **Scope:**
-  - [ ] Scaffold `workspace/robotics/state_estimation/visual_slam/` (include/src/tests/docs)
-  - [ ] `VisualSLAM : ISlamEstimator` — feature extraction, feature matching, visual odometry front-end
-  - [ ] Map: 3D landmark triangulation from feature tracks
-  - [ ] Loop closure: bag-of-words or descriptor-similarity revisit detection
-  - [ ] Add camera simulation infrastructure to `common/` (`CameraIntrinsics`, `CameraImage`) as prerequisite
-  - [ ] Tie into M6 milestone
-- **Depends on:** `perception/feature_extraction` (P2), camera sim infrastructure
+- **Resolution (2026-03-13):** `workspace/robotics/state_estimation/visual_slam/` pre-scaffolded; renamed old M6-slam → M6.5-slam; architecture note added (does not link `feature_extraction`/`visual_odometry` — pipeline assembled by caller via `common/` types); `repo-plans/modules/visual_slam.md` created; M6.5 updated with prerequisite note and replacement task bullets.
 
-### [P1] common/transforms — Coordinate frame & rigid-body math
+### ✅ [P1] common/transforms — Coordinate frame & rigid-body math
 - **Domain:** `common/transforms`
-- **Why missing:** Every module that converts between sensor frames, robot frames, and world frames reinvents this. No shared `SE2 / SE3 / SO3` types exist in common. This is a tier-0 gap.
-- **Scope:**
-  - [ ] Scaffold `workspace/robotics/common/transforms/` (header-only INTERFACE target)
-  - [ ] `SE2` (2D rigid body: x, y, θ), `SE3` (6-DOF), `SO3` quaternion/rotation-matrix helpers
-  - [ ] `transformPoint()`, `compose()`, `inverse()`, `toEigen()` utilities
-  - [ ] Full unit tests (composition, inverse, round-trip, near-singularity)
+- **Resolution (2026-03-13):** `workspace/robotics/common/transforms/` pre-scaffolded (header-only INTERFACE, SE2/SE3/SO3 + tests); `add_subdirectory(transforms)` wired in `common/CMakeLists.txt`; tasks added to `repo-plans/modules/common.md` under M1-A; M1 milestone table updated with the new sub-module row.
 
 ### [P2] control/lqr — Linear Quadratic Regulator
 - **Domain:** `control/lqr`
@@ -43,23 +30,13 @@ Fleshed out todo list:
   - [ ] Tests: regulator drives state to zero from perturbation; respects Q/R weighting
   - [ ] Add to M3 or create M3.5 (Control Optimal) milestone
 
-### [P2] perception/visual_odometry — Visual front-end for camera-based localization
+### ✅ [P2] perception/visual_odometry — Visual front-end for camera-based localization
 - **Domain:** `perception/visual_odometry`
-- **Why missing:** Visual SLAM needs a standalone VO module (frame-to-frame pose estimation from camera). Could be used independently (no map needed). M6 folds VO inside `visual_slam` but a separate module enables reuse and incremental building.
-- **Scope:**
-  - [ ] Scaffold `workspace/robotics/perception/visual_odometry/`
-  - [ ] `VisualOdometry` — feature detect → track (optical flow or descriptor match) → PnP/essential matrix → relative pose
-  - [ ] Monocular (scale-ambiguous) + depth-aided (scale-resolved) modes
-  - [ ] Tests: known frame pair → correct relative pose; scale drift bounded over 20-frame sequence
+- **Resolution (2026-03-13):** `workspace/robotics/perception/visual_odometry/` pre-scaffolded (8-point RANSAC + cheirality check); added to M6 Visual Perception Building Blocks milestone; `repo-plans/modules/visual_odometry.md` created; `CameraIntrinsics` sourced from `common/camera.hpp` (not redefined).
 
-### [P2] perception/feature_extraction — ORB / keypoint feature pipeline
+### ✅ [P2] perception/feature_extraction — ORB / keypoint feature pipeline
 - **Domain:** `perception/feature_extraction`
-- **Why missing:** Both `visual_slam` and `visual_odometry` need ORB (or equivalent) feature extraction. Sharing one module avoids duplication and makes the "copyable library" philosophy consistent.
-- **Scope:**
-  - [ ] Scaffold `workspace/robotics/perception/feature_extraction/`
-  - [ ] `ORBExtractor` — FAST keypoints + BRIEF descriptor (minimal, no OpenCV dependency)
-  - [ ] `DescriptorMatcher` — brute-force Hamming distance matcher
-  - [ ] Tests: known synthetic image → expected keypoint count; correct match on transformed image
+- **Resolution (2026-03-13):** `workspace/robotics/perception/feature_extraction/` pre-scaffolded (FAST+BRIEF stub, `DescriptorMatcher` with Hamming distance via `__builtin_popcount`, ratio test); added to M6 Visual Perception Building Blocks milestone; `repo-plans/modules/feature_extraction.md` created.
 
 ### [P2] state_estimation/ukf — Unscented Kalman Filter
 - **Domain:** `state_estimation/ukf`
