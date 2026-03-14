@@ -24,6 +24,11 @@ Get the simplest version of every layer running end-to-end first (M1), then upgr
 | **M10** | [Polish & Showcase](milestones/M10-polish-showcase.md) | Docs site, examples, packaging, demo GIFs | Not Started |
 | **M11** | [Advanced Control](milestones/M11-advanced-control.md) | Adaptive PID, RLS parameter estimator, Frenet controller | Not Started |
 | **M12** | [Fleet Management](milestones/M12-fleet-management.md) | VDA 5050, task allocation, fleet monitor, battery management | Not Started |
+| **M13** | [Classical & Optimal Control](milestones/M13-classical-optimal-control.md) | LQR (DARE-based state feedback), Stanley path tracker | Not Started |
+| **M14** | [Advanced State Estimation II](milestones/M14-advanced-state-estimation-2.md) | UKF (Merwe sigma points), pose graph optimizer (GN/LM, SE2) | Not Started |
+| **M15** | [Visual-Inertial Odometry](milestones/M15-visual-inertial-odometry.md) | IMU filter + pre-integration, loosely-coupled VIO (EKF/UKF) | Not Started |
+| **M16** | [Planning Upgrades II](milestones/M16-planning-upgrades-2.md) | PRM (multi-query sampling), polynomial trajectories (min-jerk/snap, Bézier) | Not Started |
+| **M17** | [Camera Perception II](milestones/M17-camera-perception-2.md) | Place recognition (descriptor DB, loop closure), stereo depth (block matching) | Not Started |
 
 ## Dependency Graph
 
@@ -31,19 +36,22 @@ Get the simplest version of every layer running end-to-end first (M1), then upgr
 M0 (infra)
  └→ M1 (minimum viable robot + common/transforms)
       └→ M2 (hardening & testing)
-           ├→ M3 (control upgrades)          → M11 (advanced control)
+           ├→ M3 (control upgrades)          → M11 (advanced control)      → M13 (classical & optimal control)
            ├→ M4 (perception upgrades)
            │    └→ M6 (visual perception)
-           │         └→ M6.5 (SLAM) ←── M5
+           │         ├→ M6.5 (SLAM) ←── M5 ──── M14 (state estimation II) → M15 (VIO)
+           │         ├→ M15 (VIO) ←── M14
+           │         └→ M17 (camera perception II)
            ├→ M5 (state estimation upgrades)
-           │    └→ M6.5 (SLAM)
+           │    └→ M14 (state estimation II) → M15 (VIO)
            ├→ M7 (advanced planning) ←── M4
+           │    └→ M16 (planning upgrades II) ←── M4
            ├→ M8 (multi-robot) ←── M3, M7    → M12 (fleet management)
            ├→ M9 (web frontend)
            └→ M10 (polish & showcase) ←── M8, M9
 ```
 
-After M2, milestones M3–M5 and M9 can be developed **in parallel** since they touch independent domains. M6 (visual perception) requires M4 (occupancy grid + ray casting for the 2.5D camera renderer). M6.5 (SLAM) requires both M5 (state estimation interfaces) and M6 (feature extraction + visual odometry + camera types). M7 can start after M4 (needs costmaps). M8 needs M3 + M7. M11 requires M3 (stable control interfaces). M12 requires M8 (N-robot sim infrastructure). M10 can begin partially after M8; full completion requires all milestones.
+After M2, milestones M3–M5 and M9 can be developed **in parallel** since they touch independent domains. M6 (visual perception) requires M4 (occupancy grid + ray casting for the 2.5D camera renderer). M6.5 (SLAM) requires both M5 (state estimation interfaces) and M6 (feature extraction + visual odometry + camera types). M7 can start after M4 (needs costmaps). M8 needs M3 + M7. M11 requires M3 (stable control interfaces). M12 requires M8 (N-robot sim infrastructure). M13 requires M3 (IController interface); M11 recommended. M14 requires M5 (IStateEstimator interface). M15 requires M6 and M14 (both). M16 requires M7 (IGlobalPlanner interface) and M4 (OccupancyGrid). M17 requires M6 (feature_extraction, common/camera.hpp). M10 can begin partially after M8; full completion requires all milestones.
 
 ## Folder Structure
 

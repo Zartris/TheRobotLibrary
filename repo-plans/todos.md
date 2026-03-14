@@ -29,6 +29,7 @@ Fleshed out todo list:
   - [ ] Support linearised kinematic model at operating point
   - [ ] Tests: regulator drives state to zero from perturbation; respects Q/R weighting
   - [ ] Add to M3 or create M3.5 (Control Optimal) milestone
+- **✅ Resolution (2026-03-14):** Scaffolded in M13 — Classical & Optimal Control. `workspace/robotics/control/lqr/` created; `repo-plans/modules/lqr.md` created; wired into `control/CMakeLists.txt`.
 
 ### ✅ [P2] perception/visual_odometry — Visual front-end for camera-based localization
 - **Domain:** `perception/visual_odometry`
@@ -46,6 +47,7 @@ Fleshed out todo list:
   - [ ] `UKF : IStateEstimator` — sigma-point propagation, Merwe scaled sigma points, additive noise
   - [ ] Generic: accepts process/measurement functions as `std::function` (same style as EKF)
   - [ ] Tests: same scenarios as EKF — nonlinear pendulum converges faster than EKF
+- **✅ Resolution (2026-03-14):** Scaffolded in M14 — Advanced State Estimation II. `workspace/robotics/state_estimation/ukf/` created; `repo-plans/modules/ukf.md` created; wired into `state_estimation/CMakeLists.txt`.
 
 ### [P2] perception/imu_processing — IMU filtering and pre-integration
 - **Domain:** `perception/imu_processing`
@@ -56,6 +58,7 @@ Fleshed out todo list:
   - [ ] `ImuPreintegrator` — IMU pre-integration between keyframes (for VIO)
   - [ ] `ImuTypes` — `ImuMeasurement`, `ImuBias`, `ImuState`
   - [ ] Tests: static IMU → bias converges; pre-integration matches numerical integration
+- **✅ Resolution (2026-03-14):** Scaffolded in M15 — Visual-Inertial Odometry. `workspace/robotics/perception/imu_processing/` created; `repo-plans/modules/imu_processing.md` created; wired into `perception/CMakeLists.txt`.
 
 ### [P3] state_estimation/pose_graph — Pose graph optimization (loop closure backend)
 - **Domain:** `state_estimation/pose_graph`
@@ -66,6 +69,7 @@ Fleshed out todo list:
   - [ ] Optimizer: Gauss-Newton or LM linearised graph optimization (Eigen-only)
   - [ ] Loop closure integration: add edge → re-optimize
   - [ ] Tests: 4-node square loop → optimization closes the loop; trajectory error < threshold
+- **✅ Resolution (2026-03-14):** Scaffolded in M14 — Advanced State Estimation II. `workspace/robotics/state_estimation/pose_graph/` created; `repo-plans/modules/pose_graph.md` created; wired into `state_estimation/CMakeLists.txt`.
 
 ### [P3] motion_planning/global_planning/prm — Probabilistic Roadmap
 - **Domain:** `motion_planning/global_planning/prm`
@@ -75,6 +79,7 @@ Fleshed out todo list:
   - [ ] `PRM` — random sampling in C-space, local planner (straight-line collision check), k-nearest graph, query phase via Dijkstra/A*
   - [ ] Multi-query reuse: build roadmap once, answer multiple queries
   - [ ] Tests: cluttered environment → path found within N samples; roadmap reused for second query
+- **✅ Resolution (2026-03-14):** Scaffolded in M16 — Planning Upgrades II. `workspace/robotics/motion_planning/global_planning/prm/` created; `repo-plans/modules/prm.md` created; wired into `global_planning/CMakeLists.txt`.
 
 ### [P3] state_estimation/visual_inertial_odometry — VIO (IMU + camera fusion)
 - **Domain:** `state_estimation/visual_inertial_odometry`
@@ -84,6 +89,7 @@ Fleshed out todo list:
   - [ ] Loosely-coupled VIO: EKF/UKF fusing IMU pre-integration + VO pose updates
   - [ ] `VIOState` — pose, velocity, IMU bias
   - [ ] Tests: simulated IMU + camera sequence → trajectory error < pure VO drift
+- **✅ Resolution (2026-03-14):** Scaffolded in M15 — Visual-Inertial Odometry. `workspace/robotics/state_estimation/visual_inertial_odometry/` created; `repo-plans/modules/visual_inertial_odometry.md` created; wired into `state_estimation/CMakeLists.txt`.
 
 ### [P4] control/stanley — Stanley controller
 - **Domain:** `control/stanley`
@@ -92,6 +98,7 @@ Fleshed out todo list:
   - [ ] Scaffold `workspace/robotics/control/stanley/`
   - [ ] `StanleyController : IController` — heading error + cross-track error, speed-normalized gain
   - [ ] Tests: straight path → converges; curved path → tracks within tolerance; reversing supported
+- **✅ Resolution (2026-03-14):** Scaffolded in M13 — Classical & Optimal Control. `workspace/robotics/control/stanley/` created; `repo-plans/modules/stanley.md` created; wired into `control/CMakeLists.txt`.
 
 ### [P4] motion_planning/trajectory_planning/polynomial — Polynomial / Bézier trajectory generation
 - **Domain:** `motion_planning/trajectory_planning/polynomial`
@@ -102,6 +109,7 @@ Fleshed out todo list:
   - [ ] Waypoint-constrained polynomial generation
   - [ ] Bézier curve variant with convex hull property
   - [ ] Tests: 3-waypoint trajectory → smooth, satisfies endpoint derivatives
+- **✅ Resolution (2026-03-14):** Scaffolded in M16 — Planning Upgrades II. `workspace/robotics/motion_planning/trajectory_planning/polynomial/` created; `repo-plans/modules/polynomial.md` created; wired into `trajectory_planning/CMakeLists.txt`.
 
 ### [P4] perception/place_recognition — Loop closure / place recognition
 - **Domain:** `perception/place_recognition`
@@ -111,6 +119,7 @@ Fleshed out todo list:
   - [ ] `PlaceRecognizer` — descriptor-based place database, query by similarity score
   - [ ] Supports both lidar scan descriptors and visual feature descriptors
   - [ ] Tests: 10-frame database → correct revisit detection; false positive rate < threshold
+- **✅ Resolution (2026-03-14):** Scaffolded in M17 — Camera Perception II. `workspace/robotics/perception/place_recognition/` created; `repo-plans/modules/place_recognition.md` created; wired into `perception/CMakeLists.txt`.
 
 ### [P4] perception/stereo_depth — Stereo disparity / depth estimation
 - **Domain:** `perception/stereo_depth`
@@ -120,6 +129,7 @@ Fleshed out todo list:
   - [ ] `StereoMatcher` — block matching or semi-global matching (SGM), disparity → depth map
   - [ ] `StereoRectifier` — apply calibration to undistort + rectify stereo pair
   - [ ] Tests: synthetic stereo pair with known disparity → depth error < tolerance
+- **✅ Resolution (2026-03-14):** Scaffolded in M17 — Camera Perception II. `workspace/robotics/perception/stereo_depth/` created; `repo-plans/modules/stereo_depth.md` created; wired into `perception/CMakeLists.txt`.
 
 ### [P5] control/mppi — Model Predictive Path Integral
 - **Domain:** `control/mppi`

@@ -101,23 +101,35 @@ Each domain contains sub-modules — copy only what you need.
 |                     | `adaptive/gain_scheduling/` | Adaptive PID — online gain adjustment from tracking error|
 |                     | `adaptive/rls/`             | Recursive Least Squares parameter estimator              |
 |                     | `frenet/`                   | Frenet-Serret frame path following controller            |
+|                     | `lqr/`                      | Discrete-time infinite-horizon LQR; DARE solver via Eigen |
+|                     | `stanley/`                  | Stanley geometric path tracker; heading + speed-norm CTE  |
 | `perception`        | `lidar_processing/`         | Scan filtering, DBSCAN segmentation, RANSAC lines        |
 |                     | `occupancy_grid/`           | Binary Bayes grid, log-odds update, inflation            |
 |                     | `ray_casting/`              | Bresenham / DDA ray traversal, noise injection           |
 |                     | `obstacle_detection/`       | Detection pipeline, clustering, Kalman tracking          |
+|                     | `feature_extraction/`       | FAST+BRIEF keypoint pipeline, DescriptorMatcher          |
+|                     | `visual_odometry/`          | 8-point RANSAC essential matrix, camera-based ego-motion |
+|                     | `imu_processing/`           | Complementary filter, bias estimation, IMU pre-integration |
+|                     | `place_recognition/`        | Descriptor-based place DB; loop closure detection        |
+|                     | `stereo_depth/`             | Block-matching disparity, StereoRectifier, depth map     |
 | `state_estimation`  | `ekf/`                      | Extended Kalman Filter for diff-drive + range-bearing    |
 |                     | `particle_filter/`          | Monte Carlo Localization (MCL / AMCL)                    |
 |                     | `ekf_slam/`                 | Augmented-state EKF-SLAM with landmark management        |
 |                     | `lidar_slam/`               | ICP/NDT scan matching, pose-graph SLAM                   |
 |                     | `visual_slam/`              | Feature-based visual SLAM (ORB features, loop closure)   |
+|                     | `ukf/`                      | Unscented Kalman Filter; Merwe scaled sigma points       |
+|                     | `pose_graph/`               | Gauss-Newton / LM SE2 pose graph optimizer (loop closure backend) |
+|                     | `visual_inertial_odometry/` | Loosely-coupled VIO: IMU pre-integration + VO fusion     |
 | `motion_planning`   | `global_planning/astar/`    | A\* on 2D grid; octile heuristic; weighted A\*           |
 |                     | `global_planning/dijkstra/` | Dijkstra; multi-source distance maps                     |
 |                     | `global_planning/rrt/`      | RRT and RRT\* for continuous C-space                     |
+|                     | `global_planning/prm/`      | Probabilistic Roadmap; multi-query; Dijkstra query phase |
 |                     | `local_planning/dwa/`       | Dynamic Window Approach; velocity sampling               |
 |                     | `trajectory_planning/velocity_profiling/` | Trapezoidal / S-curve profiles; curvature-aware speed |
 |                     | `trajectory_planning/spline_fitting/`     | Cubic spline, Catmull-Rom, B-spline path smoothing    |
 |                     | `trajectory_planning/teb/`               | Timed Elastic Band: joint path + timing optimization  |
 |                     | `trajectory_planning/time_optimal/`      | TOPP-RA, minimum-snap QP, bang-bang profiles          |
+|                     | `trajectory_planning/polynomial/`        | Min-jerk / min-snap polynomials; Bézier curves (de Casteljau) |
 |                     | `multi_robot/orca/`         | VO→RVO→ORCA reactive collision avoidance              |
 |                     | `multi_robot/priority_planning/` | Sequential priority-based multi-robot planning   |
 |                     | `multi_robot/cbs/`          | Conflict-Based Search (optimal MAPF)                 |
