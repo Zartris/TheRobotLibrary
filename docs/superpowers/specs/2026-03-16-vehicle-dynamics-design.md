@@ -36,7 +36,7 @@ This follows the library's existing pattern of swappable implementations behind 
 
 ### 3. Milestone placement: M3.5 (after M3, before M4)
 
-M3.5 depends on M3 only (needs `IKinematicModel` variants and `IController` interface frozen). M4, M5, M6, M7 branch from M2 independently and are unaffected. M3.5 sits on the control branch: M3 → M3.5 → M11 → M13 → M18.
+M3.5 depends on M3 (needs the Ackermann/swerve kinematic model variants as test cases for `KinematicAdapter`, and the additional `IController` implementations for integration testing). Note: `IKinematicModel` and `IController` interfaces are defined in M1's `common/` and frozen in M2 — M3 provides the implementations, not the interfaces. M4, M5, M6, M7 branch from M2 independently and are unaffected. M3.5 sits on the control branch: M3 → M3.5 → M11 → M13 → M18.
 
 ### 4. Parameter identification included in M3.5
 
@@ -50,14 +50,17 @@ Offline calibration tools (step-response fitting, circle-test fitting, CoG estim
 
 Shared types consumed by all dynamics modules and the simulation. Added to existing `common` target.
 
-- `IDynamicModel` — interface: `step(DynamicState, ForceInput, dt) → DynamicState`, `getParams() → VehicleParams`
-- `DynamicState` — pose (SE2), linear velocity (vx, vy), yaw rate (omega), acceleration
-- `ForceInput` — longitudinal force, steering angle, braking force
+- `IDynamicModel` — interface: `step(DynamicState, VehicleInput, dt) → DynamicState`, `getParams() → VehicleParams`, `setParams(VehicleParams)` (allows applying calibrated parameters from `param_estimation`)
+- `DynamicState` — pose (SE2), linear velocity (vx, vy), yaw rate (omega), acceleration, `DynamicDiagnostics` (front/rear lateral tire forces, front/rear slip angles, front/rear normal loads, total longitudinal force)
+- `VehicleInput` — longitudinal force, steering angle, braking force (renamed from `VehicleInput` since steering angle is geometric, not a force)
 - `VehicleParams` — mass, yaw inertia (Iz), CoG position (lf, lr — front/rear axle distances), wheel radius, track width
 - `TireParams` — cornering stiffness (Cf, Cr), max friction coefficient (mu)
 - `MotorParams` — stall torque, no-load speed, gear ratio, efficiency
 
 No implementation — just types and the interface. Same pattern as `common/camera.hpp`.
+
+**Header files:**
+- `workspace/robotics/common/include/common/dynamics.hpp` — single header containing all types and the `IDynamicModel` interface (flat file, not a subdirectory — keeps it simple like `camera.hpp`)
 
 ### `control/vehicle_dynamics`
 
@@ -74,7 +77,7 @@ The core dynamic model. Implements `IDynamicModel`.
 Actuator dynamics between controller output and wheel torque.
 
 - `DcMotorModel` — torque-speed curve (linear: τ = τ_stall × (1 - ω/ω_no_load)), back-EMF, gear ratio, efficiency losses
-- `ActuatorLimiter` — decorator that wraps any `ForceInput` and clips to what the motor can physically deliver at current wheel speed
+- `ActuatorLimiter` — decorator that wraps any `VehicleInput` and clips to what the motor can physically deliver at current wheel speed
 - Tests: stall torque at zero speed; zero torque at no-load speed; gear ratio scales torque/speed correctly; limiter clips impossible commands
 
 ### `perception/terrain_model`
@@ -83,7 +86,7 @@ Per-cell terrain properties that affect tire grip and rolling resistance.
 
 - `TerrainProperties` — friction coefficient (mu), rolling resistance, slope angle
 - `TerrainMap` — maps grid cell → `TerrainProperties` (extends occupancy grid metadata, same pattern as wall material IDs in M6's camera renderer)
-- `SlipDetector` — compares commanded velocity (from dynamic model) vs "measured" velocity (from state estimator) to flag wheel slip events
+- `SlipDetector` — `detect(Eigen::Vector2d commanded_velocity, Eigen::Vector2d measured_velocity) → SlipEvent` — takes raw velocity values as arguments (no module references; the caller provides values from whatever dynamic model and state estimator it uses)
 - Scenario JSON: `"terrain": {"default_mu": 0.8, "patches": [{"region": [x1,y1,x2,y2], "mu": 0.3, "type": "ice"}]}`
 - Tests: high-friction cell → no slip at moderate speed; ice patch → slip detected; slope adds gravitational force component
 
@@ -95,7 +98,7 @@ Offline calibration of dynamic model parameters from test data.
 - `CircleTestFitter` — steady-state circle at known speed → estimates cornering stiffness (Cf, Cr) and yaw inertia (Iz) from steady-state yaw rate equation
 - `CogEstimator` — static weight measurement (front/rear axle loads) → CoG position (lf, lr)
 - All fitters return `std::expected<FittedParams, FitError>` with residual and confidence
-- Tests: synthetic data with known ground-truth params → fitted values within 5% tolerance; noisy data → still converges with wider confidence interval
+- Tests: synthetic data with known ground-truth params → fitted values within 5% tolerance; noisy data (SNR 20 dB) → fitted values within 15% tolerance with wider confidence interval
 
 ---
 
@@ -106,6 +109,23 @@ Offline calibration of dynamic model parameters from test data.
 - `TerrainMap` loaded from scenario JSON alongside existing occupancy grid
 - `DynamicState` (velocities, forces, slip angles) added to WebSocket state stream when in dynamic mode
 - Motor saturation visualized: actual torque vs commanded torque in state stream
+- REST API: `PUT /api/sim/physics_mode {"mode": "kinematic" | "dynamic"}` — switches simulation physics mode at runtime
+- WebSocket schema extension (dynamic mode adds to existing `robot` object):
+  ```json
+  {
+    "robot": {
+      "dynamic_state": {
+        "vx": 1.2, "vy": 0.01, "omega": 0.3,
+        "slip_angle_front": 0.02, "slip_angle_rear": 0.01,
+        "normal_load_front": 45.0, "normal_load_rear": 55.0,
+        "motor_torque_actual": 0.8, "motor_torque_commanded": 1.2
+      },
+      "terrain": {"mu": 0.8, "type": "asphalt"}
+    }
+  }
+  ```
+- Scenario JSON: `"terrain"` is an optional top-level key alongside `"map"`. When absent, all cells use default friction (mu=1.0, no slope)
+- Sub-stepping: `IDynamicModel::step()` may sub-step internally when `dt` exceeds the model's stability limit. `BicycleDynamicModel` uses semi-implicit Euler with an internal max step of 1ms for motor electrical dynamics. The sim loop does not need a separate physics tick rate.
 
 ---
 
@@ -114,6 +134,25 @@ Offline calibration of dynamic model parameters from test data.
 Lives in `workspace/simulation/tests/` (sim links modules, not the reverse).
 
 **Kinematic vs dynamic comparison test:** Same PID + DWA controller follows a curved path at increasing speeds. In kinematic mode, perfect tracking. In dynamic mode, slip and overshoot appear above a speed threshold. Test asserts: at low speed, kinematic and dynamic trajectories match within 0.1m; at high speed, dynamic trajectory diverges by > 0.5m (proving the physics layer produces meaningful behavior).
+
+---
+
+## CMake Targets
+
+| Module | Target | Alias |
+|--------|--------|-------|
+| `control/vehicle_dynamics` | `vehicle_dynamics` | `robotlib::vehicle_dynamics` |
+| `control/motor_model` | `motor_model` | `robotlib::motor_model` |
+| `perception/terrain_model` | `terrain_model` | `robotlib::terrain_model` |
+| `control/param_estimation` | `param_estimation` | `robotlib::param_estimation` |
+
+All link against `common` only.
+
+---
+
+## Module Documentation
+
+Each of the four new modules gets its own `README.md` following the standard template. The theory doc lives in `workspace/robotics/control/vehicle_dynamics/docs/theory.md` and covers all four modules (dynamics, motor, terrain, parameter estimation) since the topics are deeply intertwined. The other three modules' `docs/theory.md` files contain a one-line redirect: "See `workspace/robotics/control/vehicle_dynamics/docs/theory.md`."
 
 ---
 
@@ -141,9 +180,9 @@ The theory doc (`workspace/robotics/control/vehicle_dynamics/docs/theory.md`) co
 1. `vehicle_dynamics_tests` pass — F=ma, steady-state yaw rate, weight transfer
 2. `motor_model_tests` pass — torque curve, gear ratio, actuator limiter
 3. `terrain_model_tests` pass — friction variation, slip detection, slope forces
-4. `param_estimation_tests` pass — fitted params within 5% of ground truth on synthetic data
+4. `param_estimation_tests` pass — fitted params within 5% (clean) / 15% (noisy, SNR 20 dB) of ground truth
 5. `KinematicAdapter` passes — existing velocity-based controllers work on dynamic model within tolerance
-6. Integration test: kinematic vs dynamic divergence demonstrated at high speed
+6. Integration test: kinematic vs dynamic divergence demonstrated at high speed; motor saturation visibly clips torque and reduces acceleration below F=ma prediction
 7. Theory doc covers chapters 1–10 (educational through MuJoCo upgrade path)
 8. All modules pass Phase 4.5 Observability gate
 
