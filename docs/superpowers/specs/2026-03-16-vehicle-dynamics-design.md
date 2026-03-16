@@ -52,7 +52,7 @@ Shared types consumed by all dynamics modules and the simulation. Added to exist
 
 - `IDynamicModel` — interface: `step(DynamicState, VehicleInput, dt) → DynamicState`, `getParams() → VehicleParams`, `setParams(VehicleParams)` (allows applying calibrated parameters from `param_estimation`)
 - `DynamicState` — pose (SE2), linear velocity (vx, vy), yaw rate (omega), acceleration, `DynamicDiagnostics` (front/rear lateral tire forces, front/rear slip angles, front/rear normal loads, total longitudinal force)
-- `VehicleInput` — longitudinal force, steering angle, braking force (renamed from `VehicleInput` since steering angle is geometric, not a force)
+- `VehicleInput` — longitudinal force, steering angle, braking force (renamed from `ForceInput` since steering angle is geometric, not a force)
 - `VehicleParams` — mass, yaw inertia (Iz), CoG position (lf, lr — front/rear axle distances), wheel radius, track width
 - `TireParams` — cornering stiffness (Cf, Cr), max friction coefficient (mu)
 - `MotorParams` — stall torque, no-load speed, gear ratio, efficiency
