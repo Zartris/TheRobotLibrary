@@ -83,6 +83,33 @@ Fleshed out todo list:
   - [ ] `docs/theory.md`: general-sum game formulation, coupled Riccati backward pass derivation, comparison with ALGAMES, when to prefer iLQGame vs ALGAMES
   - [ ] Wire into `multi_robot/CMakeLists.txt`
 
+### [P2] motion_planning/multi_robot/opponent_modeling — Online Bayesian Opponent Objective Estimation
+- **Domain:** `motion_planning/multi_robot/opponent_modeling`
+- **Reference:** Tian et al. — "Learning to Play Trajectory Games Against Opponents with Unknown Objectives", RA-L 2023. Companion to [ilqgames](https://github.com/HJReachability/ilqgames).
+- **Why:** iLQGame and ALGAMES require knowing the opponent's cost function. This module estimates it online from observed behaviour and feeds the estimate back into any game solver. Each timestep: observe opponent state → Bayesian update over a discrete set of cost hypotheses (aggressive, passive, cooperative) → pass MAP or weighted-mixture cost to iLQGame/ALGAMES inner solver. Makes any game-theoretic planner applicable to real AV scenarios where intent is unknown. Clean separation: this module is a pure estimation layer, not a planner itself.
+- **Scope:**
+  - [ ] Scaffold `workspace/robotics/motion_planning/multi_robot/opponent_modeling/`
+  - [ ] `CostHypothesis` — parameterised opponent cost function (goal weight, collision aversion, speed preference); discrete library of N hypothesis types
+  - [ ] `BayesianOpponentEstimator` — maintains probability distribution over `CostHypothesis` set; likelihood = how well hypothesis predicts last K observed states; update via Bayes rule
+  - [ ] `OpponentModelInterface` — outputs MAP hypothesis or full posterior for use by any game solver (`ILQGameSolver`, `AlgamesSolver`)
+  - [ ] Tests: aggressive opponent observed for 5 steps → posterior concentrates on aggressive hypothesis; feed MAP into iLQGame → solution differs from uniform prior; verify posterior collapses correctly across all hypothesis types
+  - [ ] `docs/theory.md`: Bayesian inverse optimal control formulation, likelihood model derivation, how posterior uncertainty propagates through game solver, connection to level-k (level-k uses structural assumptions; this uses observed data)
+  - [ ] Wire into `multi_robot/CMakeLists.txt`
+
+### [P2] motion_planning/multi_robot/cbf_game — CBF Safety Filter for Game-Theoretic Planners
+- **Domain:** `motion_planning/multi_robot/cbf_game`
+- **Reference:** Zheng et al., "Safe iLQGame", ICRA 2024; Herbert et al. (Stanford); Zeng et al. CBF+MPC (RA-L 2021).
+- **Why:** iLQGame and ALGAMES produce Nash trajectories but have no hard safety certificate — the game solver may drift if opponent deviates from the Nash assumption. This module is a thin safety filter that wraps any game-theoretic trajectory plan: at each control timestep it takes the game planner's desired acceleration/velocity and projects it onto the safe set defined by a Control Barrier Function. Hard collision invariance is guaranteed even if the game solver's assumptions break. Reuses our existing `control/cbf/` module — implementation cost is low. This is the production-safe version of any game planner.
+- **Scope:**
+  - [ ] Scaffold `workspace/robotics/motion_planning/multi_robot/cbf_game/`
+  - [ ] `MultiAgentCBF` — pairwise CBF between all agent pairs; h(x) = ‖pᵢ - pⱼ‖² - (rᵢ + rⱼ + margin)²; vectorised over N(N-1)/2 pairs
+  - [ ] `CbfGameFilter` — takes nominal control from any game planner + current multi-agent state; solves a small QP (OSQP) to find minimal-deviation control satisfying all pairwise CBF constraints
+  - [ ] Integration adapters: `ILQGameCbfAgent`, `AlgamesCbfAgent` — composable wrappers
+  - [ ] Tests: iLQGame nominal plan + CBF filter → hard separation invariant holds when opponent deviates from Nash; verify QP solve < 0.5ms for N=6 agents
+  - [ ] `docs/theory.md`: CBF invariance proof for multi-agent case, QP formulation, when game planner + CBF is sufficient vs when CBF alone suffices (ORCA), performance overhead analysis
+  - [ ] Wire into `multi_robot/CMakeLists.txt`
+- **Note:** Depends on `control/cbf/` — must be implemented first.
+
 ### [P2] motion_planning/multi_robot/consensus_admm — Consensus ADMM Multi-Agent Trajectory Optimization
 - **Domain:** `motion_planning/multi_robot/consensus_admm`
 - **Reference:** No single canonical repo — algorithm based on Boyd et al. "Distributed Optimization and Statistical Learning via ADMM" (2011) applied to multi-agent trajectory optimization.
@@ -157,3 +184,45 @@ Fleshed out todo list:
   - [ ] Tests: 2-agent low-speed crossing → avoidance emerges; document constraint violation rate under tight merge corridor (expected to be non-zero — this is a known limitation)
   - [ ] `docs/theory.md`: factor graph formulation, Gaussian belief propagation message update equations, why soft constraints fail under hard geometric pressure, comparison with ALGAMES
   - [ ] Wire into `multi_robot/CMakeLists.txt`
+
+### [P3] motion_planning/multi_robot/potential_game — Potential Game Formulation for Multi-Agent Driving
+- **Domain:** `motion_planning/multi_robot/potential_game`
+- **Reference:** Mehr et al. (Stanford) — "Maximal Liveness of Multi-Agent Systems via Multi-Objective Optimization" + "Autonomous Vehicles on the Road", CDC 2021; Monderer & Shapley (1996) foundational.
+- **Why:** Nash equilibrium in a general-sum game requires expensive coupled iteration (ALGAMES/iLQGame). If the multi-agent problem can be cast as a **potential game** — where a single scalar potential function Φ exists such that any unilateral cost change equals the change in Φ — then Nash equilibrium reduces to minimizing Φ. Gradient descent on a single function. Orders of magnitude faster than coupled Riccati equations. Applicable when agents share infrastructure costs (merge timing gaps, road congestion, fuel efficiency). Teaches a fundamentally different path to Nash: instead of iterating coupled best-responses, find the problem structure that makes Nash cheap.
+- **Scope:**
+  - [ ] Scaffold `workspace/robotics/motion_planning/multi_robot/potential_game/`
+  - [ ] `PotentialFunction` — defines Φ over joint trajectory space; parameterised by per-agent goal costs + shared coupling terms (separation penalty, merge timing cost)
+  - [ ] `PotentialGameSolver` — gradient descent / L-BFGS on Φ over joint trajectory; step size via Armijo line search; Eigen-only
+  - [ ] `PotentialGameVerifier` — checks whether a given multi-agent cost structure admits a potential function (finite-improvement property test on small examples)
+  - [ ] Tests: 2-agent merge → potential game Nash matches ALGAMES solution within tolerance at 10× speed; verify finite-improvement property holds; document failure case where potential structure breaks down
+  - [ ] `docs/theory.md`: potential game definition, existence conditions, relationship to Nash equilibrium, congestion game examples, when the structure holds for AV (and when it doesn't)
+  - [ ] Wire into `multi_robot/CMakeLists.txt`
+
+### [P3] motion_planning/multi_robot/interaction_aware — Interaction-Aware Prediction + Game-Theoretic Planning
+- **Domain:** `motion_planning/multi_robot/interaction_aware`
+- **Reference:** Multiple groups IROS/ICRA 2022–2024; Ivanovic & Pavone (Stanford) "TRAJECTRON++"; Salzmann et al.; Sun et al. "M2I" (CVPR 2022).
+- **Why:** Separates the prediction problem (what will opponents do?) from the planning problem (what should I do given that?). Uses a learned or parametric **conditional prediction model** — predicts the opponent's trajectory distribution *conditioned on my planned trajectory*. Feeds this interaction-aware prediction into any game solver or MPC. The key upgrade over naive prediction-then-plan: the prediction model knows that opponents will react to you, so it avoids the "frozen robot" problem where the ego plan is over-cautious because predictions don't account for interaction. Bridges deep learning prediction literature into our C++ game theory stack via a clean `IInteractionPredictor` interface.
+- **Scope:**
+  - [ ] Scaffold `workspace/robotics/motion_planning/multi_robot/interaction_aware/`
+  - [ ] `IInteractionPredictor` — interface: given ego trajectory + opponent history → returns distribution over opponent future trajectories
+  - [ ] `ConstantVelocityPredictor` — baseline: ignores ego plan (frozen robot); useful for benchmarking
+  - [ ] `ReactivePredictor` — parametric: opponent maintains time gap to ego; models courtesy/aggressiveness via a single parameter α
+  - [ ] `InteractionAwareMPC` — wraps any `DmpcAgent` or `AlgamesAgent`; uses `IInteractionPredictor` to generate opponent trajectory distribution; optimizes over expected cost weighted by prediction
+  - [ ] Tests: frozen robot vs reactive predictor in merge → reactive predictor allows ego to merge more assertively; verify ego trajectory is less conservative with interaction-aware prediction
+  - [ ] `docs/theory.md`: frozen robot problem, conditional prediction vs marginal prediction, interaction-awareness as an implicit game (connection to iLQGame), plug-in interface for learned predictors
+  - [ ] Wire into `multi_robot/CMakeLists.txt`
+
+### [P4] motion_planning/multi_robot/differential_game_racing — Time-Optimal Differential Games for Autonomous Racing
+- **Domain:** `motion_planning/multi_robot/differential_game_racing`
+- **Reference:** Liniger & Lygeros — "A Noncooperative Game Approach to Autonomous Racing", T-AC 2020; Spica et al. IROS 2020; follow-ups 2022–2024. Related: [MPCC racing controller](https://github.com/alexliniger/MPCC).
+- **Why:** Zero-sum differential game applied to head-to-head racing and overtaking. Your gain (lap time, position) is exactly the opponent's loss. The optimal overtaking and blocking strategies are computable from the value function of this zero-sum game. For 2-player LQ approximations, Hamilton-Jacobi reachability gives the exact solution. Pedagogically distinct from everything else in the stack — introduces zero-sum games, saddle-point equilibria, and the connection between game theory and reachability analysis. The `MPCC` open-source racing controller (Liniger, ETH) provides a strong C++ reference.
+- **Scope:**
+  - [ ] Scaffold `workspace/robotics/motion_planning/multi_robot/differential_game_racing/`
+  - [ ] `ZeroSumRacingGame` — 2-player, joint state = [ego_state, opponent_state]; cost = ego lap progress - opponent lap progress; saddle-point equilibrium via minimax
+  - [ ] `MinimaxiLQR` — iLQR extended to minimax: ego maximizes, opponent minimizes (or vice versa); alternating gradient steps on coupled Riccati
+  - [ ] `OvertakingStrategy` — high-level policy: when to attempt overtake (value function threshold), which side to attack (left/right), blocking detection
+  - [ ] `RacingLineReference` — single-agent time-optimal racing line (minimum curvature / MPCC-style) as the nominal trajectory around which the game is linearized
+  - [ ] Tests: 2-car approach to chicane → optimal overtake emerges; blocking strategy prevents naive overtake; benchmark saddle-point convergence; compare to greedy (ignore opponent) baseline lap time
+  - [ ] `docs/theory.md`: zero-sum vs general-sum, saddle-point equilibrium, minimax iLQR derivation, connection to Hamilton-Jacobi reachability (value function = safety margin), when zero-sum assumption is appropriate (racing) vs inappropriate (merging)
+  - [ ] Wire into `multi_robot/CMakeLists.txt`
+- **Note:** Requires `trajectory_planning/time_optimal/` as dependency for the racing line reference. High implementation complexity — tackle after ALGAMES + iLQGame are solid.
