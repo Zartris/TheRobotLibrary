@@ -16,7 +16,7 @@ TheRobotLibrary's entire simulation and control stack operates on kinematic mode
 
 > **Robotics modules may only depend on `common`.** Never on each other, simulation, or frontends.
 
-This means `vehicle_dynamics` does not link against `motor_model` or `terrain_model`. The simulation assembles the full physics pipeline: `motor_model` → `vehicle_dynamics` → `terrain_model` feedback. Data flows via shared types in `common/dynamics/`.
+This means `vehicle_dynamics` does not link against `motor_model`. The simulation assembles the full physics pipeline: `motor_model` → `vehicle_dynamics` (with `TerrainProperties` passed per-tick). Data flows via shared types in `common/robot/` and `common/environment/`.
 
 ---
 
@@ -38,7 +38,31 @@ This follows the library's existing pattern of swappable implementations behind 
 
 M3.5 depends on M3 (needs the Ackermann/swerve kinematic model variants as test cases for `KinematicAdapter`, and the additional `IController` implementations for integration testing). Note: `IKinematicModel` and `IController` interfaces are defined in M1's `common/` and frozen in M2 — M3 provides the implementations, not the interfaces. M4, M5, M6, M7 branch from M2 independently and are unaffected. M3.5 sits on the control branch: M3 → M3.5 → M11 → M13 → M18.
 
-### 4. Parameter identification included in M3.5
+### 4. Reorganize `common/` into semantic sub-groups
+
+`common/` is growing into a flat bag of unrelated types. M3.5 introduces a reorganization into meaningful sub-groups:
+
+```
+common/
+├── interfaces/        ← IController, IStateEstimator, IGlobalPlanner (existing)
+├── logging/           ← ILogger, SpdlogLogger (existing)
+├── transforms/        ← SE2, SE3, SO3 (existing)
+├── robot/             ← NEW: IKinematicModel (moved from interfaces/),
+│                        IDynamicModel, VehicleParams, MotorParams,
+│                        WheelConfig, TireParams — "what is this robot?"
+├── environment/       ← NEW: TerrainProperties, wall material types
+│                        — "what world is the robot in?"
+├── camera.hpp         ← CameraIntrinsics, CameraFrame (existing)
+└── noise_models/      ← GaussianNoise, etc. (existing, M21)
+```
+
+**Rationale:** `IKinematicModel` and `IDynamicModel` describe the robot's physical form — they belong together in `common/robot/`, not mixed with algorithm interfaces like `IController`. `TerrainProperties` describes the environment — it belongs in `common/environment/`, not in a perception module (terrain friction is physics, not sensing).
+
+**No rule change:** The dependency rule stays "modules may only depend on `common`." This is internal reorganization only — `common` remains a single CMake target. Existing `#include` paths get backwards-compatible forwarding headers during migration.
+
+**`terrain_model` is NOT a standalone module:** `TerrainProperties` is a small struct in `common/environment/`. `TerrainMap` (grid → properties lookup) lives in the simulation, since it's the sim that knows which cell the robot occupies and passes `TerrainProperties` to `IDynamicModel::step()`. `SlipDetector` is a utility function in `common/environment/` — `detect(commanded_vel, measured_vel) → SlipEvent`.
+
+### 5. Parameter identification included in M3.5
 
 Offline calibration tools (step-response fitting, circle-test fitting, CoG estimation) live in M3.5 alongside the dynamic model they calibrate. M11's RLS estimator remains as the online/adaptive variant — M3.5 provides the offline/calibration variant. M11 gets a documentation note that RLS can operate on structured dynamic model parameters when M3.5 is available.
 
@@ -46,29 +70,41 @@ Offline calibration tools (step-response fitting, circle-test fitting, CoG estim
 
 ## Modules
 
-### `common/dynamics` (header-only INTERFACE)
+### `common/robot/` (header-only, part of existing `common` target)
 
-Shared types consumed by all dynamics modules and the simulation. Added to existing `common` target.
+Robot description types — "what is this robot?"
 
-- `IDynamicModel` — interface: `step(DynamicState, VehicleInput, dt) → DynamicState`, `getParams() → VehicleParams`, `setParams(VehicleParams)` (allows applying calibrated parameters from `param_estimation`)
-- `DynamicState` — pose (SE2), linear velocity (vx, vy), yaw rate (omega), acceleration, `DynamicDiagnostics` (front/rear lateral tire forces, front/rear slip angles, front/rear normal loads, total longitudinal force)
-- `VehicleInput` — longitudinal force, steering angle, braking force (renamed from `ForceInput` since steering angle is geometric, not a force)
-- `VehicleParams` — mass, yaw inertia (Iz), CoG position (lf, lr — front/rear axle distances), wheel radius, track width
-- `TireParams` — cornering stiffness (Cf, Cr), max friction coefficient (mu)
-- `MotorParams` — stall torque, no-load speed, gear ratio, efficiency
+- `workspace/robotics/common/include/common/robot/i_dynamic_model.hpp`:
+  - `IDynamicModel` — interface: `step(DynamicState, VehicleInput, TerrainProperties, dt) → DynamicState`, `getParams() → VehicleParams`, `setParams(VehicleParams)` (allows applying calibrated parameters from `param_estimation`)
+  - `DynamicState` — pose (SE2), linear velocity (vx, vy), yaw rate (omega), acceleration, `DynamicDiagnostics` (front/rear lateral tire forces, front/rear slip angles, front/rear normal loads, total longitudinal force)
+  - `VehicleInput` — longitudinal force, steering angle, braking force (renamed from `ForceInput` since steering angle is geometric, not a force)
+- `workspace/robotics/common/include/common/robot/vehicle_params.hpp`:
+  - `VehicleParams` — mass, yaw inertia (Iz), CoG position (lf, lr — front/rear axle distances), wheel radius, track width
+  - `TireParams` — cornering stiffness (Cf, Cr), max friction coefficient (mu)
+  - `MotorParams` — stall torque, no-load speed, gear ratio, efficiency
+  - `WheelConfig` — radius, width, position relative to CoG
 
-No implementation — just types and the interface. Same pattern as `common/camera.hpp`.
+**Migration note:** `IKinematicModel` moves from `common/interfaces/` to `common/robot/` during M3.5 implementation. A forwarding header at the old path preserves backwards compatibility.
 
-**Header files:**
-- `workspace/robotics/common/include/common/dynamics.hpp` — single header containing all types and the `IDynamicModel` interface (flat file, not a subdirectory — keeps it simple like `camera.hpp`)
+### `common/environment/` (header-only, part of existing `common` target)
+
+Environment description types — "what world is the robot in?"
+
+- `workspace/robotics/common/include/common/environment/terrain.hpp`:
+  - `TerrainProperties` — friction coefficient (mu), rolling resistance, slope angle
+  - `SlipDetector` — `detect(Eigen::Vector2d commanded_velocity, Eigen::Vector2d measured_velocity) → SlipEvent` — pure utility function, takes raw values (no module references)
+  - `SlipEvent` — slip detected (bool), slip ratio, severity
+
+**Simulation owns `TerrainMap`:** The grid-cell → `TerrainProperties` lookup lives in `workspace/simulation/` (not in `common/`), since it's the sim that knows which cell the robot occupies and passes the appropriate `TerrainProperties` to `IDynamicModel::step()` each tick. Scenario JSON: `"terrain": {"default_mu": 0.8, "patches": [{"region": [x1,y1,x2,y2], "mu": 0.3, "type": "ice"}]}`
 
 ### `control/vehicle_dynamics`
 
 The core dynamic model. Implements `IDynamicModel`.
 
 - `BicycleDynamicModel : IDynamicModel` — planar Newton-Euler (3-DOF: x, y, yaw)
-- Linear tire model: lateral force = cornering_stiffness × slip_angle
+- Linear tire model: lateral force = cornering_stiffness × slip_angle, scaled by `TerrainProperties.mu`
 - Weight transfer: longitudinal (braking/accel shifts load front↔rear) and lateral (cornering shifts load left↔right)
+- `step()` receives `TerrainProperties` for the current cell — friction coefficient scales tire grip, slope angle adds gravitational force component
 - `KinematicAdapter` — wraps `IDynamicModel`, accepts velocity commands (like `IKinematicModel`), internally runs a PD controller to convert velocity → force. Lets existing controllers run on the dynamic model unchanged.
 - Tests: straight-line acceleration matches F=ma; steady-state circle matches analytical yaw rate; weight transfer shifts tire load correctly; adapter tracks velocity reference within tolerance
 
@@ -79,16 +115,6 @@ Actuator dynamics between controller output and wheel torque.
 - `DcMotorModel` — torque-speed curve (linear: τ = τ_stall × (1 - ω/ω_no_load)), back-EMF, gear ratio, efficiency losses
 - `ActuatorLimiter` — decorator that wraps any `VehicleInput` and clips to what the motor can physically deliver at current wheel speed
 - Tests: stall torque at zero speed; zero torque at no-load speed; gear ratio scales torque/speed correctly; limiter clips impossible commands
-
-### `perception/terrain_model`
-
-Per-cell terrain properties that affect tire grip and rolling resistance.
-
-- `TerrainProperties` — friction coefficient (mu), rolling resistance, slope angle
-- `TerrainMap` — maps grid cell → `TerrainProperties` (extends occupancy grid metadata, same pattern as wall material IDs in M6's camera renderer)
-- `SlipDetector` — `detect(Eigen::Vector2d commanded_velocity, Eigen::Vector2d measured_velocity) → SlipEvent` — takes raw velocity values as arguments (no module references; the caller provides values from whatever dynamic model and state estimator it uses)
-- Scenario JSON: `"terrain": {"default_mu": 0.8, "patches": [{"region": [x1,y1,x2,y2], "mu": 0.3, "type": "ice"}]}`
-- Tests: high-friction cell → no slip at moderate speed; ice patch → slip detected; slope adds gravitational force component
 
 ### `control/param_estimation`
 
@@ -106,7 +132,7 @@ Offline calibration of dynamic model parameters from test data.
 
 - Sim gains `physics_mode` config: `"kinematic"` (default, existing behavior) or `"dynamic"` (new)
 - In dynamic mode, sim calls `IDynamicModel::step()` instead of `IKinematicModel::step()`
-- `TerrainMap` loaded from scenario JSON alongside existing occupancy grid
+- `TerrainMap` (sim-owned) loaded from scenario JSON alongside existing occupancy grid; sim looks up `TerrainProperties` for the robot's current cell and passes it to `IDynamicModel::step()` each tick
 - `DynamicState` (velocities, forces, slip angles) added to WebSocket state stream when in dynamic mode
 - Motor saturation visualized: actual torque vs commanded torque in state stream
 - REST API: `PUT /api/sim/physics_mode {"mode": "kinematic" | "dynamic"}` — switches simulation physics mode at runtime
@@ -143,16 +169,15 @@ Lives in `workspace/simulation/tests/` (sim links modules, not the reverse).
 |--------|--------|-------|
 | `control/vehicle_dynamics` | `vehicle_dynamics` | `robotlib::vehicle_dynamics` |
 | `control/motor_model` | `motor_model` | `robotlib::motor_model` |
-| `perception/terrain_model` | `terrain_model` | `robotlib::terrain_model` |
 | `control/param_estimation` | `param_estimation` | `robotlib::param_estimation` |
 
-All link against `common` only.
+All link against `common` only. `common/robot/` and `common/environment/` are header-only additions to the existing `common` target — no new CMake targets needed.
 
 ---
 
 ## Module Documentation
 
-Each of the four new modules gets its own `README.md` following the standard template. The theory doc lives in `workspace/robotics/control/vehicle_dynamics/docs/theory.md` and covers all four modules (dynamics, motor, terrain, parameter estimation) since the topics are deeply intertwined. The other three modules' `docs/theory.md` files contain a one-line redirect: "See `workspace/robotics/control/vehicle_dynamics/docs/theory.md`."
+Each of the three new domain modules gets its own `README.md` following the standard template. The theory doc lives in `workspace/robotics/control/vehicle_dynamics/docs/theory.md` and covers all dynamics topics (vehicle model, motor, terrain, parameter estimation) since the topics are deeply intertwined. `motor_model` and `param_estimation`'s `docs/theory.md` files contain a one-line redirect: "See `workspace/robotics/control/vehicle_dynamics/docs/theory.md`."
 
 ---
 
@@ -179,7 +204,7 @@ The theory doc (`workspace/robotics/control/vehicle_dynamics/docs/theory.md`) co
 
 1. `vehicle_dynamics_tests` pass — F=ma, steady-state yaw rate, weight transfer
 2. `motor_model_tests` pass — torque curve, gear ratio, actuator limiter
-3. `terrain_model_tests` pass — friction variation, slip detection, slope forces
+3. `common` terrain tests pass — `SlipDetector` detects slip from velocity divergence; `TerrainProperties` applied to `BicycleDynamicModel` reduces grip on low-mu surface; slope adds correct gravitational force
 4. `param_estimation_tests` pass — fitted params within 5% (clean) / 15% (noisy, SNR 20 dB) of ground truth
 5. `KinematicAdapter` passes — existing velocity-based controllers work on dynamic model within tolerance
 6. Integration test: kinematic vs dynamic divergence demonstrated at high speed; motor saturation visibly clips torque and reduces acceleration below F=ma prediction
@@ -221,8 +246,7 @@ M4, M5, M6, M7, M9 branch from M2 independently — unaffected by M3.5 insertion
 | Create | `repo-plans/milestones/M3.5-vehicle-dynamics.md` |
 | Create | `repo-plans/modules/vehicle_dynamics.md` |
 | Create | `repo-plans/modules/motor_model.md` |
-| Create | `repo-plans/modules/terrain_model.md` |
 | Create | `repo-plans/modules/param_estimation.md` |
 | Modify | `repo-plans/README.md` — add M3.5 row to table, update dependency graph |
-| Modify | `repo-plans/modules/common.md` — add `common/dynamics` section |
+| Modify | `repo-plans/modules/common.md` — add `common/robot/` and `common/environment/` sections, note `IKinematicModel` migration |
 | Modify | `repo-plans/todos.md` — add entry for vehicle dynamics |
