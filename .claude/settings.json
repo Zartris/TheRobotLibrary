@@ -9,6 +9,15 @@
             "command": "bash -c 'f=\"$CLAUDE_TOOL_INPUT_FILE_PATH\"; [[ \"$f\" == *.cpp || \"$f\" == *.h || \"$f\" == *.hpp ]] && clang-format -i --style=file:$(git -C \"$(dirname \"$f\")\" rev-parse --show-toplevel)/workspace/.clang-format \"$f\" 2>/dev/null || true'"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'cmd=\"$CLAUDE_TOOL_INPUT_COMMAND\"; echo \"$cmd\" | grep -q \"git commit\" && git log -1 --format=\"%B\" 2>/dev/null | grep -qi \"co-authored-by.*claude\\|co-authored-by.*anthropic\" && echo \"WARNING: Last commit contains AI Co-Authored-By trailer — remove it\" || true'"
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -18,6 +27,17 @@
           {
             "type": "command",
             "command": "bash -c '[[ \"$CLAUDE_TOOL_INPUT_FILE_PATH\" == *\"cmake/deps.cmake\"* ]] && echo \"BLOCK: cmake/deps.cmake is protected. Confirm explicitly before editing.\" && exit 2 || exit 0'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REMINDER: If you completed tasks from a tracker, re-read the tracker file and confirm all items are marked done before reporting completion.'"
           }
         ]
       }

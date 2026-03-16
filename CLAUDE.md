@@ -59,8 +59,10 @@ Simulation       → may depend on robotics modules
 Frontends        → network API only (no library links)
 ```
 ### Workflow
-- Use superpower workflow: Brainstorm → plan → execute → review for all new features, modules, and milestones.
-- During brainstorm, when asking questions always have a recommended answer ready to guide the response and why that is recommended (don't leave it open-ended).
+- **Use superpowers workflow for all new features, modules, and milestones:** Brainstorm → plan → execute → review.
+- During brainstorm, always have a recommended answer ready when asking questions — don't leave choices open-ended.
+- Specs go in `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+- Plans go in `docs/superpowers/plans/YYYY-MM-DD-<topic>-milestones.md`
 
 ## Module Template
 
@@ -99,9 +101,35 @@ From [workspace/architecture.md](workspace/architecture.md):
 
 All modules must use `common/logging/` (`ILogger` + `SpdlogLogger`) before being considered complete. This is the "Phase 4.5" gate in the milestone checklist.
 
+## Claude Code Hooks (already active)
+
+- **Auto-format:** Any `.cpp`/`.hpp`/`.h` edit automatically runs `clang-format` (config: `workspace/.clang-format`)
+- **deps.cmake guard:** Edits to `workspace/cmake/deps.cmake` are blocked until explicitly confirmed
+- **Co-Authored-By check:** After any `git commit`, warns if AI attribution trailer slipped through
+- **Task completion reminder:** Fires at end of each response — re-read tracker before declaring done
+
+## Skills
+
+- `/new-module <domain> <name>` — scaffold a new module from template
+- `/module-status [module]` — show implementation status across the workspace
+
+## Gotchas
+
+- **Never add Co-Authored-By trailers to commits.** A `commit-msg` hook blocks AI attribution. Install after cloning:
+  ```bash
+  ln -sf ../../.github/hooks/commit-msg .git/hooks/commit-msg
+  ```
+- **Before claiming all tasks done**, re-read the task tracker file and list any items NOT marked complete.
+- **`common/` has sub-modules:** `kinematics/` (IKinematicModel, IDynamicModel), `robot/` (VehicleParams, MotorParams, TireParams, WheelConfig), `environment/` (TerrainProperties, SlipDetector), `logging/`, `transforms/`, `noise_models/`. Header-only types only — no logic.
+- **TerrainMap lives in simulation**, not common. Only `TerrainProperties` (the struct) lives in `common/environment/`.
+- **Module task files** live in `repo-plans/modules/<module>.md` and move to `repo-plans/modules/done/` when complete.
+
 ## Key Reference Files
 
 - [workspace/architecture.md](workspace/architecture.md) — system design, API specs, module index (read before adding a new module)
 - [workspace/cmake/deps.cmake](workspace/cmake/deps.cmake) — all third-party dependencies (Eigen, Catch2, Crow, OSQP, nlohmann/json, etc.)
-- [repo-plans/README.md](repo-plans/README.md) — M0–M12 milestone roadmap
+- [repo-plans/README.md](repo-plans/README.md) — M0–M24 milestone roadmap
+- [repo-plans/modules/](repo-plans/modules/) — per-module 7-phase task files (one per module, moved to done/ when complete)
 - [repo-plans/todos.md](repo-plans/todos.md) — active work items
+- [docs/superpowers/specs/](docs/superpowers/specs/) — design specs (brainstorm output)
+- [docs/superpowers/plans/](docs/superpowers/plans/) — implementation plans (plan output, executed by subagent-driven-development)
