@@ -39,6 +39,10 @@ Fleshed out todo list:
 - **Domain:** `perception/feature_extraction`
 - **Resolution (2026-03-13):** `workspace/robotics/perception/feature_extraction/` pre-scaffolded (FAST+BRIEF stub, `DescriptorMatcher` with Hamming distance via `__builtin_popcount`, ratio test); added to M6 Visual Perception Building Blocks milestone; `repo-plans/modules/feature_extraction.md` created.
 
+### ✅ Vehicle Dynamics — Dynamic model, motor, terrain, param ID
+- **Domain:** `control/vehicle_dynamics`, `control/motor_model`, `control/param_estimation`, `common/robot/`, `common/environment/`
+- **✅ Resolution (2026-03-16):** M3.5 milestone created. `BicycleDynamicModel : IDynamicModel` (linear tire, Newton-Euler 2D), `DcMotorModel` + `ActuatorLimiter`, `StepResponseFitter`/`CircleTestFitter`/`CogEstimator` for offline calibration. Shared types in `common/robot/` (VehicleParams, MotorParams, TireParams) and `common/environment/` (TerrainProperties, SlipDetector). TerrainMap owned by simulation. Theory doc covers full spectrum (Pacejka, Lagrangian, MuJoCo upgrade path).
+
 ### [P2] state_estimation/ukf — Unscented Kalman Filter
 - **Domain:** `state_estimation/ukf`
 - **Why missing:** The UKF is the natural upgrade path from EKF for strongly nonlinear systems (e.g., SE3 poses, IMU integration). M5 only adds a particle filter. UKF fills the gap between EKF and particle filter in accuracy vs. cost.
