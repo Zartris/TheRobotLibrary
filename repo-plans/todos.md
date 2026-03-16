@@ -3,6 +3,7 @@ This file is listing down tasks and features that we want before making it into 
 
 ---
 Quick todo list:
+- Should we cluster modules more? I have not a lot of game theory motion_planning methods in the list, maybe i should go motion_planning/game_theory/multi-agent|single/[module]
 ---
 Fleshed out todo list:
 
