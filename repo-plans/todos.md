@@ -8,6 +8,67 @@ Fleshed out todo list:
 
 ---
 
+### [P1] motion_planning/multi_robot/algames — Augmented Lagrangian Game-Theoretic MPC (High-Speed Merging)
+- **Domain:** `motion_planning/multi_robot/algames`
+- **Reference:** [Algames.jl (Simon Le Cleac'h)](https://github.com/simon-lc/Algames.jl) — Cleac'h et al., RSS 2020
+- **Why:** Best-fit algorithm for high-speed peer-to-peer merging with hard constraints. Models the merging problem as a **Nash game**: each agent minimizes its own trajectory cost (reach goal fast, stay smooth) with hard inter-agent collision-avoidance coupling constraints enforced via augmented Lagrangian. The "who yields" priority decision emerges naturally as a Nash equilibrium — no explicit combinatorial search needed. Addresses the fundamental failure mode of GBPPlanner (soft Gaussian collision factors violated under tight corridor pressure). Reference is Julia; our implementation targets C++ with OSQP.
+- **Key concepts:** Augmented Lagrangian for hard constraint enforcement; general-sum game (agents have different costs); KKT conditions per agent; coupled constraint Jacobians; merge corridor as a constrained workspace.
+- **Scope:**
+  - [ ] Scaffold `workspace/robotics/motion_planning/multi_robot/algames/`
+  - [ ] `AlgamesAgent` — per-agent iLQR solver with augmented Lagrangian coupling constraints; receives other agents' current trajectories via P2P comms
+  - [ ] `AlgamesCoordinator` — iterates agents' solvers to Nash equilibrium convergence (centralised version for benchmarking); optional decentralised mode where agents share iterates
+  - [ ] `CouplingConstraint` — minimum separation hard constraint between agent pairs; evaluates constraint value + Jacobian
+  - [ ] `AugmentedLagrangianSolver` — penalty parameter schedule (μ doubling), dual variable updates, convergence check on constraint violation
+  - [ ] Merging scenario test: two agents approaching a merge corridor at high speed → converges to one yielding, no collision, trajectories are dynamically feasible
+  - [ ] Tests: 2-agent head-on scenario; 4-agent intersection crossing; constraint violation < tolerance at convergence; benchmark iterations-to-convergence vs soft-constraint baseline
+  - [ ] `docs/theory.md`: Nash equilibrium formulation, augmented Lagrangian method, KKT conditions, comparison with DMPC (no game theory) and iLQGame (same family, lighter)
+  - [ ] Wire into `multi_robot/CMakeLists.txt`; add to M8 or new M8.5 milestone
+- **Note:** Start with centralised coordinator for correctness, then add decentralised P2P iterate-sharing variant. Depends on Eigen only (no external QP solver needed for the inner iLQR; OSQP optional for constrained sub-problems).
+
+### [P1] motion_planning/multi_robot/ilqgame — Iterative LQR for General-Sum Multi-Agent Games
+- **Domain:** `motion_planning/multi_robot/ilqgame`
+- **Reference:** [ilqgames (Fridovich-Keil et al.)](https://github.com/HJReachability/ilqgames) — ICRA 2020; C++, open source
+- **Why:** Lighter-weight game-theoretic planner in the same family as ALGAMES. Extends the iLQR algorithm (already understood from our control modules) to multi-player general-sum games by solving coupled Riccati equations per agent. Converges to local Nash equilibria. Faster per iteration than ALGAMES (no augmented Lagrangian penalty loop), but less robust convergence in highly constrained scenarios. C++ open-source reference with merging/intersection demos makes it an excellent learning companion to ALGAMES — implement both to understand the trade-offs.
+- **Key difference from ALGAMES:** Uses iLQR's backward pass to compute per-agent linear feedback policies simultaneously; hard constraints via projection rather than augmented Lagrangian → faster but softer safety.
+- **Scope:**
+  - [ ] Scaffold `workspace/robotics/motion_planning/multi_robot/ilqgame/`
+  - [ ] `ILQGameSolver` — coupled backward pass solving per-agent Riccati equations; forward pass with line search; shared `GameState` containing all agents' states
+  - [ ] `PlayerCost` — per-agent quadratic cost (goal tracking + control effort + proximity penalty)
+  - [ ] `GameDynamics` — stacked single-agent dynamics; computes coupled Jacobians
+  - [ ] Constraint handling: soft quadratic barrier (base), optional hard projection step for collision constraints
+  - [ ] Tests: 2-agent merging → converges to Nash; 4-agent roundabout → no deadlock; benchmark convergence speed vs ALGAMES
+  - [ ] `docs/theory.md`: general-sum game formulation, coupled Riccati backward pass derivation, comparison with ALGAMES, when to prefer iLQGame vs ALGAMES
+  - [ ] Wire into `multi_robot/CMakeLists.txt`
+
+### [P2] motion_planning/multi_robot/consensus_admm — Consensus ADMM Multi-Agent Trajectory Optimization
+- **Domain:** `motion_planning/multi_robot/consensus_admm`
+- **Reference:** No single canonical repo — algorithm based on Boyd et al. "Distributed Optimization and Statistical Learning via ADMM" (2011) applied to multi-agent trajectory optimization.
+- **Why:** This is conceptually "GBPPlanner with hard constraints." GBPPlanner uses Gaussian Belief Propagation over a factor graph — each inter-agent collision factor is a Gaussian (soft). ADMM uses the same factor-graph decomposition but enforces inter-agent constraints exactly via dual variable (Lagrange multiplier) updates. Each agent solves a local trajectory optimization subproblem; a consensus step drives agreement on shared collision-avoidance constraints. At convergence, hard constraints are satisfied by construction. Pedagogically bridges the gap between GBP (which the user already knows) and the game-theoretic approaches.
+- **Key insight:** Replace GBP's Gaussian message passing with ADMM's dual variable updates. Same local subproblem structure, hard constraint guarantee instead of soft.
+- **Scope:**
+  - [ ] Scaffold `workspace/robotics/motion_planning/multi_robot/consensus_admm/`
+  - [ ] `AdmmAgent` — solves local trajectory QP (OSQP) with augmented Lagrangian terms for coupling constraints; broadcasts primal trajectory and receives neighbors' trajectories
+  - [ ] `ConsensusLayer` — maintains dual variables (λ) and penalty parameter (ρ); updates λ after each primal solve; broadcasts consensus targets
+  - [ ] `CouplingConstraint` — minimum separation constraint linearised around current trajectory; forms the A matrix in the ADMM split
+  - [ ] Warm-starting: previous solution as initial iterate for real-time replanning
+  - [ ] Tests: 2-agent merging → hard separation constraint satisfied at convergence; compare constraint violation vs GBP baseline; test with increasing ρ schedule
+  - [ ] `docs/theory.md`: ADMM split for trajectory optimization, dual variable update derivation, connection to GBP (message passing = dual updates), convergence rate vs penalty schedule
+  - [ ] Wire into `multi_robot/CMakeLists.txt`
+
+### [P2] motion_planning/multi_robot/bvc — Buffered Voronoi Cells
+- **Domain:** `motion_planning/multi_robot/bvc`
+- **Reference:** Zhu & Alonso-Mora — "Chance-Constrained Collision Avoidance for MAVs in Dynamic Environments", T-RO 2019. See also [bvc implementations](https://github.com/Mit-agility/bvc) and related Alonso-Mora group repos.
+- **Why:** Simplest hard-constraint decentralized planner, and surprisingly effective for merging. Each agent computes its Voronoi cell w.r.t. neighbors, shrinks it by a safety buffer (= robot radius + margin), then solves a local QP to stay within its buffered cell. Hard constraint by construction — agents cannot enter each other's buffered cells. The Voronoi partition naturally encodes priority in merging (the agent closer to the merge point gets the larger cell). O(N log N) per agent. Real-time. Excellent reactive safety layer that can run under ALGAMES or iLQGame.
+- **Scope:**
+  - [ ] Scaffold `workspace/robotics/motion_planning/multi_robot/bvc/`
+  - [ ] `VoronoiPartition` — computes 2D/3D Voronoi tessellation from agent positions (Fortune's algorithm or incremental; Eigen-only)
+  - [ ] `BufferedVoronoiCell` — shrinks Voronoi cell by safety buffer; expresses cell as set of half-plane constraints
+  - [ ] `BvcAgent` — solves local QP (OSQP) to find velocity/waypoint within buffered cell closest to goal direction
+  - [ ] Tests: 2-agent merge → each stays within its cell, no collision; 10-agent random → no pairwise cell overlap; benchmark QP solve time < 1ms
+  - [ ] `docs/theory.md`: Voronoi tessellation, buffer sizing derivation, half-plane QP formulation, why this handles merging priority implicitly
+  - [ ] Wire into `multi_robot/CMakeLists.txt`
+- **Note:** Natural pairing with ALGAMES: BVC as the hard reactive safety filter, ALGAMES for trajectory-level planning.
+
 ### [P2] motion_planning/multi_robot/rmader — Robust MADER: Decentralized Multi-Agent Trajectory Planning Robust to Communication Delay
 - **Domain:** `motion_planning/multi_robot/rmader`
 - **Reference:** [RMADER (MIT ACL)](https://github.com/mit-acl/rmader) — Kondo et al., IEEE RA-L + ICRA 2023, arXiv:2303.06222
@@ -39,3 +100,17 @@ Fleshed out todo list:
   - [ ] `docs/theory.md`: Hermite basis functions, knot velocity optimization, comparison with min-snap, receding-horizon replanning loop
   - [ ] Add to appropriate milestone (M16 Planning Upgrades II or new M16.5)
 
+
+### [P5] motion_planning/multi_robot/gbp_planner — Gaussian Belief Propagation Multi-Agent Planner
+- **Domain:** `motion_planning/multi_robot/gbp_planner`
+- **Reference:** [gbpplanner (Patwardhan et al.)](https://github.com/aalpatya/gbpplanner) — Patwardhan, Bhatt & Stachniss, ICRA 2023
+- **Why (low priority):** GBP is a beautiful factor-graph algorithm for joint trajectory optimization — each agent's trajectory and inter-agent collision avoidance are modelled as factors in a probabilistic graph; belief propagation finds a consensus solution. Pedagogically interesting as an alternative to optimization-based approaches. However, collision factors are Gaussian (soft constraints) — the planner degrades in tight high-speed scenarios where constraints cannot be softened. **Add primarily for comparison and learning; ALGAMES/iLQGame are the correct choice for hard-constraint merging.** Open source C++, clean implementation.
+- **Scope:**
+  - [ ] Scaffold `workspace/robotics/motion_planning/multi_robot/gbp_planner/`
+  - [ ] `FactorGraph` — variable nodes (waypoints) + factor nodes (dynamics, obstacle, inter-agent); sparse message-passing structure
+  - [ ] `DynamicsFactor` — enforces kinematic continuity between waypoints
+  - [ ] `InterAgentFactor` — Gaussian collision cost between pairs of agents' waypoint variables
+  - [ ] `GbpSolver` — iterative belief propagation (fixed iterations or convergence check); produces mean trajectory per agent
+  - [ ] Tests: 2-agent low-speed crossing → avoidance emerges; document constraint violation rate under tight merge corridor (expected to be non-zero — this is a known limitation)
+  - [ ] `docs/theory.md`: factor graph formulation, Gaussian belief propagation message update equations, why soft constraints fail under hard geometric pressure, comparison with ALGAMES
+  - [ ] Wire into `multi_robot/CMakeLists.txt`
