@@ -44,21 +44,23 @@ M3.5 depends on M3 (needs the Ackermann/swerve kinematic model variants as test 
 
 ```
 common/
-├── interfaces/        ← IController, IStateEstimator, IGlobalPlanner (existing)
-├── logging/           ← ILogger, SpdlogLogger (existing)
-├── transforms/        ← SE2, SE3, SO3 (existing)
-├── robot/             ← NEW: IKinematicModel (moved from interfaces/),
-│                        IDynamicModel, VehicleParams, MotorParams,
-│                        WheelConfig, TireParams — "what is this robot?"
-├── environment/       ← NEW: TerrainProperties, wall material types
-│                        — "what world is the robot in?"
-├── camera.hpp         ← CameraIntrinsics, CameraFrame (existing)
-└── noise_models/      ← GaussianNoise, etc. (existing, M21)
+├── *(flat)*            ← Pose2D, Twist, Transform2D, IController, IStateEstimator,
+│                         IGlobalPlanner, math utils, map types (existing)
+├── kinematics/         ← IKinematicModel, diff-drive, unicycle, Ackermann, swerve (existing)
+│                         + IDynamicModel interface (NEW — motion model, belongs with IKinematicModel)
+├── logging/            ← ILogger, SpdlogLogger (existing)
+├── transforms/         ← SE2, SE3, SO3 (existing)
+├── robot/              ← NEW: VehicleParams, MotorParams, WheelConfig, TireParams
+│                         — "what is this robot?" (physical parameters, not interfaces)
+├── environment/        ← NEW: TerrainProperties, SlipDetector, SlipEvent
+│                         — "what world is the robot in?"
+├── camera.hpp          ← CameraIntrinsics, CameraFrame (existing, M6)
+└── noise_models/       ← GaussianNoise, etc. (existing, M21)
 ```
 
-**Rationale:** `IKinematicModel` and `IDynamicModel` describe the robot's physical form — they belong together in `common/robot/`, not mixed with algorithm interfaces like `IController`. `TerrainProperties` describes the environment — it belongs in `common/environment/`, not in a perception module (terrain friction is physics, not sensing).
+**Rationale:** Motion model interfaces (`IKinematicModel`, `IDynamicModel`) belong together in `common/kinematics/` — they're both "how does the robot move?" contracts. Physical parameter structs (`VehicleParams`, `MotorParams`, `TireParams`) go in `common/robot/` — they describe "what is this robot?" as data, not behavior. `TerrainProperties` describes the environment — it belongs in `common/environment/`, not in a perception module (terrain friction is physics, not sensing).
 
-**No rule change:** The dependency rule stays "modules may only depend on `common`." This is internal reorganization only — `common` remains a single CMake target. Existing `#include` paths get backwards-compatible forwarding headers during migration.
+**No rule change:** The dependency rule stays "modules may only depend on `common`." This is additive — `common` remains a single CMake target. No existing headers are moved; `IDynamicModel` is added to `common/kinematics/` alongside `IKinematicModel`.
 
 **`terrain_model` is NOT a standalone module:** `TerrainProperties` is a small struct in `common/environment/`. `TerrainMap` (grid → properties lookup) lives in the simulation, since it's the sim that knows which cell the robot occupies and passes `TerrainProperties` to `IDynamicModel::step()`. `SlipDetector` is a utility function in `common/environment/` — `detect(commanded_vel, measured_vel) → SlipEvent`.
 
@@ -70,21 +72,26 @@ Offline calibration tools (step-response fitting, circle-test fitting, CoG estim
 
 ## Modules
 
-### `common/robot/` (header-only, part of existing `common` target)
+### `common/kinematics/` addition (header-only, part of existing `common` target)
 
-Robot description types — "what is this robot?"
+`IDynamicModel` is added alongside the existing `IKinematicModel` — both are motion model interfaces.
 
-- `workspace/robotics/common/include/common/robot/i_dynamic_model.hpp`:
+- `workspace/robotics/common/kinematics/include/common/kinematics/i_dynamic_model.hpp`:
   - `IDynamicModel` — interface: `step(DynamicState, VehicleInput, TerrainProperties, dt) → DynamicState`, `getParams() → VehicleParams`, `setParams(VehicleParams)` (allows applying calibrated parameters from `param_estimation`)
   - `DynamicState` — pose (SE2), linear velocity (vx, vy), yaw rate (omega), acceleration, `DynamicDiagnostics` (front/rear lateral tire forces, front/rear slip angles, front/rear normal loads, total longitudinal force)
   - `VehicleInput` — longitudinal force, steering angle, braking force (renamed from `ForceInput` since steering angle is geometric, not a force)
+
+### `common/robot/` (header-only, part of existing `common` target)
+
+Physical parameter types — "what is this robot?"
+
 - `workspace/robotics/common/include/common/robot/vehicle_params.hpp`:
   - `VehicleParams` — mass, yaw inertia (Iz), CoG position (lf, lr — front/rear axle distances), wheel radius, track width
   - `TireParams` — cornering stiffness (Cf, Cr), max friction coefficient (mu)
   - `MotorParams` — stall torque, no-load speed, gear ratio, efficiency
   - `WheelConfig` — radius, width, position relative to CoG
 
-**Migration note:** `IKinematicModel` moves from `common/interfaces/` to `common/robot/` during M3.5 implementation. A forwarding header at the old path preserves backwards compatibility.
+No migration needed — existing `common/kinematics/` headers stay where they are. `IDynamicModel` is added to the same directory.
 
 ### `common/environment/` (header-only, part of existing `common` target)
 
