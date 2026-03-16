@@ -90,3 +90,29 @@ _N/A — common has no visual representation._
 
 - [ ] `include/common/camera.hpp` — `CameraIntrinsics` (fx, fy, cx, cy, width, height; `project()` → `std::optional<Eigen::Vector2d>`, `unproject()` → `Eigen::Vector3d`, `K()` → `Eigen::Matrix3d`), `CameraFrame` (timestamp `double`, width, height, data `std::vector<uint8_t>` row-major grayscale)
 - [ ] Tests: `project` round-trip; behind-camera returns `std::nullopt`; `K()` diagonal matches intrinsics; `CameraFrame::valid()` on empty data returns false
+
+---
+
+## M3.5 Addition: `common/robot/` — Physical Parameter Types
+
+**Milestone:** M3.5 — Vehicle Dynamics
+**Tracked here** because these are header-only additions to the `common` library target.
+
+- [ ] `include/common/robot/vehicle_params.hpp` — `VehicleParams` (mass, yaw inertia Iz, CoG position lf/lr, wheel_radius, track_width), `TireParams` (cornering stiffness Cf/Cr, max friction mu), `MotorParams` (stall_torque, no_load_speed, gear_ratio, efficiency), `WheelConfig` (radius, width, position relative to CoG)
+- [ ] Tests: construction with defaults; VehicleParams validates positive mass/inertia
+
+## M3.5 Addition: `common/kinematics/` — IDynamicModel Interface
+
+**Milestone:** M3.5 — Vehicle Dynamics
+**Tracked here** because `IDynamicModel` is added alongside existing `IKinematicModel` in `common/kinematics/`.
+
+- [ ] `include/common/kinematics/i_dynamic_model.hpp` — `IDynamicModel`: `step(DynamicState, VehicleInput, TerrainProperties, dt) → DynamicState`, `getParams() → VehicleParams`, `setParams(VehicleParams)`; `DynamicState` (pose SE2, vx, vy, omega, acceleration, `DynamicDiagnostics`); `VehicleInput` (longitudinal force, steering angle, braking force)
+- [ ] Tests: DynamicState default construction; VehicleInput zero-init
+
+## M3.5 Addition: `common/environment/` — Terrain Types
+
+**Milestone:** M3.5 — Vehicle Dynamics
+**Tracked here** because these are header-only additions to the `common` library target.
+
+- [ ] `include/common/environment/terrain.hpp` — `TerrainProperties` (mu, rolling_resistance, slope_angle), `SlipDetector::detect(commanded_vel, measured_vel) → SlipEvent`, `SlipEvent` (detected bool, slip_ratio, severity)
+- [ ] Tests: SlipDetector with matching velocities → no slip; divergent velocities → slip detected; TerrainProperties default mu=1.0
