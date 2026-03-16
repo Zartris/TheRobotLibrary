@@ -28,6 +28,6 @@ case "${1:-}" in
             docker compose -f "$COMPOSE_FILE" build
         fi
         docker compose -f "$COMPOSE_FILE" up -d
-        docker exec -it therobotlibrary-sandbox bash
+        docker exec -it therobotlibrary-sandbox tmux new-session -A -s dev
         ;;
 esac

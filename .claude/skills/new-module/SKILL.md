@@ -1,6 +1,6 @@
 ---
 name: new-module
-description: Scaffold a new robotics module following TheRobotLibrary template. Args: <domain> <module-name> (e.g., "control dwa" or "perception lidar_slam")
+description: "Scaffold a new robotics module following TheRobotLibrary template. Args: <domain> <module-name>"
 ---
 
 Scaffold a new robotics module at `workspace/robotics/<domain>/<module-name>/` following the standard template.

@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     vim \
     nano \
     procps \
+    tmux \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
@@ -30,6 +31,12 @@ RUN EXISTING_USER=$(getent passwd $USER_UID | cut -d: -f1) \
     && groupmod -n $USERNAME $EXISTING_GROUP \
     && usermod -l $USERNAME -d /home/$USERNAME -m $EXISTING_USER \
     && echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Install tmux config and cheat-sheet helper (as root, before USER switch)
+COPY tmux.conf /home/$USERNAME/.tmux.conf
+COPY welcome.sh /usr/local/bin/trl-welcome
+RUN chown $USERNAME:$USERNAME /home/$USERNAME/.tmux.conf \
+    && chmod +x /usr/local/bin/trl-welcome
 
 USER $USERNAME
 WORKDIR /workspace
