@@ -14,6 +14,7 @@ Get the simplest version of every layer running end-to-end first (M1), then upgr
 | **M1** | [Minimum Viable Robot](milestones/M1-minimum-viable-robot.md) | common + lidar + grid + A* + DWA + PID + EKF + sim + frontend | Not Started |
 | **M2** | [Hardening & Testing](milestones/M2-hardening-testing.md) | ≥80% coverage, 3+ integration scenarios, interface freeze | Not Started |
 | **M3** | [Control Upgrades](milestones/M3-control-upgrades.md) | pure_pursuit, MPC (acados), CBF safety filter, additional kinematics | Not Started |
+| **M3.5** | [Vehicle Dynamics](milestones/M3.5-vehicle-dynamics.md) | Bicycle dynamic model, DC motor, terrain interaction, param identification | Not Started |
 | **M4** | [Perception Upgrades](milestones/M4-perception-upgrades.md) | obstacle_detection, RANSAC, inflation, dynamic obstacles | Not Started |
 | **M5** | [State Estimation Upgrades](milestones/M5-state-estimation-upgrades.md) | Particle filter (MCL) as EKF alternative | Not Started |
 | **M6** | [Visual Perception Building Blocks](milestones/M6-visual-perception.md) | `common/camera.hpp`, `feature_extraction`, `visual_odometry`, 2.5D sim renderer | Not Started |
@@ -43,7 +44,8 @@ Get the simplest version of every layer running end-to-end first (M1), then upgr
 M0 (infra)
  └→ M1 (minimum viable robot + common/transforms)
       └→ M2 (hardening & testing)
-           ├→ M3 (control upgrades)          → M11 (advanced control)      → M13 (classical & optimal control)
+           ├→ M3 (control upgrades)
+           │    └→ M3.5 (vehicle dynamics) → M11 (advanced control) → M13 (classical & optimal control)
            │    └→ M13 ──────────────────────────────────────────────────────→ M18 (advanced nonlinear control)
            │    └→ M13 ──────────────────────────────────────────────────────→ M22 (optimal output feedback)
            ├→ M4 (perception upgrades)
@@ -68,6 +70,8 @@ M0 (infra)
            ├→ M9 (web frontend)
            └→ M10 (polish & showcase) ←── M8, M9
 ```
+
+M3.5 requires M3 (Ackermann/swerve kinematic variants for KinematicAdapter testing). M3.5 does not block M4/M5/M6/M7 — they branch from M2 independently.
 
 After M2, milestones M3–M5 and M9 can be developed **in parallel** since they touch independent domains. M6 (visual perception) requires M4 (occupancy grid + ray casting for the 2.5D camera renderer). M6.5 (SLAM) requires both M5 (state estimation interfaces) and M6 (feature extraction + visual odometry + camera types). M7 can start after M4 (needs costmaps). M8 needs M3 + M7. M11 requires M3 (stable control interfaces). M12 requires M8 (N-robot sim infrastructure). M13 requires M3 (IController interface); M11 recommended. M14 requires M5 (IStateEstimator interface). M15 requires M6 and M14 (both). M16 requires M7 (IGlobalPlanner interface) and M4 (OccupancyGrid). M17 requires M6 (feature_extraction, common/camera.hpp). M10 can begin partially after M8; full completion requires all milestones.
 
