@@ -65,7 +65,7 @@ Every module follows the same structure:
 
 - All modules may depend on `common`.
 - No module may depend on another domain module (e.g. `control` must not include from `perception`).
-- No module may depend on `simulation` or `frontends`.
+- No module may depend on `simulation` or the simulation app.
 - Cross-domain shared types belong in `common`.
 
 ```

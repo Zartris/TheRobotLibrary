@@ -23,7 +23,7 @@ between **fleet management systems (FMS)** and **automated guided vehicles (AGVs
 
 In this library, VDA 5050 types are implemented as C++ structs with nlohmann/json
 serialization. The transport layer (MQTT) is not implemented — structs are exchanged
-via the existing REST/WebSocket API.
+in-process via the simulation app's bridge layer.
 
 ## Task Allocation Strategies
 
@@ -40,7 +40,7 @@ via the existing REST/WebSocket API.
 ## Fleet Monitor
 
 The fleet monitor aggregates per-robot state updates into a single `FleetState` snapshot.
-Consumers (task allocator, battery manager, frontend) query `FleetState` rather than
+Consumers (task allocator, battery manager, simulation app) query `FleetState` rather than
 polling individual robots, decoupling the coordination logic from update timing.
 
 ## Battery Management

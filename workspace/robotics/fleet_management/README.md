@@ -7,14 +7,14 @@ handles task-level coordination, protocol compliance, and fleet-wide resource ma
 ## Architecture
 
 Fleet management is a **pure library domain** — it has no dependency on simulation or
-frontends. The simulation server links fleet_management modules during M12 to expose
-fleet management via the existing Crow REST/WS server.
+the simulation app. The simulation app links fleet_management modules during M12 to
+expose fleet management via its ImGui panels and bridge layer.
 
 ```
                   ┌─────────────────────────────────┐
-                  │      Simulation Backend          │
+                  │        Simulation App            │
                   │  ┌──────────────────────────┐    │
-                  │  │  /api/fleet/* endpoints  │    │
+                  │  │     ImGui fleet panel    │    │
                   │  └──────────┬───────────────┘    │
                   └─────────────┼───────────────────-┘
                                 │ uses

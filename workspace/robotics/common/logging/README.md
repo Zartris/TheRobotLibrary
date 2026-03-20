@@ -4,7 +4,7 @@ Structured logging interface and default spdlog implementation for all robotlib 
 
 ## Purpose
 
-Provides an `ILogger` interface and `SpdlogLogger` concrete implementation so every module can emit structured, leveled log messages without coupling to a specific logging backend. AI agents and automated tools can consume the log output without needing access to a graphical frontend.
+Provides an `ILogger` interface and `SpdlogLogger` concrete implementation so every module can emit structured, leveled log messages without coupling to a specific logging backend. AI agents and automated tools can consume the log output without needing the simulation app running.
 
 ## Interfaces
 

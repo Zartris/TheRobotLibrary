@@ -39,4 +39,4 @@ before diving into a specific sub-module.
 ## Dependency rule
 
 All sub-modules depend only on `common`. No sub-module may depend on another perception
-sub-module, on `simulation`, or on `frontends`.
+sub-module, on `simulation`, or on the simulation app.

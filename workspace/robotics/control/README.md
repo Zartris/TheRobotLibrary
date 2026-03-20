@@ -27,4 +27,4 @@ before diving into a specific sub-module's theory document.
 ## Dependency rule
 
 All sub-modules depend only on `common`. They have no dependency on each other, on
-`simulation`, or on `frontends`.
+`simulation`, or on the simulation app.
