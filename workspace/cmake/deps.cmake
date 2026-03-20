@@ -73,6 +73,18 @@ if(NOT TARGET spdlog::spdlog)
     set(SPDLOG_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
     set(SPDLOG_INSTALL        OFF CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(spdlog)
+    # sdflib (transitive via MuJoCo) fetches spdlog under the alias 'spdlog_lib'
+    # and calls add_subdirectory(), which would create a duplicate 'spdlog' target.
+    # Pre-declare spdlog_lib pointing at our already-fetched source so that
+    # sdflib's spdlog_lib_POPULATED check is true and it skips add_subdirectory.
+    FetchContent_Declare(spdlog_lib
+        SOURCE_DIR ${spdlog_SOURCE_DIR}
+        BINARY_DIR ${spdlog_BINARY_DIR}
+    )
+    FetchContent_GetProperties(spdlog_lib)
+    if(NOT spdlog_lib_POPULATED)
+        FetchContent_Populate(spdlog_lib)
+    endif()
 endif()
 
 # ---------------------------------------------------------------------------

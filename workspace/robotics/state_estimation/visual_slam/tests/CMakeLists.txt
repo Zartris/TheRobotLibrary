@@ -7,5 +7,5 @@ target_link_libraries(visual_slam_tests
     PRIVATE robotlib::visual_slam Catch2::Catch2WithMain
 )
 
-include(Catch2/extras/Catch.cmake OPTIONAL)
+include(Catch)
 catch_discover_tests(visual_slam_tests)

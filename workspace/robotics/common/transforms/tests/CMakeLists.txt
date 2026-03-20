@@ -7,5 +7,5 @@ target_link_libraries(transforms_tests
     PRIVATE robotlib::transforms Catch2::Catch2WithMain
 )
 
-include(Catch2/extras/Catch.cmake OPTIONAL)
+include(Catch)
 catch_discover_tests(transforms_tests)
