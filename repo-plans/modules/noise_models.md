@@ -56,7 +56,7 @@ cd build && ctest -R noise_models --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[
 
 ### Phase 6 — Frontend Visualization
 
-- [ ] No frontend visualization required for this utility module
+- [ ] No visualization required for this utility module
 
 ### Phase 7 — Docs Polish
 

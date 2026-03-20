@@ -54,7 +54,7 @@ cd build && ctest -R factor_graph --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[
 
 ### Phase 6 — Frontend Visualization
 
-- [ ] No frontend visualization required for this infrastructure module
+- [ ] No visualization required for this infrastructure module
 
 ### Phase 7 — Docs Polish
 
