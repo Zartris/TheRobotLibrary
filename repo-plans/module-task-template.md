@@ -53,7 +53,7 @@ cd build && ctest -R <module> --output-on-failure
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("<module>")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths)
@@ -72,15 +72,14 @@ cd build && ctest -R <module> --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRAC
 > _For M1 sub-phases B–I, sim integration happens during M1-K when the pipeline is created. For post-M1 modules, register with the existing `RobotPipeline`._
 
 - [ ] Wire module into simulation loop (register with `RobotPipeline`)
-- [ ] Add module output to WebSocket state message
-- [ ] Add REST endpoints for module-specific config (if needed)
+- [ ] Add module output to bridge state adapter
+- [ ] Add ImGui panel entries for module-specific config (if needed)
 - [ ] Integration test: sim runs with this module active, state is valid
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
-- [ ] Add rendering layer to native frontend (ImGui `ImDrawList`)
+- [ ] Add visualization to ImGui telemetry panel (if applicable)
 - [ ] Toggle visibility from UI panel
-- [ ] (Later — M9) Mirror rendering in web frontend Canvas 2D
 
 ### Phase 7 — Docs Polish
 
