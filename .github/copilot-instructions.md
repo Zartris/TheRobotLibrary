@@ -2,11 +2,10 @@
 
 ## Architecture
 
-TheRobotLibrary is a modular C++20 robotics library with three strictly separated tiers:
+TheRobotLibrary is a modular C++20 robotics library with two tiers combined into a single executable:
 
-- **Tier 1 — Robotics modules** (`workspace/robotics/`): Self-contained libraries. May only depend on `common`. Never on each other, simulation, or frontends.
-- **Tier 2 — Simulation backend** (`workspace/simulation/`): Crow HTTP/WebSocket server, 50 Hz sim loop, 30 Hz state streaming. May link robotics modules.
-- **Tier 3 — Frontends** (`workspace/frontends/`): Native (ImGui+SDL2) and Web (TypeScript/React). Network-only communication — never link against simulation or robotics libraries.
+- **Tier 1 — Robotics modules** (`workspace/robotics/`): Self-contained libraries. May only depend on `common`. Never on each other or simulation. No MuJoCo dependency.
+- **Tier 2 — Simulation** (`workspace/simulation/`): MuJoCo physics with integrated GLFW/ImGui visualization (single executable). Links against robotics modules via a bridge layer. No network API.
 
 ## Code Conventions
 
@@ -48,7 +47,7 @@ Tests are conditionally included: `if(BUILD_TESTING AND EXISTS tests/CMakeLists.
 
 - All builds target `workspace/` as the CMake source root
 - Dependencies managed via CMake FetchContent — no vcpkg or Conan
-- See `workspace/cmake/deps.cmake` for all third-party deps (Eigen, Catch2, Crow, OSQP, nlohmann/json, etc.)
+- See `workspace/cmake/deps.cmake` for all third-party deps (MuJoCo, Eigen, Catch2, OSQP, nlohmann/json, ImGui, spdlog, etc.)
 - `cmake/deps.cmake` is the single source of truth for dependencies — do not edit without explicit intent
 
 ## Scaffolding a New Module
