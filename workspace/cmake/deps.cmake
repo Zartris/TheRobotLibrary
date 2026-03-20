@@ -60,6 +60,22 @@ if(NOT TARGET nlohmann_json::nlohmann_json)
 endif()
 
 # ---------------------------------------------------------------------------
+# spdlog v1.15.0 — header-only fast logging (common/logging, simulation)
+# ---------------------------------------------------------------------------
+if(NOT TARGET spdlog::spdlog)
+    FetchContent_Declare(spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog.git
+        GIT_TAG        v1.15.0
+        GIT_SHALLOW    TRUE
+    )
+    set(SPDLOG_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(SPDLOG_BUILD_BENCH    OFF CACHE BOOL "" FORCE)
+    set(SPDLOG_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
+    set(SPDLOG_INSTALL        OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(spdlog)
+endif()
+
+# ---------------------------------------------------------------------------
 # OSQP v0.6.3 — Embedded QP solver (multi_robot/dmpc, general QP needs)
 # Note: MPC uses acados (see below) for NMPC. OSQP retained for simpler QP
 # problems (DMPC per-robot subproblems, trajectory optimization QPs).
