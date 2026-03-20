@@ -49,7 +49,7 @@ cd build && ctest -R dwa --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 - [ ] Default local planner in robot pipeline (M1-K)
 - [ ] Selectable via ImGui module selector (local planner type: "dwa")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Top-N trajectory candidates rendered as thin blue arcs (M1-L)
 

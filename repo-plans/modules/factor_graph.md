@@ -52,7 +52,7 @@ cd build && ctest -R factor_graph --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[
 
 - [ ] Integration note: `PoseGraph (M14)` can optionally be re-implemented as a thin wrapper over `FactorGraph` post-M21; not a requirement of M21 itself
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] No visualization required for this infrastructure module
 

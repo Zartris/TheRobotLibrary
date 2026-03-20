@@ -52,7 +52,7 @@ cd build && ctest -R mppi --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 
 - [ ] Selectable via ImGui module selector (controller type: "mppi")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Visualise rollout fan (N sampled trajectories, grey) + selected trajectory (highlighted)
 

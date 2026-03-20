@@ -111,7 +111,7 @@ Headless VO pipeline test. Lives in `workspace/simulation/tests/` (sim links mod
 ## NOT IN
 
 - Visual SLAM (map, loop closure) — M6.5
-- Frontend camera view panel — M6.5
+- Camera view panel — M6.5
 - `place_recognition` as a standalone module — loop closure is a sub-task within `visual_slam`
 - OpenCV dependency
 - GPU acceleration

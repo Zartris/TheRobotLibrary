@@ -50,7 +50,7 @@ cd build && ctest -R lqg --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 
 - [ ] Selectable via ImGui module selector (controller type: "lqg")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render estimated state covariance ellipse; control effort vs. time; estimation residual panel
 

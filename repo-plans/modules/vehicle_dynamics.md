@@ -85,7 +85,7 @@ cd build && ctest -R vehicle_dynamics --output-on-failure 2>&1 | grep "\[DEBUG\]
 - [ ] ImGui panel: physics mode toggle ("kinematic" | "dynamic")
 - [ ] Integration test: sim runs with dynamic model active, state is valid
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Dynamic state overlay: slip angles, tire forces, terrain mu displayed
 - [ ] Toggle visibility from UI panel

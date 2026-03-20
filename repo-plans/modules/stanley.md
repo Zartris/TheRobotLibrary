@@ -53,7 +53,7 @@ cd build && ctest -R stanley --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE
   require a bicycle-model kinematic layer. If not available, defer Phase 5 to a post-M13
   sim upgrade; document the deferral in this file.
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Cross-track error overlay (same style as `frenet` from M11)
 

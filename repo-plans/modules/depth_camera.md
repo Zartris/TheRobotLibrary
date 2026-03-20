@@ -52,7 +52,7 @@ cd build && ctest -R depth_camera --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[
 
 - [ ] Sim note: live RGB-D rendering deferred; offline/synthetic testing covered by unit tests
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] False-colour depth overlay panel (hot = close, cool = far)
 

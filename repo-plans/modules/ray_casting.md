@@ -48,7 +48,7 @@ cd build && ctest -R ray_casting --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[T
 
 - [ ] Used by simulation to generate simulated lidar data (M1-J)
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Lidar rays rendered in simulation app (M1-L)
 

@@ -58,7 +58,7 @@ cd build && ctest -R charging_station --output-on-failure 2>&1 | grep "\[DEBUG\]
 
 - [ ] Fleet ImGui panel: charging request controls + status display
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Charging station map overlay; queue depth indicator; charge completion countdown
 

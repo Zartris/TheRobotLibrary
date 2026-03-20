@@ -51,7 +51,7 @@ cd build && ctest -R lane_detection --output-on-failure 2>&1 | grep "\[DEBUG\]\|
 
 - [ ] Sim note: operates on pre-computed binary edge images; sim edge rendering deferred to post-M22 extension
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render left/right lane polynomial curves overlaid on camera image
 

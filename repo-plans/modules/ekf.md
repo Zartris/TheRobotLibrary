@@ -49,7 +49,7 @@ cd build && ctest -R ekf --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 - [ ] EKF receives odometry (predict) and landmark/scan data (update) each tick (M1-K)
 - [ ] Selectable via ImGui module selector (estimator type: "ekf")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Covariance ellipse rendered around estimated robot pose (M1-L)
 

@@ -51,7 +51,7 @@ cd build && ctest -R polynomial --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TR
 
 - [ ] Trajectory planner slot — replaces `velocity_profiling` for drone/arm scenarios
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render polynomial trajectory with curvature color coding
 

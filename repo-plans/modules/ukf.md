@@ -51,7 +51,7 @@ cd build && ctest -R ukf --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 
 - [ ] Registerable as alternative state estimator alongside EKF via ImGui module selector (estimator type: "ukf")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render state covariance ellipse (same panel as EKF)
 

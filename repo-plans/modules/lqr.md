@@ -50,7 +50,7 @@ cd build && ctest -R lqr --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 
 - [ ] Selectable via ImGui module selector (controller type: "lqr")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render Q/R gain panel + current control effort
 

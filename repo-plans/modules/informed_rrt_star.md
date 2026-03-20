@@ -50,7 +50,7 @@ cd build && ctest -R informed_rrt_star --output-on-failure 2>&1 | grep "\[DEBUG\
 
 - [ ] Selectable via ImGui module selector (global planner type: "informed_rrt_star")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render PHS ellipse overlay; show `c_best` convergence curve in side panel
 

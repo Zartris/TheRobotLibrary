@@ -53,7 +53,7 @@ cd build && ctest -R stereo_depth --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[
 - [ ] M17 scope covers offline/synthetic testing only
 - [ ] Live sim stereo rendering deferred to post-M17 sim upgrade (requires two camera viewpoints offset by baseline)
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Depth map false-colour overlay
 - [ ] Disparity histogram panel

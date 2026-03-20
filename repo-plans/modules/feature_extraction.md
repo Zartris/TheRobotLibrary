@@ -77,9 +77,9 @@ cd build && ctest -R feature_extraction --output-on-failure 2>&1 | grep "\[DEBUG
 - [ ] `FeatureExtractor` used by sim integration test `test_vo_integration` (in `workspace/simulation/tests/`)
 - [ ] Module itself does not link against simulation — sim links the module
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
-- [ ] (M6.5 / M9) Feature tracks overlay on camera view panel
+- [ ] (M6.5) Feature tracks overlay on camera view panel
 
 ### Phase 7 — Docs Polish
 

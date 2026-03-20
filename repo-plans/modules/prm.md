@@ -50,7 +50,7 @@ cd build && ctest -R prm --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 
 - [ ] Selectable via ImGui module selector (global planner type: "prm")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render roadmap graph (grey edges) + planned path (highlighted)
 

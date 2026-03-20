@@ -79,7 +79,7 @@ cd build && ctest -R motor_model --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[T
 - [ ] Motor saturation visualized: actual torque vs commanded torque in `dynamic_state`
 - [ ] Integration test: motor-limited acceleration visibly lower than F=ma prediction
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Motor saturation indicator (actual vs commanded torque)
 - [ ] Toggle visibility from UI panel

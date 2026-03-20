@@ -49,7 +49,7 @@ cd build && ctest -R velocity_profiling --output-on-failure 2>&1 | grep "\[DEBUG
 - [ ] Called in pipeline between A* and DWA: A* produces a global `Path`, velocity profiler converts it to a `TimedPath`, DWA receives the `Path` portion and uses `TimedPath` velocity hints for its cost function (M1-K)
 - [ ] Note: `ILocalPlanner::compute()` takes `Path` (not `TimedPath`). The pipeline extracts speed targets from `TimedPath` and passes them as DWA config parameters (e.g. `max_vel` for current segment).
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Velocity profile visible in UI panel (speed vs distance graph)
 

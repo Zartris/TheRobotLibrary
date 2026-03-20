@@ -52,7 +52,7 @@ cd build && ctest -R visual_inertial_odometry --output-on-failure 2>&1 | grep "\
 
 - [ ] SLAM pipeline slot: `ImuPreintegrator` + `VisualOdometry` + `VisualInertialOdometry`
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] VIO trajectory trace alongside raw VO trace
 - [ ] Bias drift panel

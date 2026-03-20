@@ -84,7 +84,7 @@ cd build && ctest -R param_estimation --output-on-failure 2>&1 | grep "\[DEBUG\]
 - [ ] Fitted params applied to `IDynamicModel` via `setParams()`
 - [ ] Integration test: calibrated model matches ground truth within tolerance
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Parameter estimation results overlay (fitted values, residuals, confidence)
 - [ ] Toggle visibility from UI panel

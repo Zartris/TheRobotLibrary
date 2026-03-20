@@ -50,7 +50,7 @@ cd build && ctest -R pid --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 - [ ] Default controller in robot pipeline (M1-K)
 - [ ] Selectable via ImGui module selector (controller type: "pid")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Controller output visible in robot state panel
 

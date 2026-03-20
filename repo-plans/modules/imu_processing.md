@@ -52,7 +52,7 @@ cd build && ctest -R imu_processing --output-on-failure 2>&1 | grep "\[DEBUG\]\|
 - [ ] Part of the VIO pipeline slot: `ImuPreintegrator` → `VisualInertialOdometry`
 - [ ] No standalone ImGui entry — consumed by `visual_inertial_odometry`
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Displayed indirectly via VIO bias drift panel (M15 VIO module)
 

@@ -48,7 +48,7 @@ cd build && ctest -R lidar_processing --output-on-failure 2>&1 | grep "\[DEBUG\]
 
 - [ ] Filters raw simulated lidar before occupancy grid update (M1-K)
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 _No direct visualization — filtering is invisible. Raw vs filtered scans could be toggled later._
 

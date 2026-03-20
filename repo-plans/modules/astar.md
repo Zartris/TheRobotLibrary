@@ -50,7 +50,7 @@ cd build && ctest -R astar --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]
 - [ ] Default global planner in robot pipeline (M1-K)
 - [ ] Selectable via ImGui module selector (global planner type: "astar")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Planned global path rendered as green line (M1-L)
 

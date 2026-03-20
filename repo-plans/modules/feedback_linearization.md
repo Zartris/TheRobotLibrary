@@ -51,7 +51,7 @@ cd build && ctest -R feedback_linearization --output-on-failure 2>&1 | grep "\[D
 
 - [ ] Selectable via ImGui module selector (controller type: "feedback_linearization")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render virtual output point trajectory overlay
 

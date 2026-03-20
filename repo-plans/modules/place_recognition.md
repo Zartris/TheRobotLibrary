@@ -52,7 +52,7 @@ cd build && ctest -R place_recognition --output-on-failure 2>&1 | grep "\[DEBUG\
 - [ ] Integration note: output `PlaceCandidate` list can be routed to `pose_graph (M14)` as loop closure edges
 - [ ] No standalone ImGui entry; consumed by SLAM pipeline assembler
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Rendered indirectly via SLAM loop closure visualization (post-M17 wiring)
 

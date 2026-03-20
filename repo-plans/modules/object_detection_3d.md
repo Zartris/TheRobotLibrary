@@ -52,7 +52,7 @@ cd build && ctest -R object_detection_3d --output-on-failure 2>&1 | grep "\[DEBU
 
 - [ ] Integrate with lidar point cloud pipeline; 3D objects renderable as oriented boxes
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render oriented bounding boxes with class label overlays in 3D scene view
 

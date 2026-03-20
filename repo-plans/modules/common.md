@@ -72,7 +72,7 @@ cd build && ctest -R common --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\
 
 _N/A — common is a dependency, not wired directly into sim loop._
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 _N/A — common has no visual representation._
 

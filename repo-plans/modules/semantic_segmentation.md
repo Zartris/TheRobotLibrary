@@ -55,9 +55,9 @@ cd build && ctest -R semantic_segmentation --output-on-failure 2>&1 | grep "\[DE
 
 - [ ] Sim note: semantic overlay requires sim rendering extension; M23 scope covers offline/batch processing only
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
-- [ ] No live frontend visualization in M23 scope (requires sim rendering extension)
+- [ ] No live visualization in simulation app in M23 scope (requires sim rendering extension)
 
 ### Phase 7 — Docs Polish
 

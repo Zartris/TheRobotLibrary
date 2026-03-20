@@ -48,7 +48,7 @@ cd build && ctest -R occupancy_grid --output-on-failure 2>&1 | grep "\[DEBUG\]\|
 
 - [ ] Grid updated from filtered lidar scans each sim tick (M1-K)
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Grid rendered as colored cells in simulation app (M1-L)
 

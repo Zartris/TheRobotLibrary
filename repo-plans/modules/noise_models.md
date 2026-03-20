@@ -54,7 +54,7 @@ cd build && ctest -R noise_models --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[
 
 - [ ] No sim integration required; `noise_models` is used by other modules' test suites
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] No visualization required for this utility module
 

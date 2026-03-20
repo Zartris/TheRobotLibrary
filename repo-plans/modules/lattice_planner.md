@@ -52,7 +52,7 @@ cd build && ctest -R lattice_planner --output-on-failure 2>&1 | grep "\[DEBUG\]\
 
 - [ ] Selectable via ImGui module selector (global planner type: "lattice")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render lattice graph (grey edges) + planned path (highlighted) + heading arrows at each node
 

@@ -50,7 +50,7 @@ cd build && ctest -R potential_field --output-on-failure 2>&1 | grep "\[DEBUG\]\
 
 - [ ] Selectable via ImGui module selector (local planner type: "potential_field")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render potential field gradient vectors (arrow overlay, optional toggle)
 
