@@ -21,9 +21,9 @@ Before any algorithm work, the simulation needs N-robot support:
 - [ ] World model supports N robots (each with own pose, sensors, pipeline)
 - [ ] Per-robot sensor streams (each robot has independent lidar)
 - [ ] Per-robot pipeline (each robot can have different controller/planner/estimator)
-- [ ] WebSocket state extended: array of robot states
-- [ ] REST: `/api/robots` (list), `/api/robots/{id}/pipeline` (per-robot config)
-- [ ] Frontend: multi-robot rendering (colored triangles, per-robot paths, per-robot lidar)
+- [ ] Bridge state extended: array of robot states (populated from mjData each physics tick)
+- [ ] ImGui panel: robot list, per-robot pipeline config selectors
+- [ ] MuJoCo 3D scene: multi-robot rendering (colored models, per-robot paths, per-robot lidar)
 - [ ] Scenario JSON supports N robots with independent start/goal positions
 
 ---
@@ -97,15 +97,15 @@ MADER: decentralized asynchronous replanning. Shared committed trajectory segmen
 
 - [ ] Multi-robot sim infrastructure
 - [ ] 5 modules: orca, priority_planning, cbs, dmpc, mader — each with unit tests
-- [ ] Algorithm selector in frontend (dropdown for multi-robot algorithm)
-- [ ] Frontend: multi-robot visualization (colored robots, per-robot paths, collision zones)
+- [ ] Algorithm selector in ImGui panel (dropdown for multi-robot algorithm)
+- [ ] Simulation app: multi-robot visualization (colored robots, per-robot paths, collision zones)
 - [ ] Mini-demo: 3–5 robots, toggle algorithms to compare behavior
 
 ## Exit Criteria
 
 1. 5 robots navigate to goals without collision using each algorithm
 2. All unit tests pass
-3. Algorithm switching visible in frontend
+3. Algorithm switching visible in simulation app
 4. CBS finds provably optimal solution on small instances
 5. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
 

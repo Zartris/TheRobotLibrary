@@ -32,7 +32,7 @@ RGB-D camera processing pipeline. Converts raw depth images (uint16 mm or float3
   - Empty depth image (all NaN): `toPointCloud()` → empty point cloud; no crash
 - [ ] Phase 4.5: `ILogger`, valid pixel count + hole-fill pass count at `DEBUG`, projection time per frame at `TRACE`
 - [ ] Sim note: depth camera simulation requires sim renderer extension. M19 covers offline/synthetic testing; live sim RGB-D rendering deferred to a post-M19 sim upgrade.
-- [ ] Frontend: false-colour depth overlay panel (hot = close, cool = far)
+- [ ] ImGui panel: false-colour depth overlay panel (hot = close, cool = far)
 
 ### perception/object_detection_3d
 
@@ -50,8 +50,8 @@ RGB-D camera processing pipeline. Converts raw depth images (uint16 mm or float3
   - Single-point cluster (below `min_points`): filtered out; not returned as object
   - Empty point cloud: returns empty `Detection3DList`; no crash
 - [ ] Phase 4.5: `ILogger`, cluster count + per-cluster point count at `DEBUG`, DBSCAN + PCA time at `TRACE`
-- [ ] Sim: integrate with lidar point cloud pipeline; 3D objects renderable as oriented boxes in frontend
-- [ ] Frontend: render oriented bounding boxes with class label overlays in 3D scene view
+- [ ] Sim: integrate with lidar point cloud pipeline; 3D objects renderable as oriented boxes in simulation app
+- [ ] Simulation app: render oriented bounding boxes with class label overlays in MuJoCo 3D scene view
 
 ---
 

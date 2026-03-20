@@ -57,4 +57,4 @@ Make the M1 codebase rock-solid before adding new features. Stabilize interfaces
 
 ## NOT IN
 
-New algorithms, new modules, performance optimization, frontend changes.
+New algorithms, new modules, performance optimization, simulation app changes.

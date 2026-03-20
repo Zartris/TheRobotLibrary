@@ -36,8 +36,8 @@ Charging station registry and assignment manager. Tracks which stations are avai
   - Empty registry: `requestCharging()` → error via `std::expected`
   - No stations available + queue limit exceeded → documented cap behaviour (return error)
 - [ ] Phase 4.5: `ILogger`, assignment decisions + queue depth at `DEBUG`, completion prediction compute time at `TRACE`
-- [ ] Sim: fleet REST endpoints `POST /api/fleet/charging/request` + `GET /api/fleet/charging/status`
-- [ ] Frontend: charging station map overlay; queue depth indicator; charge completion countdown
+- [ ] Sim: ImGui fleet charging panel (request charging, view status)
+- [ ] ImGui panel: charging station map overlay; queue depth indicator; charge completion countdown
 
 ---
 

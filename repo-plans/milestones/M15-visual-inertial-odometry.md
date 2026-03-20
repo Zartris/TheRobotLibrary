@@ -56,7 +56,7 @@ provided by the caller through `common/` types.
   - Bias observability: after N VO updates, bias estimate converges toward true injected bias
 - [ ] Phase 4.5: `ILogger`, predict/update cycle at `DEBUG`, cycle time + residual at `TRACE`
 - [ ] Sim: SLAM pipeline slot — `ImuPreintegrator` + `VisualOdometry` + `VisualInertialOdometry`
-- [ ] Frontend: VIO trajectory trace alongside raw VO trace; bias drift panel
+- [ ] ImGui panel: VIO trajectory trace alongside raw VO trace; bias drift panel
 
 ---
 
@@ -65,7 +65,7 @@ provided by the caller through `common/` types.
 - [ ] `perception/imu_processing` module: interface, implementation, tests
 - [ ] `state_estimation/visual_inertial_odometry` module: interface, implementation, tests
 - [ ] VIO pipeline slot wired in simulation
-- [ ] Frontend shows VIO trace vs VO trace + bias drift panel
+- [ ] Simulation app shows VIO trace vs VO trace + bias drift panel
 - [ ] All modules pass Phase 4.5 — Observability gate
 
 ---

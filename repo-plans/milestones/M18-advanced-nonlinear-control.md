@@ -30,8 +30,8 @@ Model Predictive Path Integral controller. Samples N control trajectories as Gau
   - Temperature λ: high λ → uniform weights (exploration); low λ → peaked on best rollout (exploitation)
   - N = 1 (degenerate case): no crash; produces finite control output
 - [ ] Phase 4.5: `ILogger`, rollout cost distribution (min/max/mean) at `DEBUG`, per-iteration solve time at `TRACE`
-- [ ] Sim: selectable via `PUT /api/robot/controller {"type":"mppi"}`
-- [ ] Frontend: visualise rollout fan (N sampled trajectories) + selected trajectory (highlighted)
+- [ ] Sim: selectable via ImGui controller dropdown
+- [ ] ImGui panel: visualise rollout fan (N sampled trajectories) + selected trajectory (highlighted)
 
 ### control/feedback_linearization
 
@@ -48,8 +48,8 @@ Exact input-output linearization for a differential-drive robot in chained form.
   - Lie derivative check: numerical `L_f h(x)` matches analytic expression (< 1e-5 relative error)
   - Singularity: `l = 0` → documented error via `std::expected`; no division by zero
 - [ ] Phase 4.5: `ILogger`, virtual output error + Lie derivative residual at `DEBUG`, computation time at `TRACE`
-- [ ] Sim: selectable via `PUT /api/robot/controller {"type":"feedback_linearization"}`
-- [ ] Frontend: render virtual output point trajectory overlay
+- [ ] Sim: selectable via ImGui controller dropdown
+- [ ] ImGui panel: render virtual output point trajectory overlay
 
 ---
 
@@ -57,7 +57,7 @@ Exact input-output linearization for a differential-drive robot in chained form.
 
 - [ ] `control/mppi` module: interface, implementation, tests
 - [ ] `control/feedback_linearization` module: interface, implementation, tests
-- [ ] Both controllers hot-swappable via REST mid-run without crash
+- [ ] Both controllers hot-swappable via ImGui mid-run without crash
 - [ ] MPPI: importance weight normalization and temperature behaviour verified in tests
 - [ ] Feedback linearization: Lie derivative numerical check passes
 - [ ] All modules pass Phase 4.5 — Observability gate
@@ -70,7 +70,7 @@ Exact input-output linearization for a differential-drive robot in chained form.
 2. MPPI obstacle avoidance: obstacle-colliding rollouts receive near-zero weight
 3. Feedback linearization: straight-line and circular-arc tracking within CTE tolerance
 4. Lie derivative numerical check passes (< 1e-5 relative error vs. analytic)
-5. Both controllers hot-swappable via REST mid-run without crash
+5. Both controllers hot-swappable via ImGui mid-run without crash
 6. All unit tests pass, CI green
 7. All modules pass Phase 4.5 — Observability gate (state transitions at `DEBUG`, metrics at `TRACE`)
 

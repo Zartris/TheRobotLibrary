@@ -33,8 +33,8 @@ the performance gain of adaptation vs. fixed-gain PID on changing robot payloads
   - Step disturbance (robot load doubles): gains readjust within N steps
   - Gain bounds enforced: gains never exceed `[min, max]`
   - Reset clears adaptation state
-- [ ] Sim integration: selectable via `PUT /api/robot/controller {"type":"adaptive_pid"}`
-- [ ] Frontend: render current gain values as a live readout panel
+- [ ] Sim integration: selectable via ImGui controller dropdown
+- [ ] ImGui panel: render current gain values as a live readout panel
 
 ### adaptive/rls
 
@@ -50,7 +50,7 @@ drag) for consumption by MPC or adaptive PID.
   - Covariance doesn't blow up or collapse under repeated identical inputs
   - `getEstimatedParams()` returns stable values after convergence
 - [ ] Sim integration: RLS runs as background estimator; estimated params logged each tick
-- [ ] Frontend: render estimated params (mass estimate, friction estimate) as live readout
+- [ ] ImGui panel: render estimated params (mass estimate, friction estimate) as live readout
 
 ### frenet
 
@@ -66,8 +66,8 @@ pure_pursuit, especially at higher speeds.
   - Feedforward curvature term: robot follows curve with less lateral error than P-only
   - Speed tracking: longitudinal PI tracks `v_ref` from velocity profiler
   - Path end: robot decelerates and stops at last waypoint
-- [ ] Sim integration: selectable via `PUT /api/robot/controller {"type":"frenet"}`
-- [ ] Frontend: render cross-track error overlay (distance from robot to closest path point)
+- [ ] Sim integration: selectable via ImGui controller dropdown
+- [ ] ImGui panel: render cross-track error overlay (distance from robot to closest path point)
 
 ---
 
@@ -76,8 +76,8 @@ pure_pursuit, especially at higher speeds.
 - [ ] `adaptive/gain_scheduling` module: interface, implementation, tests, sim integration
 - [ ] `adaptive/rls` module: interface, implementation, tests, sim integration
 - [ ] `frenet` module: interface, implementation, tests, sim integration
-- [ ] All controllers selectable via REST mid-run without crash
-- [ ] Frontend shows module-specific debug panels (gain values, RLS params, cross-track error)
+- [ ] All controllers selectable via ImGui mid-run without crash
+- [ ] Simulation app shows module-specific debug panels (gain values, RLS params, cross-track error)
 - [ ] Mini-demo: compare Frenet vs pure_pursuit on tight hairpin curve; compare adaptive PID vs fixed-gain PID after sudden load change; show RLS param convergence plot
 
 ## Exit Criteria
@@ -86,7 +86,7 @@ pure_pursuit, especially at higher speeds.
 2. Adaptive PID visibly reduces tracking error after a simulated load change
 3. Frenet cross-track error lower than pure_pursuit on curved paths (quantified in logs)
 4. RLS correctly identifies mass/friction on a known-params scenario (within 10%)
-5. REST controller swap works mid-run for all new modules
+5. ImGui controller swap works mid-run for all new modules
 6. All unit tests pass, CI green
 7. All modules pass Phase 4.5 — Observability gate (state transitions logged, metrics at TRACE)
 

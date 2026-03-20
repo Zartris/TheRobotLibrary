@@ -30,12 +30,12 @@ Monte Carlo Localization (MCL) for known-map localization.
 
 ---
 
-## Sim & Frontend Integration
+## Sim & ImGui Integration
 
-- [ ] Estimator hot-swap: `PUT /api/robot/estimator {"type": "particle_filter"}`
-- [ ] WebSocket state includes particle data when particle_filter active (sampled subset for bandwidth)
-- [ ] Frontend: particle cloud visualization (small dots with heading ticks)
-- [ ] Frontend: toggle between EKF covariance ellipse and particle cloud
+- [ ] Estimator hot-swap: ImGui estimator dropdown selector
+- [ ] Bridge state includes particle data when particle_filter active (sampled subset)
+- [ ] ImGui panel: particle cloud visualization (small dots with heading ticks)
+- [ ] ImGui panel: toggle between EKF covariance ellipse and particle cloud
 - [ ] Mini-demo: side-by-side EKF vs particle filter comparison on same scenario
 
 ---
@@ -44,7 +44,7 @@ Monte Carlo Localization (MCL) for known-map localization.
 
 - [ ] particle_filter module: interface, implementation, tests
 - [ ] Estimator hot-swap in sim
-- [ ] Frontend particle cloud rendering
+- [ ] ImGui particle cloud rendering
 - [ ] Demo: EKF vs MCL comparison
 
 ## Exit Criteria
@@ -52,7 +52,7 @@ Monte Carlo Localization (MCL) for known-map localization.
 1. Particle filter localizes robot with ≤ 0.2m mean error in known-map scenario
 2. Swap EKF ↔ particle_filter mid-run without crash
 3. All unit tests pass
-4. Visual difference clear in frontend (ellipse vs particle cloud)
+4. Visual difference clear in simulation app (ellipse vs particle cloud)
 5. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
 
 ## NOT IN

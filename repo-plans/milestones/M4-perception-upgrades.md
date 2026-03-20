@@ -53,7 +53,7 @@ Expand obstacles by robot radius for collision-safe planning.
 - [ ] Add moving obstacle entities to world model (circles/rectangles, linear/circular motion)
 - [ ] Configurable in scenario JSON (`"dynamic_obstacles": [...]`)
 - [ ] Dynamic obstacles appear in lidar scans (via ray_casting)
-- [ ] Frontend: render dynamic obstacles, detected obstacle bounding boxes, extracted lines, inflated grid overlay
+- [ ] Simulation app: render dynamic obstacles, detected obstacle bounding boxes, extracted lines, inflated grid overlay in MuJoCo 3D scene / ImGui telemetry panel
 
 ---
 
@@ -63,7 +63,7 @@ Expand obstacles by robot radius for collision-safe planning.
 - [ ] RANSAC line extraction: implementation + tests
 - [ ] Inflation layer: implementation + tests
 - [ ] Dynamic obstacles in sim
-- [ ] Frontend visualization for all new features
+- [ ] Simulation app visualization for all new features
 
 ## Exit Criteria
 

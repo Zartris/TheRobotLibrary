@@ -2,7 +2,7 @@
 
 **Status:** Not Started  
 **Dependencies:** M8 (N-robot simulation infrastructure)  
-**Scope:** Fleet-level coordination: VDA 5050 protocol, task assignment, fleet monitoring, battery management. All modules hot-swappable via REST.
+**Scope:** Fleet-level coordination: VDA 5050 protocol, task assignment, fleet monitoring, battery management. All modules hot-swappable via ImGui panel.
 
 ---
 
@@ -88,31 +88,27 @@ Monitor battery levels and route robots to chargers when needed.
 
 ---
 
-## Sim & REST Integration
+## Sim & ImGui Integration
 
-- [ ] Extend simulation WorldModel: add charger station locations to scenario JSON
-- [ ] Extend scenario JSON: `"chargers": [{"id": "C1", "pose": {...}}]`
-- [ ] New REST endpoints:
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/fleet/task` | Submit VDA 5050 Order (JSON body) |
-| GET | `/api/fleet/state` | Return full `FleetState` as JSON |
-| POST | `/api/fleet/instant_action` | Submit `InstantAction` to a specific robot |
-| GET | `/api/fleet/allocator` | Get current task allocator type |
-| PUT | `/api/fleet/allocator` | Switch allocator `{"type": "greedy"\|"auction"}` |
-
-- [ ] WebSocket state extended: add `"fleet": { "robots": [...], "chargers": [...] }` field to existing state message
+- [ ] Extend simulation WorldModel: add charger station locations to scenario MJCF/JSON
+- [ ] Extend scenario config: `"chargers": [{"id": "C1", "pose": {...}}]`
+- [ ] ImGui fleet panel:
+  - Submit VDA 5050 Order via ImGui form
+  - Display full `FleetState`
+  - Submit `InstantAction` to a specific robot
+  - Display current task allocator type
+  - Switch allocator (greedy/auction) via ImGui dropdown
+- [ ] Bridge state extended: fleet data (robots, chargers) populated from simulation state each tick
 - [ ] Backend tick: after each sim step, call `FleetMonitor::update()` with each robot's VDA 5050 state; call `BatteryManager::needsCharging()` for each robot
 
 ---
 
-## Frontend Integration
+## Visualization
 
-- [ ] Native frontend: fleet panel showing per-robot state table (ID, pose, SoC, mode, current order)
-- [ ] Native frontend: charger station icons on grid map
-- [ ] Native frontend: highlight robot being routed to charger
-- [ ] Mini-demo: 3 robots assigned tasks via REST; one runs low on battery and routes to charger automatically
+- [ ] ImGui fleet panel: per-robot state table (ID, pose, SoC, mode, current order)
+- [ ] MuJoCo 3D scene: charger station models on map
+- [ ] ImGui panel: highlight robot being routed to charger
+- [ ] Mini-demo: 3 robots assigned tasks via ImGui; one runs low on battery and routes to charger automatically
 
 ---
 
@@ -122,16 +118,16 @@ Monitor battery levels and route robots to chargers when needed.
 - [ ] `task_allocation` module: 2 allocator implementations, tests
 - [ ] `fleet_monitor` module: thread-safe monitor, tests
 - [ ] `battery_management` module: threshold policy, tests
-- [ ] Fleet REST API (`/api/fleet/*`)
-- [ ] WebSocket fleet state extension
-- [ ] Frontend fleet panel
+- [ ] ImGui fleet control panel
+- [ ] Bridge fleet state integration
+- [ ] ImGui fleet panel
 - [ ] At least 1 fleet scenario JSON with 3+ robots + 2+ charger stations
 
 ## Exit Criteria
 
-1. 3 robots assigned tasks via `POST /api/fleet/task` and complete them
+1. 3 robots assigned tasks via ImGui fleet panel and complete them
 2. Low-SoC robot automatically routed to charger
-3. Task allocator hot-swap (greedy ↔ auction) via REST without crash
+3. Task allocator hot-swap (greedy ↔ auction) via ImGui without crash
 4. VDA 5050 JSON round-trip test passes for all 5 message types
 5. All unit tests pass, CI green
 6. All modules pass Phase 4.5 — Observability gate (state transitions logged, metrics at TRACE)

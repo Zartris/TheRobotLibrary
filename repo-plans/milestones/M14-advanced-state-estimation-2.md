@@ -35,7 +35,7 @@ nonlinear systems (SE3 poses, IMU integration).
   - Degenerate covariance: `P` stays positive semi-definite throughout
 - [ ] Phase 4.5: `ILogger`, sigma-point spread and residual norm at `DEBUG`, propagation time at `TRACE`
 - [ ] Sim: registerable as alternative state estimator alongside EKF
-- [ ] Frontend: render state covariance ellipse (same panel as EKF)
+- [ ] ImGui panel: render state covariance ellipse (same panel as EKF)
 
 ### state_estimation/pose_graph
 
@@ -63,7 +63,7 @@ that both `lidar_slam` and `visual_slam` (M6.5) can optionally adopt after M14 c
 - [ ] `state_estimation/ukf` module: interface, implementation, tests
 - [ ] `state_estimation/pose_graph` module: interface, implementation, tests
 - [ ] UKF registerable as alternative estimator in simulation
-- [ ] UKF covariance ellipse rendered in frontend
+- [ ] UKF covariance ellipse rendered in simulation app ImGui panel
 - [ ] Pose graph optimizer ready for optional adoption by lidar_slam / visual_slam
 - [ ] All modules pass Phase 4.5 — Observability gate
 

@@ -82,7 +82,7 @@ Wolfenstein-style per-column raycaster added to `workspace/simulation/`.
 - [ ] `workspace/simulation/src/camera_renderer.cpp` — per-column ray-cast; wall distance → column height; texture lookup (procedural: brick = alternating dark/light bands by wall position; concrete = gradient noise; checker = XOR grid); floor/ceiling distance-shaded grey
 - [ ] Wall material IDs added to occupancy grid cell metadata (0 = free, 1 = wall-brick, 2 = wall-concrete, 3 = wall-checker)
 - [ ] Scenario JSON support: `"camera": {"fov": 90, "resolution": [320, 240], "height_offset": 0.5}`
-- [ ] `CameraFrame` streamed over WebSocket at 30 Hz as base64-encoded grayscale payload alongside existing lidar state JSON
+- [ ] `CameraFrame` populated by bridge SensorAdapter from MuJoCo offscreen render each physics tick
 - [ ] `workspace/simulation/tests/test_camera_renderer.cpp` — known room (all walls brick) → CameraFrame has non-uniform pixel values; floor pixels darker than wall pixels at same distance; frame dimensions match config
 
 ---
@@ -104,14 +104,14 @@ Headless VO pipeline test. Lives in `workspace/simulation/tests/` (sim links mod
 
 1. `feature_extraction_tests` all pass (`hammingDistance`, cross-check, ratio test)
 2. `visual_odometry_tests` all pass (round-trip, synthetic translation scenario within 5°)
-3. Simulation builds with camera renderer; streams `CameraFrame` at 30 Hz alongside lidar state (verified by `test_vo_integration`)
+3. Simulation builds with camera renderer; bridge populates `CameraFrame` from MuJoCo offscreen render (verified by `test_vo_integration`)
 4. `test_vo_integration` passes: trajectory drift < 0.5 m over 5 m straight corridor
 5. All modules pass Phase 4.5 Observability gate
 
 ## NOT IN
 
 - Visual SLAM (map, loop closure) — M6.5
-- Frontend camera view panel — M6.5 or M9
+- Frontend camera view panel — M6.5
 - `place_recognition` as a standalone module — loop closure is a sub-task within `visual_slam`
 - OpenCV dependency
 - GPU acceleration

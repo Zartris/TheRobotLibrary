@@ -8,7 +8,7 @@
 
 ## Goal
 
-Three controllers available — PID (from M1), pure_pursuit, MPC — all implementing `IController`. Four kinematic models available — differential-drive (from M1), unicycle, Ackermann, swerve — all implementing `IKinematicModel`. User picks the combination at runtime via REST API. Demonstrates the swappable architecture for both control and kinematics.
+Three controllers available — PID (from M1), pure_pursuit, MPC — all implementing `IController`. Four kinematic models available — differential-drive (from M1), unicycle, Ackermann, swerve — all implementing `IKinematicModel`. User picks the combination at runtime via ImGui selector. Demonstrates the swappable architecture for both control and kinematics.
 
 ---
 
@@ -25,8 +25,8 @@ Geometric path follower for differential-drive. Adaptive lookahead distance (spe
   - Curved path → correct curvature-based omega
   - Lookahead beyond path end → targets last waypoint
   - Speed-dependent lookahead scales correctly
-- [ ] Sim integration: selectable via `PUT /api/robot/controller {"type": "pure_pursuit"}`
-- [ ] Frontend: render lookahead point + lookahead circle
+- [ ] Sim integration: selectable via ImGui controller dropdown
+- [ ] ImGui panel: render lookahead point + lookahead circle
 
 ### 
 
@@ -51,8 +51,8 @@ Workflow: define OCP in Python (CASAdi + acados Python API) → acados generates
   - Tracks curved reference → smooth velocity/omega profile
   - Respects input constraints (max vel, max omega)
   - Obstacle avoidance constraints (optional soft constraints)
-- [ ] Sim integration: selectable via `PUT /api/robot/controller {"type": "mpc"}`
-- [ ] Frontend: render prediction horizon (future poses)
+- [ ] Sim integration: selectable via ImGui controller dropdown
+- [ ] ImGui panel: render prediction horizon (future poses)
 
 ### Kinematic Models
 
@@ -65,9 +65,9 @@ Expand the kinematic model set in `common/kinematics/`. All implement `IKinemati
 - [ ] `tests/test_unicycle.cpp` — forward motion, pure rotation, zero input
 - [ ] `tests/test_ackermann.cpp` — straight drive, turning at max steering, min radius validation, no-slip constraint
 - [ ] `tests/test_swerve_drive.cpp` — holonomic strafing, rotation-in-place, diagonal motion
-- [ ] Sim integration: `PUT /api/robot/kinematics {"type": "ackermann"}` — swaps kinematic model live
+- [ ] Sim integration: ImGui kinematics dropdown — swaps kinematic model live
 - [ ] Scenario JSON supports `"kinematics"` field (default: `"differential_drive"`)
-- [ ] Frontend: robot shape changes to reflect kinematics (triangle for diff-drive, car outline for Ackermann, diamond for swerve)
+- [ ] MuJoCo 3D scene: robot shape changes to reflect kinematics (diff-drive, Ackermann, swerve models)
 
 ---
 
@@ -83,8 +83,8 @@ nominal command through a QP that guarantees collision-free velocity within defi
   - Single obstacle on heading: CBF deflects velocity to maintain safe distance
   - Multiple obstacles: all safety constraints satisfied simultaneously
   - Safety radius = 0: same behavior as bare nominal controller
-- [ ] Sim integration: `PUT /api/robot/controller {"type":"cbf","wraps":"pid"}` — CBF wraps the specified nominal controller
-- [ ] Frontend: render safety circle (r_safe) around robot when CBF active
+- [ ] Sim integration: ImGui CBF selector (wraps selected nominal controller)
+- [ ] ImGui panel: render safety circle (r_safe) around robot when CBF active
 
 ---
 
@@ -97,7 +97,7 @@ nominal command through a QP that guarantees collision-free velocity within defi
 - [ ] Controller hot-swap works mid-run without crash
 - [ ] Kinematics hot-swap works mid-run without crash
 - [ ] CBF wrapping any controller works mid-run without crash
-- [ ] Frontend shows controller-specific and kinematics-specific visualization
+- [ ] Simulation app shows controller-specific and kinematics-specific visualization
 - [ ] Mini-demo: compare tracking quality PID → pure_pursuit → MPC on same path; compare kinematics on same scenario; show CBF preventing collision on near-miss obstacle
 
 ## Exit Criteria
@@ -106,8 +106,8 @@ nominal command through a QP that guarantees collision-free velocity within defi
 2. CBF wrapping PID prevents collision on a scenario where bare PID would fail
 3. All four kinematic models work with PID (at minimum)
 4. Unit tests pass for all new modules
-5. REST swap mid-run without crash (controller + kinematics independently)
-6. Visual difference apparent in frontend (PID oscillates, pure_pursuit smooth, MPC optimal; Ackermann has turning radius constraints, swerve can strafe; CBF shows safety circle)
+5. ImGui swap mid-run without crash (controller + kinematics independently)
+6. Visual difference apparent in simulation app (PID oscillates, pure_pursuit smooth, MPC optimal; Ackermann has turning radius constraints, swerve can strafe; CBF shows safety circle)
 7. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)
 
 ## NOT IN

@@ -34,8 +34,8 @@ Query phase: Dijkstra / A* on the roadmap graph.
   - No path: all samples blocked → query returns `std::nullopt`; no crash
   - `k_nearest` parameter: larger k → denser roadmap → shorter query paths (statistical test)
 - [ ] Phase 4.5: `ILogger`, roadmap build stats (nodes, edges) at `DEBUG`, query solve time at `TRACE`
-- [ ] Sim: selectable via `PUT /api/robot/global_planner {"type":"prm"}`
-- [ ] Frontend: render roadmap graph (grey edges) + planned path (highlighted)
+- [ ] Sim: selectable via ImGui global planner dropdown
+- [ ] ImGui panel: render roadmap graph (grey edges) + planned path (highlighted)
 
 ### motion_planning/trajectory_planning/polynomial
 
@@ -55,7 +55,7 @@ de Casteljau algorithm with convex hull safety guarantee.
   - Single segment: analytic polynomial coefficients match closed-form solution
 - [ ] Phase 4.5: `ILogger`, QP solve time + condition number at `DEBUG`, sample computation time at `TRACE`
 - [ ] Sim: trajectory planner slot — replaces `velocity_profiling` for drone/arm scenarios
-- [ ] Frontend: render polynomial trajectory with curvature color coding
+- [ ] ImGui panel: render polynomial trajectory with curvature color coding
 
 ---
 
@@ -63,9 +63,9 @@ de Casteljau algorithm with convex hull safety guarantee.
 
 - [ ] `motion_planning/global_planning/prm` module: interface, implementation, tests
 - [ ] `motion_planning/trajectory_planning/polynomial` module: interface, implementation, tests
-- [ ] PRM selectable via REST mid-run without crash
-- [ ] Frontend renders PRM roadmap graph + planned path
-- [ ] Frontend renders polynomial trajectory with curvature color coding
+- [ ] PRM selectable via ImGui mid-run without crash
+- [ ] Simulation app renders PRM roadmap graph + planned path
+- [ ] Simulation app renders polynomial trajectory with curvature color coding
 - [ ] All modules pass Phase 4.5 — Observability gate
 
 ---
