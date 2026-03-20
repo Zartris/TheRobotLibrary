@@ -46,7 +46,7 @@ if(NOT TARGET Catch2::Catch2)
 endif()
 
 # ---------------------------------------------------------------------------
-# nlohmann/json v3.11.3 — header-only JSON (simulation, REST payloads)
+# nlohmann/json v3.11.3 — header-only JSON (simulation, scenario configs)
 # ---------------------------------------------------------------------------
 if(NOT TARGET nlohmann_json::nlohmann_json)
     FetchContent_Declare(nlohmann_json
@@ -57,21 +57,6 @@ if(NOT TARGET nlohmann_json::nlohmann_json)
     set(JSON_BuildTests     OFF CACHE BOOL "" FORCE)
     set(JSON_Install        OFF CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(nlohmann_json)
-endif()
-
-# ---------------------------------------------------------------------------
-# Crow v1.2 — C++ HTTP + WebSocket server (simulation backend)
-# Crow internally fetches standalone Asio if not found on the system.
-# ---------------------------------------------------------------------------
-if(NOT TARGET Crow::Crow)
-    FetchContent_Declare(Crow
-        GIT_REPOSITORY https://github.com/CrowCpp/Crow.git
-        GIT_TAG        v1.2
-        GIT_SHALLOW    TRUE
-    )
-    set(CROW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    set(CROW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(Crow)
 endif()
 
 # ---------------------------------------------------------------------------
@@ -90,54 +75,39 @@ if(NOT TARGET osqp::osqp)
 endif()
 
 # ---------------------------------------------------------------------------
-# cpp-httplib v0.15.3 — header-only HTTP/HTTPS client (frontends/native)
+# MuJoCo (latest 3.x stable) — physics engine (simulation backend)
+# MuJoCo brings its own transitive deps: abseil, lodepng, tinyxml2, ccd, qhull.
+# If FetchContent causes target conflicts, fall back to ExternalProject_Add
+# or system install with find_package(mujoco). Validate in M0.
+# GLFW comes transitively via MuJoCo.
 # ---------------------------------------------------------------------------
-if(NOT TARGET httplib::httplib)
-    FetchContent_Declare(cpp-httplib
-        GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
-        GIT_TAG        v0.15.3
+if(NOT TARGET mujoco)
+    FetchContent_Declare(mujoco
+        GIT_REPOSITORY https://github.com/google-deepmind/mujoco.git
+        GIT_TAG        3.3.2
         GIT_SHALLOW    TRUE
     )
-    set(HTTPLIB_COMPILE OFF CACHE BOOL "" FORCE)   # stay header-only
-    FetchContent_MakeAvailable(cpp-httplib)
+    set(MUJOCO_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(MUJOCO_BUILD_SIMULATE OFF CACHE BOOL "" FORCE)
+    set(MUJOCO_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
+    set(MUJOCO_BUILD_PYTHON   OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(mujoco)
+    # NOTE: MuJoCo FetchContent exports target as 'mujoco' (no namespace).
+    # When using find_package(mujoco) it exports 'mujoco::mujoco'.
+    # Verify the actual target name during M0 validation.
 endif()
 
 # ---------------------------------------------------------------------------
-# IXWebSocket v11.4.4 — WebSocket client (frontends/native)
-# ---------------------------------------------------------------------------
-if(NOT TARGET ixwebsocket::ixwebsocket)
-    FetchContent_Declare(IXWebSocket
-        GIT_REPOSITORY https://github.com/machinezone/IXWebSocket.git
-        GIT_TAG        v11.4.4
-        GIT_SHALLOW    TRUE
-    )
-    set(USE_TLS OFF CACHE BOOL "" FORCE)   # set ON to enable SSL support
-    FetchContent_MakeAvailable(IXWebSocket)
-endif()
-
-# ---------------------------------------------------------------------------
-# SDL2 release-2.30.0 — window / input / OpenGL context (frontends/native)
-# ---------------------------------------------------------------------------
-if(NOT TARGET SDL2::SDL2)
-    FetchContent_Declare(SDL2
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-        GIT_TAG        release-2.30.0
-        GIT_SHALLOW    TRUE
-    )
-    set(SDL_STATIC  ON  CACHE BOOL "" FORCE)
-    set(SDL_SHARED  OFF CACHE BOOL "" FORCE)
-    set(SDL_TEST    OFF CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(SDL2)
-endif()
-
-# ---------------------------------------------------------------------------
-# Dear ImGui v1.90.4 — immediate-mode GUI (frontends/native)
+# Dear ImGui (docking branch) — immediate-mode GUI (simulation app)
 # ImGui has no official CMakeLists; we create a STATIC target manually.
+# NOTE: Must appear after MuJoCo in this file — ImGui links glfw which
+# comes transitively via MuJoCo's FetchContent.
+# Pin to a specific docking branch commit hash for reproducibility once validated.
 # ---------------------------------------------------------------------------
 if(NOT TARGET imgui::imgui)
     FetchContent_Declare(imgui
         GIT_REPOSITORY https://github.com/ocornut/imgui.git
-        GIT_TAG        v1.90.4
+        GIT_TAG        docking
         GIT_SHALLOW    TRUE
     )
     FetchContent_MakeAvailable(imgui)
@@ -149,15 +119,15 @@ if(NOT TARGET imgui::imgui)
         ${imgui_SOURCE_DIR}/imgui_draw.cpp
         ${imgui_SOURCE_DIR}/imgui_tables.cpp
         ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-        # SDL2 + OpenGL3 back-end
-        ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl2.cpp
+        # GLFW + OpenGL3 back-end
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
         ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
     )
     target_include_directories(imgui PUBLIC
         ${imgui_SOURCE_DIR}
         ${imgui_SOURCE_DIR}/backends
     )
-    target_link_libraries(imgui PUBLIC SDL2::SDL2 OpenGL::GL)
+    target_link_libraries(imgui PUBLIC glfw OpenGL::GL)
     add_library(imgui::imgui ALIAS imgui)
 endif()
 
