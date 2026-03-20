@@ -34,7 +34,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("stereo_depth")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, disparity search range, match quality)

@@ -32,7 +32,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("stanley")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, CTE + heading error per step)
@@ -48,7 +48,7 @@ cd build && ctest -R stanley --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE
 
 ### Phase 5 — Simulation Integration
 
-- [ ] Selectable via `PUT /api/robot/controller {"type":"stanley"}`
+- [ ] Selectable via ImGui module selector (controller type: "stanley")
 - [ ] Note: Stanley outputs a steering angle δ for Ackermann kinematics. Sim integration may
   require a bicycle-model kinematic layer. If not available, defer Phase 5 to a post-M13
   sim upgrade; document the deferral in this file.

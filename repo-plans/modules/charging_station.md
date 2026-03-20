@@ -40,7 +40,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("charging_station")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, assignment decisions + queue depth)
@@ -56,7 +56,7 @@ cd build && ctest -R charging_station --output-on-failure 2>&1 | grep "\[DEBUG\]
 
 ### Phase 5 — Simulation Integration
 
-- [ ] Fleet REST endpoints: `POST /api/fleet/charging/request` + `GET /api/fleet/charging/status`
+- [ ] Fleet ImGui panel: charging request controls + status display
 
 ### Phase 6 — Frontend Visualization
 

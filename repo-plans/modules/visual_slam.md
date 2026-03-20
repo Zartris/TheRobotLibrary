@@ -78,7 +78,7 @@ cd build && ctest -R visual_slam --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[T
 ### Phase 5 — Simulation Integration
 
 - [ ] Sim assembles pipeline: `CameraRenderer` → `FeatureExtractor` → `VisualOdometry` → `VisualSlam` each tick
-- [ ] `VisualSlam` output (pose, landmark map) added to WebSocket state message
+- [ ] `VisualSlam` output (pose, landmark map) added to bridge state adapter
 - [ ] Unknown-map scenario: robot explores corridor with camera, builds feature map end-to-end
 - [ ] Module itself does not link against simulation
 

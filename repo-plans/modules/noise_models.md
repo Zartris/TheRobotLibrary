@@ -37,7 +37,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected via `common::getLogger("noise_models")` (mockable in tests)
 - [ ] Seed value logged at `DEBUG` level on construction; not logged per-sample (too hot)

@@ -75,7 +75,7 @@ cd build && ctest -R motor_model --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[T
 
 ### Phase 5 — Simulation Integration
 
-- [ ] Motor torque actual vs commanded added to WebSocket state stream
+- [ ] Motor torque actual vs commanded added to bridge state adapter
 - [ ] Motor saturation visualized: actual torque vs commanded torque in `dynamic_state`
 - [ ] Integration test: motor-limited acceleration visibly lower than F=ma prediction
 
@@ -83,7 +83,6 @@ cd build && ctest -R motor_model --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[T
 
 - [ ] Motor saturation indicator (actual vs commanded torque)
 - [ ] Toggle visibility from UI panel
-- [ ] (Later — M9) Mirror rendering in web frontend Canvas 2D
 
 ### Phase 7 — Docs Polish
 

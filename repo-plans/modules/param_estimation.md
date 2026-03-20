@@ -88,7 +88,6 @@ cd build && ctest -R param_estimation --output-on-failure 2>&1 | grep "\[DEBUG\]
 
 - [ ] Parameter estimation results overlay (fitted values, residuals, confidence)
 - [ ] Toggle visibility from UI panel
-- [ ] (Later — M9) Mirror rendering in web frontend Canvas 2D
 
 ### Phase 7 — Docs Polish
 

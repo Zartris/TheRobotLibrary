@@ -33,7 +33,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("imu_processing")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, bias estimates)
@@ -50,7 +50,7 @@ cd build && ctest -R imu_processing --output-on-failure 2>&1 | grep "\[DEBUG\]\|
 ### Phase 5 — Simulation Integration
 
 - [ ] Part of the VIO pipeline slot: `ImuPreintegrator` → `VisualInertialOdometry`
-- [ ] No standalone REST endpoint — consumed by `visual_inertial_odometry`
+- [ ] No standalone ImGui entry — consumed by `visual_inertial_odometry`
 
 ### Phase 6 — Frontend Visualization
 

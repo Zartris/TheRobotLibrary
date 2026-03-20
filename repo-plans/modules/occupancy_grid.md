@@ -30,7 +30,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("occupancy_grid")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths)
@@ -50,7 +50,7 @@ cd build && ctest -R occupancy_grid --output-on-failure 2>&1 | grep "\[DEBUG\]\|
 
 ### Phase 6 — Frontend Visualization
 
-- [ ] Grid rendered as colored cells in native frontend (M1-L)
+- [ ] Grid rendered as colored cells in simulation app (M1-L)
 
 ### Phase 7 — Docs Polish
 

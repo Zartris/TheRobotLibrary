@@ -32,7 +32,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("prm")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, roadmap build stats: nodes, edges)
@@ -48,7 +48,7 @@ cd build && ctest -R prm --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 
 ### Phase 5 — Simulation Integration
 
-- [ ] Selectable via `PUT /api/robot/global_planner {"type":"prm"}`
+- [ ] Selectable via ImGui module selector (global planner type: "prm")
 
 ### Phase 6 — Frontend Visualization
 

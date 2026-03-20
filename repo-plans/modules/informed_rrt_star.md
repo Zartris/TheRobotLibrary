@@ -32,7 +32,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("informed_rrt_star")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, `c_best` improvement per iteration, PHS volume reduction per iteration)
@@ -48,7 +48,7 @@ cd build && ctest -R informed_rrt_star --output-on-failure 2>&1 | grep "\[DEBUG\
 
 ### Phase 5 — Simulation Integration
 
-- [ ] Selectable via `PUT /api/robot/global_planner {"type":"informed_rrt_star"}`
+- [ ] Selectable via ImGui module selector (global planner type: "informed_rrt_star")
 
 ### Phase 6 — Frontend Visualization
 
