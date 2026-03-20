@@ -116,3 +116,42 @@ _N/A — common has no visual representation._
 
 - [ ] `include/common/environment/terrain.hpp` — `TerrainProperties` (mu, rolling_resistance, slope_angle), `SlipDetector::detect(commanded_vel, measured_vel) → SlipEvent`, `SlipEvent` (detected bool, slip_ratio, severity)
 - [ ] Tests: SlipDetector with matching velocities → no slip; divergent velocities → slip detected; TerrainProperties default mu=1.0
+
+---
+
+## MuJoCo Architecture Addition: `common/types_3d/` — 3D Geometric Types
+
+**Milestone:** M1 (MuJoCo architecture)
+**Tracked here** because these are header-only additions to the `common` library target, required by the simulation bridge layer.
+
+- [ ] `include/common/types_3d/pose3d.hpp` — `Pose3D` (position `Eigen::Vector3d`, orientation `Eigen::Quaterniond`; `identity()`, `inverse()`, `compose()`) in `robotlib` namespace
+- [ ] `include/common/types_3d/transform3d.hpp` — `Transform3D` (SE3: `Eigen::Isometry3d` wrapper; `compose()`, `inverse()`, `transformPoint()`, `toMatrix()`, `fromMatrix()`) in `robotlib` namespace
+- [ ] `include/common/types_3d/quaternion.hpp` — `Quaternion` utilities: `fromRPY()`, `toRPY()`, `fromAxisAngle()`, `normalize()`, `slerp()` — all header-only in `robotlib` namespace
+- [ ] `include/common/types_3d/twist3d.hpp` — `Twist3D` (linear `Eigen::Vector3d`, angular `Eigen::Vector3d`) in `robotlib` namespace
+- [ ] `include/common/types_3d/wrench.hpp` — `Wrench` (force `Eigen::Vector3d`, torque `Eigen::Vector3d`) in `robotlib` namespace
+- [ ] `include/common/types_3d/terrain_pose.hpp` — `TerrainPose` (Pose3D on terrain surface + surface normal `Eigen::Vector3d` + slope angle) in `robotlib` namespace
+- [ ] Tests: quaternion round-trip `fromRPY/toRPY`; `Transform3D` compose + inverse within 1e-9; `Pose3D::inverse()` identity check; `Twist3D` zero-init
+
+---
+
+## MuJoCo Architecture Addition: `common/sensors/` — Sensor Reading Types
+
+**Milestone:** M1 (MuJoCo architecture)
+**Tracked here** because these are header-only sensor data types shared between simulation bridge and robotics modules.
+
+- [ ] `include/common/sensors/lidar_scan.hpp` — `LidarScan` (timestamp `double`, angle_min, angle_max, angle_increment, range_min, range_max, `std::vector<float> ranges`, `std::vector<float> intensities`) in `robotlib` namespace
+- [ ] `include/common/sensors/imu_reading.hpp` — `ImuReading` (timestamp `double`, linear_acceleration `Eigen::Vector3d`, angular_velocity `Eigen::Vector3d`, orientation `Eigen::Quaterniond`) in `robotlib` namespace
+- [ ] `include/common/sensors/camera_frame.hpp` — `CameraFrame` (timestamp `double`, width `int`, height `int`, data `std::vector<uint8_t>` row-major, intrinsics `CameraIntrinsics`; `valid() → bool`) in `robotlib` namespace
+- [ ] `include/common/sensors/depth_frame.hpp` — `DepthFrame` (timestamp `double`, width `int`, height `int`, data `std::vector<float>` row-major metres, intrinsics `CameraIntrinsics`; `valid() → bool`) in `robotlib` namespace
+- [ ] `include/common/sensors/force_torque_sensor.hpp` — `ForceTorqueSensor` (timestamp `double`, force `Eigen::Vector3d`, torque `Eigen::Vector3d`) in `robotlib` namespace
+- [ ] Tests: `CameraFrame::valid()` on empty data returns false; `DepthFrame::valid()` on zero dimensions returns false; `ImuReading` zero-init construction
+
+---
+
+## MuJoCo Architecture Addition: `common/transforms/` — 3D Conversion Utilities
+
+**Milestone:** M1 (MuJoCo architecture)
+**Tracked here** as additions to the existing `common/transforms/` sub-module.
+
+- [ ] `include/transforms/transforms.hpp` additions: `Pose3D ↔ Pose2D` projection (`toSE2()`, `fromSE2()`), `Euler ↔ Quaternion` (`eulerToQuat()`, `quatToEuler()` — ZYX convention), `Transform3D::toSE2()` dropping z/roll/pitch
+- [ ] Tests: `Pose3D → Pose2D` drops z and extracts yaw correctly; `eulerToQuat / quatToEuler` round-trip within 1e-9; `fromSE2` sets z=0 and identity roll/pitch
