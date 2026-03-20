@@ -1,47 +1,44 @@
-# Simulation Backend
+# Simulation
 
-The simulation backend is a standalone C++ server application that runs the 2D simulated
-world and exposes it to frontends over a WebSocket + REST API.
+A standalone C++ application that runs the 3D simulated world using MuJoCo physics
+and provides an integrated ImGui control panel for visualization and interaction.
 
-**Important:** The simulation is the single source of truth for world state. Both the native
-and web frontends are read-only subscribers (via WebSocket) that also send commands (via REST).
-No frontend links against this library — they communicate only through the network API.
+**Important:** The simulation is the single source of truth for world state. It is a
+single executable — there are no separate frontends or network APIs. Visualization
+(MuJoCo 3D rendering) and controls (ImGui panels) are integrated into the same process.
 
 ---
 
 ## Responsibilities
 
-- Maintaining the simulated world: robot pose, map, obstacles, sensor readings
-- Running the simulation loop at a fixed internal tick rate (default 50 Hz)
-- Streaming world state to connected clients via WebSocket at 30 Hz
-- Accepting control commands and configuration over REST HTTP
-- Loading and managing simulation scenarios
-
----
-
-## API Summary
-
-See [`../../architecture.md`](../../architecture.md) for the full API specification.
-
-| Protocol   | Endpoint              | Purpose                              |
-|------------|-----------------------|--------------------------------------|
-| WebSocket  | `ws://host:8080/state`| Continuous state stream to clients   |
-| REST POST  | `/api/sim/start`      | Start / resume simulation            |
-| REST POST  | `/api/sim/stop`       | Pause simulation                     |
-| REST POST  | `/api/sim/reset`      | Reset to initial state               |
-| REST PUT   | `/api/sim/speed`      | Set speed multiplier                 |
-| REST POST  | `/api/robot/cmd_vel`  | Send velocity command `{v, omega}`   |
-| REST GET   | `/api/scenario/list`  | List available scenarios             |
-| REST POST  | `/api/scenario/load`  | Load a named scenario                |
+- Loading MJCF model files (robots, terrain, sensors, world scenarios)
+- Running MuJoCo physics at a configurable timestep (default 2ms / 500Hz)
+- Bridging MuJoCo state to `common/` types for robotics modules
+- Running the module pipeline (estimator -> planner -> controller) each physics tick
+- Rendering the 3D scene via MuJoCo's OpenGL renderer
+- Providing ImGui overlay panels for simulation control and module configuration
+- Supporting headless mode (no window) for batch testing and CI
 
 ---
 
 ## Technology
 
-- **Server library:** [Crow](https://crowcpp.org/) — header-only C++ HTTP + WebSocket server
-- **Build:** CMake, produces an executable `simulation_server`
-- **Dependencies:** Crow, nlohmann/json (JSON serialization), and the robotics modules from
-  `workspace/robotics/` (linked directly, not via network)
+- **Physics:** [MuJoCo](https://mujoco.org/) — fast, accurate rigid-body dynamics with contact
+- **Windowing:** GLFW (comes transitively via MuJoCo)
+- **3D Rendering:** MuJoCo's built-in OpenGL renderer (`mjr_render()`)
+- **UI Overlay:** [Dear ImGui](https://github.com/ocornut/imgui) (docking branch, GLFW+OpenGL3 backend)
+- **Build:** CMake, produces an executable `simulation_app`
+- **Dependencies:** MuJoCo, ImGui, and the robotics modules from
+  `workspace/robotics/` (linked directly)
+
+---
+
+## Threading Model
+
+- **Physics thread:** runs `mj_step1()` -> module pipeline -> `mj_step2()` in a tight loop
+- **Main thread (OpenGL):** copies `mjData` under mutex, renders 3D scene, draws ImGui panels
+- **Async planning thread:** slow planners (RRT*, MPC) run asynchronously and deliver results
+  to the pipeline via a thread-safe buffer
 
 ---
 
@@ -49,28 +46,39 @@ See [`../../architecture.md`](../../architecture.md) for the full API specificat
 
 ```
 simulation/
-├── CMakeLists.txt
-├── README.md               ← This file
-├── include/simulation/     # Internal headers (not for external consumers)
-├── src/
-│   ├── main.cpp            # Entry point; starts Crow server
-│   ├── world.cpp           # World state model
-│   ├── sim_loop.cpp        # Fixed-timestep simulation loop
-│   ├── api_server.cpp      # WebSocket broadcaster + REST route handlers
-│   └── scenario_loader.cpp # Loads scenario files from disk
-├── tests/
-└── docs/
-    └── design.md           # Internal design decisions and extension guide
++-- CMakeLists.txt
++-- README.md               <- This file
++-- include/simulation/
+|   +-- bridge/             # SensorAdapter, StateAdapter, ActuatorAdapter, ModelAdapter
+|   +-- pipeline/           # Module pipeline wiring + runtime switching
+|   +-- app/                # GLFW window, ImGui panels, render loop
++-- src/
+|   +-- main.cpp            # Entry point: load MJCF, create window, run
+|   +-- bridge/             # Bridge implementations
+|   +-- pipeline/           # Pipeline implementations
+|   +-- app/                # App shell, ImGui panels, render
+|   +-- scenario_loader/    # Scenario loading logic
++-- scenarios/              # MJCF model files
++-- tests/                  # Integration tests (headless MuJoCo)
++-- docs/
+    +-- design.md
 ```
 
 ---
 
-## Running the Simulation Server
+## Running
 
 ```bash
-cd workspace/simulation
-cmake -B build && cmake --build build
-./build/simulation_server --port 8080 --scenario default
-```
+# Build from workspace root
+cmake -B build -S workspace -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
 
-Once running, open the native frontend or web frontend and they will connect automatically.
+# Run with default scenario
+./build/simulation/simulation_app
+
+# Run with a specific scenario
+./build/simulation/simulation_app --scenario scenarios/diff_drive_flat.xml
+
+# Run headless (no window, for CI/testing)
+./build/simulation/simulation_app --headless --scenario scenarios/diff_drive_flat.xml
+```
