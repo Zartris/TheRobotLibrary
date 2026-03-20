@@ -1,50 +1,60 @@
 # Module: simulation
 
-**Milestone:** M1 — Minimum Viable Robot (Sub-phases M1-J + M1-K)  
-**Status:** Not Started  
-**Depends on:** common, ray_casting, + all M1 robotics modules for pipeline integration
+**Milestone:** M1
+**Status:** Not Started
+**Depends on:** common (types), MuJoCo (physics), ImGui (UI)
 
 ---
 
-### Phase 1 — Interface Design (M1-J)
+### Phase 1 — Scaffold
 
-- [ ] `include/simulation/world.hpp` — `WorldModel` (grid map, robot, landmarks, dynamic obstacles)
-- [ ] `include/simulation/robot.hpp` — `Robot` (pose, velocity, uses `IKinematicModel` for `step()`)
-- [ ] `include/simulation/sim_loop.hpp` — `SimLoop` (fixed timestep tick)
-- [ ] `include/simulation/api_server.hpp` — Crow routes + WebSocket broadcast
-- [ ] `include/simulation/scenario_loader.hpp` — JSON → world config
-- [ ] `include/simulation/robot_pipeline.hpp` — `RobotPipeline` with swappable interfaces
+- [ ] `simulation/include/simulation/bridge/sensor_adapter.hpp`
+- [ ] `simulation/include/simulation/bridge/state_adapter.hpp`
+- [ ] `simulation/include/simulation/bridge/actuator_adapter.hpp`
+- [ ] `simulation/include/simulation/bridge/model_adapter.hpp`
+- [ ] `simulation/include/simulation/pipeline/module_pipeline.hpp`
+- [ ] `simulation/include/simulation/app/app_shell.hpp`
+- [ ] `simulation/include/simulation/app/imgui_panels.hpp`
+- [ ] `simulation/src/main.cpp`
+- [ ] `simulation/src/bridge/*.cpp`
+- [ ] `simulation/src/pipeline/*.cpp`
+- [ ] `simulation/src/app/*.cpp`
+- [ ] `simulation/src/scenario_loader/scenario_loader.cpp`
 
-### Phase 2 — Failing Tests (Red)
+### Phase 2 — Core Implementation
 
-- [ ] `tests/CMakeLists.txt`
-- [ ] `tests/test_robot.cpp` — kinematic model step (twist via DifferentialDrive → expected pose)
-- [ ] `tests/test_world.cpp` — load scenario, step, state consistency
-- [ ] `tests/test_scenario_loader.cpp` — parse JSON → valid config
-- [ ] `tests/test_pipeline_integration.cpp` — robot navigates from A to B (M1-K)
+- [ ] MuJoCo model loading from MJCF (`mj_loadXML` / `mj_loadModel`)
+- [ ] Split-step physics loop: `mj_step1` → control injection → `mj_step2`
+- [ ] Bridge adapters: read `mjData` fields → `common::` types (Pose3D, Twist3D, etc.)
+- [ ] Bridge adapters: write control outputs → `mjData::ctrl[]`
+- [ ] Model adapter: extract `VehicleParams`, `WheelConfig`, etc. from `mjModel` at startup
+- [ ] Headless mode support (no window, physics-only execution)
 
-### Phase 3 — Implementation (Green)
+### Phase 3 — Module Pipeline
 
-- [ ] `src/main.cpp` — entry point, CLI args (port, scenario)
-- [ ] `src/world.cpp`
-- [ ] `src/robot.cpp` — delegates motion to `IKinematicModel` (DifferentialDrive default)
-- [ ] `src/sim_loop.cpp` — fixed timestep, autonomous tick pipeline
-- [ ] `src/api_server.cpp` — Crow WS state stream + REST endpoints
-- [ ] `src/scenario_loader.cpp` — JSON parsing via nlohmann/json
-- [ ] At least 1 scenario JSON: simple room + walls + start/goal + landmarks
+- [ ] Pluggable module slots: `IStateEstimator`, `IGlobalPlanner`, `ILocalPlanner`, `IController`
+- [ ] Runtime module switching via ImGui dropdowns
+- [ ] Async planning thread for slow planners (global planner runs off physics thread)
+- [ ] Thread-safe result buffer between planning thread and physics loop
 
-### Phase 4 — Passing Tests
+### Phase 4 — App Shell
 
-- [ ] Unit tests pass (robot, world, scenario_loader)
-- [ ] Integration test: robot reaches goal within 60 sim seconds
-- [ ] Module swap via REST doesn't crash
+- [ ] GLFW window creation + OpenGL context initialization
+- [ ] MuJoCo 3D rendering via `mjr_render()`
+- [ ] ImGui overlay using GLFW+OpenGL3 backend (docking branch)
+- [ ] ImGui panel: sim control (play/pause/reset, timestep)
+- [ ] ImGui panel: module selector (dropdown per pipeline slot)
+- [ ] ImGui panel: parameter tuning (live editable module params)
+- [ ] ImGui panel: telemetry plots (pose, velocity, control outputs over time)
+- [ ] ImGui panel: scenario loader (list + load MJCF scenarios)
+- [ ] Threading model: physics thread + main render thread, `mj_copyData()` under mutex
 
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
-- [ ] `ILogger` injected into module constructor via `common::getLogger("simulation")` (mockable in tests)
+- [ ] `ILogger` injected throughout bridge and pipeline via `common::getLogger("simulation")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths)
 - [ ] Hot-loop performance metrics logged at `TRACE` level (cycle time per iteration in µs, iteration count)
 - [ ] At least one test asserts expected log lines appear via stdout capture
@@ -56,24 +66,20 @@ cmake --build build --target simulation_tests
 cd build && ctest -R simulation --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 ```
 
-### Phase 5 — Smoke Test
+### Phase 5 — Scenarios
 
-```bash
-./build/simulation_server --scenario default
-curl http://localhost:8080/api/scenario/list
-curl -X POST http://localhost:8080/api/sim/start
-# Verify WS state stream in browser/wscat
-```
+- [ ] First MJCF scenario: differential drive robot on flat ground (`simulation/scenarios/flat_ground.xml`)
+- [ ] Scenario directory structure: `simulation/scenarios/`
+- [ ] Scenario loader reads MJCF path from config / CLI argument
 
-### Phase 6 — REST API for Module Swapping (M1-K)
+### Phase 6 — Testing
 
-- [ ] `PUT /api/robot/controller {"type": "pid"}`
-- [ ] `PUT /api/robot/global_planner {"type": "astar"}`
-- [ ] `PUT /api/robot/local_planner {"type": "dwa"}`
-- [ ] `PUT /api/robot/estimator {"type": "ekf"}`
-- [ ] `GET /api/robot/pipeline` — current module selections
+- [ ] Headless integration tests: MuJoCo physics runs N steps without window (CI-safe)
+- [ ] Bridge adapter unit tests: `mjData` mock → expected `common::` type values
+- [ ] Pipeline wiring tests: modules registered, called in correct order, outputs propagated
 
-### Phase 7 — Docs Polish
+### Phase 7 — Documentation
 
-- [ ] Update simulation README.md with API docs + scenario format
+- [ ] Update simulation `README.md` with architecture overview and scenario format
+- [ ] Update `design.md` to reflect final implementation decisions
 - [ ] Move this file to `repo-plans/modules/done/simulation.md`
