@@ -12,8 +12,11 @@ file(GLOB_RECURSE SOURCES src/*.cpp)
 if(SOURCES)
     add_library(common_logging STATIC ${SOURCES})
     set(_vis PUBLIC)
-    # spdlog must be available when sources are present
-    find_package(spdlog REQUIRED)
+    # spdlog provided via FetchContent in deps.cmake (workspace builds)
+    # or find_package for standalone builds
+    if(NOT TARGET spdlog::spdlog)
+        find_package(spdlog REQUIRED)
+    endif()
     target_link_libraries(common_logging PUBLIC common spdlog::spdlog)
 else()
     add_library(common_logging INTERFACE)

@@ -66,6 +66,7 @@ Checks: >
   readability-math-missing-parentheses,
   readability-misleading-indentation,
   readability-misplaced-array-index,
+  readability-identifier-naming,
   readability-named-parameter,
   readability-non-const-parameter,
   readability-operators-representation,
