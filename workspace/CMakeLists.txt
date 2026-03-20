@@ -26,4 +26,3 @@ include(CTest)
 # ── Sub-directories ──────────────────────────────────────────────────────────
 add_subdirectory(robotics)
 add_subdirectory(simulation)
-add_subdirectory(frontends)
