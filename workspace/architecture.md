@@ -1,63 +1,52 @@
 # System Architecture
 
 > **For AI agents:** Read this document in full before writing any code in this repository.
-> It defines the component boundaries, communication protocols, naming conventions, and
-> dependency rules that all code must follow. Do not deviate from these without updating
-> this document first.
+> It defines the component boundaries, naming conventions, and dependency rules that all
+> code must follow. Do not deviate from these without updating this document first.
 
 ---
 
 ## Overview
 
-TheRobotLibrary is built around three clearly separated components:
+TheRobotLibrary is built around two tiers combined into a single executable:
 
 1. **Robotics modules** (`workspace/robotics/`) — Self-contained C++ libraries implementing
-   individual robotics domains. They have no dependency on the simulation or frontends and
-   can be used in any C++ project independently.
+   individual robotics domains. They depend only on Eigen and `common` — never on MuJoCo,
+   simulation, or any rendering library. Copy any module to a real robot project and it
+   just works.
 
-2. **Simulation backend** (`workspace/simulation/`) — A standalone C++ server that runs the
-   simulated 2D world. It uses the robotics modules internally and exposes its state and
-   control interface via WebSocket and REST HTTP.
-
-3. **Frontends** (`workspace/frontends/`) — User interfaces that connect to the simulation
-   over the network. The native ImGui frontend and the web frontend are entirely independent
-   codebases. They share nothing except the API contract with the simulation server.
+2. **Simulation** (`workspace/simulation/`) — A single C++ executable combining MuJoCo
+   physics, 3D rendering (GLFW + MuJoCo renderer), and ImGui control panels. It links
+   against the robotics modules and wires them into the MuJoCo physics loop via a bridge
+   layer. There is no network API — all interaction happens through the integrated UI.
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│                            Frontends                                 │
-│                                                                      │
-│   ┌───────────────────────┐        ┌─────────────────────────────┐   │
-│   │  Native (ImGui / C++) │        │   Web (TypeScript / React)  │   │
-│   └───────────┬───────────┘        └──────────────┬──────────────┘   │
-│               │                                   │                  │
-└───────────────┼───────────────────────────────────┼──────────────────┘
-                │  WebSocket  (state stream @ 30 Hz)│
-                │  REST HTTP  (commands)            │
-                ▼                                   ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│                     Simulation Backend (C++)                         │
-│                                                                      │
-│  ┌─────────────────┐  ┌────────────────┐  ┌───────────────────────┐  │
-│  │   World model   │  │  Sim loop      │  │  WebSocket + REST API │  │
-│  └────────────┬────┘  └───────┬────────┘  └───────────────────────┘  │
-│               └───────────────┘                                      │
-│                       uses ▼                                         │
-└──────────────────────────────────────────────────────────────────────┘
-                             │
-┌──────────────────────────────────────────────────────────────────────┐
-│               Robotics Modules  (workspace/robotics/)                │
-│                                                                      │
-│  ┌──────────┐  ┌───────────┐  ┌──────────────────┐  ┌───────────┐    │
-│  │  common  │  │  control  │  │ state_estimation │  │ planning  │    │
-│  └──────────┘  └───────────┘  └──────────────────┘  └───────────┘    │
-└──────────────────────────────────────────────────────────────────────┘
++------------------------------------------------------------------+
+|               Robotics Modules (workspace/robotics/)              |
+|                                                                   |
+|  Pure C++20/Eigen libraries. No MuJoCo dependency.               |
+|  Copy any module to a real robot project and it just works.       |
+|                                                                   |
+|  common/  control/  perception/  state_estimation/                |
+|  motion_planning/  fleet_management/                              |
++-------------------------------+----------------------------------+
+                                | linked directly
++-------------------------------v----------------------------------+
+|               Simulation (workspace/simulation/)                  |
+|                                                                   |
+|  Single executable: MuJoCo physics + GLFW + ImGui UI              |
+|                                                                   |
+|  +----------+  +-----------+  +----------+  +------------------+  |
+|  | MuJoCo   |  | Bridge    |  | GLFW +   |  | ImGui Control    |  |
+|  | Physics  |<>| Layer     |<>| MuJoCo   |  | Panels           |  |
+|  | (mj_step)|  | (adapter) |  | Render   |  |                  |  |
+|  +----------+  +-----------+  +----------+  +------------------+  |
++------------------------------------------------------------------+
 ```
 
 **Dependency rule (strictly enforced):**
-- Robotics modules → no dependency on simulation or frontends
-- Simulation → may depend on robotics modules, must not depend on frontends
-- Frontends → communicate with simulation via API only; no direct library links
+- Robotics modules -> depend only on `common` (Eigen-based, no MuJoCo)
+- Simulation -> depends on MuJoCo, robotics modules, ImGui, GLFW
 
 ---
 
@@ -75,14 +64,14 @@ Every module follows this identical structure:
 
 ```
 <module_name>/
-├── CMakeLists.txt          # Produces a static library; no workspace-level deps required
-├── README.md               # What this module does and how to integrate it
-├── include/
-│   └── <module_name>/      # Public headers only (consumers add this to their include path)
-├── src/                    # Implementation files
-├── tests/                  # Unit tests (Catch2 or GoogleTest)
-└── docs/
-    └── theory.md           # Theory, math, and algorithm explanations for this domain
++-- CMakeLists.txt          # Produces a static library; no workspace-level deps required
++-- README.md               # What this module does and how to integrate it
++-- include/
+|   +-- <module_name>/      # Public headers only (consumers add this to their include path)
++-- src/                    # Implementation files
++-- tests/                  # Unit tests (Catch2)
++-- docs/
+    +-- theory.md           # Theory, math, and algorithm explanations for this domain
 ```
 
 ### Module index
@@ -92,9 +81,14 @@ Each domain contains sub-modules — copy only what you need.
 | Domain              | Sub-module                  | Description                                              |
 |---------------------|-----------------------------|----------------------------------------------------------|
 | `common`            | *(flat)*                    | `Pose2D`, `Twist`, `Transform2D`, math utils, map types, interfaces |
+|                     | `types_3d/`                 | `Pose3D`, `Quaternion`, `Transform3D`, `Twist3D`, `Wrench`, `TerrainPose` |
+|                     | `sensors/`                  | `LidarScan`, `ImuReading`, `CameraFrame`, `DepthFrame`, `ForceTorqueSensor` |
 |                     | `kinematics/`               | `IKinematicModel`, differential-drive, unicycle, Ackermann, swerve   |
 |                     | `logging/`                  | `ILogger`, `SpdlogLogger`, `getLogger()` — observability for all modules |
+|                     | `transforms/`               | 2D transforms + 3D conversion utilities (Pose3D<->Pose2D, Euler<->quaternion) |
 |                     | `noise_models/`             | `GaussianNoise<T>`, `UniformNoise<T>`, `OutlierInjector<T>` — seeded, reproducible (header-only) |
+|                     | `robot/`                    | `VehicleParams`, `MotorParams`, `TireParams`, `WheelConfig` |
+|                     | `environment/`              | `TerrainProperties`, `SlipDetector` |
 | `control`           | `pid/`                      | Discrete PID with anti-windup and derivative kick fix    |
 |                     | `pure_pursuit/`             | Geometric path tracker; adaptive lookahead               |
 |                     | `mpc/`                      | Receding-horizon NMPC via acados; diff-drive/Ackermann/swerve       |
@@ -116,7 +110,7 @@ Each domain contains sub-modules — copy only what you need.
 |                     | `imu_processing/`           | Complementary filter, bias estimation, IMU pre-integration |
 |                     | `place_recognition/`        | Descriptor-based place DB; loop closure detection        |
 |                     | `stereo_depth/`             | Block-matching disparity, StereoRectifier, depth map     |
-|                     | `depth_camera/`             | RGB-D processing: depth→pointcloud, hole fill, outlier removal, `RgbdCamera` |
+|                     | `depth_camera/`             | RGB-D processing: depth->pointcloud, hole fill, outlier removal, `RgbdCamera` |
 |                     | `object_detection_3d/`      | 3D DBSCAN + PCA oriented bounding box; size-based classification (PERSON/CAR/UNKNOWN) |
 |                     | `lane_detection/`           | Hough on binary edge image, lane polynomial fitting (degree-2), left/right assignment |
 |                     | `semantic_segmentation/`    | `ISemanticSegmenter` + stub + `PluginSemanticSegmenter` (`std::function` DL plugin point) |
@@ -141,8 +135,8 @@ Each domain contains sub-modules — copy only what you need.
 |                     | `trajectory_planning/spline_fitting/`     | Cubic spline, Catmull-Rom, B-spline path smoothing    |
 |                     | `trajectory_planning/teb/`               | Timed Elastic Band: joint path + timing optimization  |
 |                     | `trajectory_planning/time_optimal/`      | TOPP-RA, minimum-snap QP, bang-bang profiles          |
-|                     | `trajectory_planning/polynomial/`        | Min-jerk / min-snap polynomials; Bézier curves (de Casteljau) |
-|                     | `multi_robot/orca/`         | VO→RVO→ORCA reactive collision avoidance              |
+|                     | `trajectory_planning/polynomial/`        | Min-jerk / min-snap polynomials; Bezier curves (de Casteljau) |
+|                     | `multi_robot/orca/`         | VO->RVO->ORCA reactive collision avoidance              |
 |                     | `multi_robot/priority_planning/` | Sequential priority-based multi-robot planning   |
 |                     | `multi_robot/cbs/`          | Conflict-Based Search (optimal MAPF)                 |
 |                     | `multi_robot/dmpc/`         | Distributed MPC with inter-robot trajectory constraints |
@@ -156,11 +150,11 @@ Each domain contains sub-modules — copy only what you need.
 ### Dependency graph between modules
 
 ```
-common  ←  control
-common  ←  perception
-common  ←  state_estimation
-common  ←  motion_planning
-common  ←  fleet_management
+common  <-  control
+common  <-  perception
+common  <-  state_estimation
+common  <-  motion_planning
+common  <-  fleet_management
 ```
 
 No module other than `common` may depend on another domain module. If cross-domain shared
@@ -168,109 +162,173 @@ data is needed, the type belongs in `common`.
 
 ---
 
-## Simulation Backend (`workspace/simulation/`)
+## Type System (`common/`)
+
+### SE2 Types (kept, for 2D algorithms)
+
+- `Pose2D` — (x, y, theta)
+- `Transform2D` — SE2 rigid body transform
+- `Twist` — (linear, angular) velocity
+
+These remain the primary types for 2D algorithms (path planning, 2D controllers, 2D SLAM).
+Ground robots use 2D kinematics even in the 3D world.
+
+### SE3 Types (new, in `common/types_3d/`)
+
+- `Pose3D` — position (x, y, z) + orientation (quaternion)
+- `Transform3D` — SE3 rigid body transform (rotation matrix + translation)
+- `Quaternion` — unit quaternion with multiplication, slerp, Euler/rotation-matrix conversion
+- `Twist3D` — 6-DOF velocity (linear xyz + angular xyz)
+- `Wrench` — 6-axis force + torque vector
+
+### 2.5D Bridge Types (for ground robots on slopes)
+
+- `TerrainPose` — `Pose2D` + elevation + pitch + roll
+- Conversion utilities: `Pose3D` <-> `Pose2D` projection, `Pose3D` -> `TerrainPose`
+
+### Sensor Data Types (in `common/sensors/`)
+
+Hardware-agnostic sensor data types — the same types work with MuJoCo simulation or real
+hardware drivers:
+
+- `LidarScan` — array of ranges + angles (2D) or point cloud (3D)
+- `ImuReading` — accelerometer + gyroscope + timestamp
+- `CameraFrame` — RGB image buffer (`std::vector<uint8_t>`) + width/height/channels + intrinsics (`Eigen::Matrix3d`) + extrinsics (`Transform3D`)
+- `DepthFrame` — depth buffer (`std::vector<float>`) + width/height + intrinsics
+- `ForceTorqueSensor` — 6-axis wrench reading
+
+### Sub-Module Boundaries
+
+- **`common/types_3d/`** owns all 3D type definitions: Pose3D, Quaternion, Transform3D, Twist3D, Wrench, TerrainPose
+- **`common/transforms/`** owns conversion functions between types: 2D<->3D projections, Euler<->quaternion, rotation matrix conversions
+- **`common/sensors/`** owns sensor data type definitions
+- The existing 2D types remain in their current locations
+
+All types live in the `robotlib` namespace and are Eigen-based. No MuJoCo includes anywhere
+in `workspace/robotics/`.
+
+---
+
+## Simulation (`workspace/simulation/`)
 
 ### Purpose
 
-The simulation backend is a C++ application that:
-- Maintains the simulated world state (robot pose, map, obstacles, sensor readings)
-- Runs the simulation loop at a fixed timestep (configurable, default 50 Hz internally)
-- Streams world state to connected clients via WebSocket at 30 Hz
-- Accepts commands from clients via REST HTTP
+The simulation is a single C++ executable that:
+- Loads MJCF (XML) model files defining robots, terrain, sensors, and world geometry
+- Runs MuJoCo physics with a configurable timestep (default 2ms / 500Hz)
+- Renders the 3D scene via MuJoCo's built-in renderer
+- Provides ImGui overlay panels for simulation control, module switching, and telemetry
+- Can run headless (no window) for batch testing and CI
 
-The C++ server library used is **[Crow](https://crowcpp.org/)** — header-only, handles both
-HTTP REST and WebSocket on the same server instance cleanly.
+### MuJoCo Physics Core
 
-### WebSocket — state streaming
+- **MJCF loading:** Robot and world parameters are defined in MJCF files. The `ModelAdapter`
+  extracts what robotics modules need (`VehicleParams`, sensor configurations) from the
+  loaded `mjModel` at startup.
+- **Split-step loop:** `mj_step1()` -> module control injection -> `mj_step2()`. This
+  allows the robotics pipeline to read sensor data and write control signals between the
+  two halves of the physics step.
+- **Configurable timestep:** Default 2ms (500Hz). Adjustable for accuracy vs. speed tradeoffs.
+- **Headless mode:** Physics runs without a window for CI and batch testing.
 
-- **Endpoint:** `ws://<host>:8080/state`
-- The server pushes a JSON state message every simulation tick
-- Clients subscribe and receive; they do not send data over this channel
+### Bridge Layer (`simulation/bridge/`)
 
-State message schema:
-```json
-{
-  "t": 1234567890.123,
-  "robot": {
-    "pose": { "x": 1.2, "y": 3.4, "theta": 0.5 },
-    "velocity": { "linear": 0.3, "angular": 0.1 }
-  },
-  "sensors": {
-    "lidar": [0.5, 0.7, 1.2, 2.0, 1.8]
-  },
-  "map": {
-    "width": 100,
-    "height": 100,
-    "resolution": 0.05,
-    "data": "..."
-  }
-}
+The bridge is the **only** code in the repository that includes `<mujoco/mujoco.h>`:
+
+- **SensorAdapter** — reads `mjData` sensor arrays -> `common::LidarScan`, `ImuReading`, `CameraFrame`, etc.
+- **StateAdapter** — reads `mjData` qpos/qvel -> `common::Pose3D`, `Pose2D`, `TerrainPose`
+- **ActuatorAdapter** — takes `common::Twist` from controllers -> writes `mjData::ctrl[]`
+- **ModelAdapter** — reads `mjModel` at startup -> populates `VehicleParams`, `MotorParams`, sensor configs
+
+For real hardware deployment (no MuJoCo), a separate hardware config loader would populate
+the same `common/` structs. Modules do not care where params came from.
+
+### Module Pipeline
+
+Pluggable robotics modules wired together at runtime:
+
+```
+Sensors (via SensorAdapter)
+  -> IStateEstimator (EKF, particle filter, ...)
+  -> IGlobalPlanner (A*, RRT, ...)
+  -> ILocalPlanner (DWA, potential field, ...)
+  -> IController (PID, pure_pursuit, MPC, ...)
+  -> ActuatorAdapter -> MuJoCo ctrl[]
 ```
 
-### REST HTTP — commands and configuration
+- Each slot has an interface defined in `common/` or its domain
+- Runtime switching via ImGui dropdown panels
+- Pipeline reads sensor data from bridge, computes commands, feeds back through bridge
 
-- **Base URL:** `http://<host>:8080/api/`
-- All request and response bodies are JSON
+### App Shell (GLFW + MuJoCo Render + ImGui)
 
-| Method | Endpoint                    | Description                                          |
-|--------|-----------------------------|------------------------------------------------------|
-| POST   | `/api/sim/start`            | Start or resume the simulation                       |
-| POST   | `/api/sim/stop`             | Pause the simulation                                 |
-| POST   | `/api/sim/reset`            | Reset world to initial state                         |
-| POST   | `/api/sim/step`             | Advance simulation by one tick (only while paused)   |
-| PUT    | `/api/sim/speed`            | Set simulation speed multiplier                      |
-| POST   | `/api/robot/cmd_vel`        | Send velocity command `{linear, angular}`            |
-| GET    | `/api/robot/pipeline`       | Get current module selections for each pipeline slot |
-| PUT    | `/api/robot/controller`     | Switch controller `{"type": "pid"}`                  |
-| PUT    | `/api/robot/global_planner` | Switch global planner `{"type": "astar"}`            |
-| PUT    | `/api/robot/local_planner`  | Switch local planner `{"type": "dwa"}`               |
-| PUT    | `/api/robot/estimator`      | Switch state estimator `{"type": "ekf"}`             |
-| PUT    | `/api/robot/kinematics`     | Switch kinematic model `{"type": "differential_drive"}`|
-| GET    | `/api/fleet/state`          | Return full fleet state (all robots + chargers)              |
-| POST   | `/api/fleet/task`           | Submit VDA 5050 Order for task allocation                    |
-| POST   | `/api/fleet/instant_action` | Send instant action to a specific robot                      |
-| GET    | `/api/fleet/allocator`      | Get current task allocator type                              |
-| PUT    | `/api/fleet/allocator`      | Switch task allocator `{"type": "greedy"|"auction"}`         |
+Single executable combining:
+
+- **GLFW** window creation + OpenGL context
+- **MuJoCo** `mjr_render()` for 3D scene in the main viewport
+- **ImGui** overlay panels (docking branch, GLFW + OpenGL3 backend):
+  - Simulation control (play/pause/step/reset/speed)
+  - Module pipeline selector (dropdowns for controller, planner, estimator, kinematics)
+  - Parameter tuning (PID gains, lookahead distance, etc.)
+  - Telemetry plots (velocity, tracking error, sensor data)
+  - Scenario loader (load different MJCF worlds)
+
+### Threading Model
+
+```
+Physics Thread                    Main Thread (OpenGL)
++--------------------------+      +-------------------------+
+| loop:                    |      | loop:                   |
+|   mj_step1(m, d)        |      |   lock(mtx)             |
+|   bridge.readSensors(d)  |      |   mj_copyData(d_render, |
+|   pipeline.run()         |      |                m, d)    |
+|   bridge.writeCtrl(d)    |      |   unlock(mtx)           |
+|   mj_step2(m, d)        |      |   mjr_render(d_render)  |
+|   lock(mtx)              |      |   ImGui panels          |
+|   notify render          |      |   glfwSwapBuffers()     |
+|   unlock(mtx)            |      +-------------------------+
++--------------------------+
+```
+
+Key design choices:
+- **Module pipeline runs on the physics thread** between `mj_step1()` and `mj_step2()`.
+  Fast modules (PID, EKF, DWA) complete well within the 2ms budget.
+- **Slow planners (RRT\*, MPC, A\*) run asynchronously**: launched on a separate planning
+  thread, producing results consumed on the next tick via a thread-safe buffer. The
+  controller uses the last-known-good plan until a new one arrives.
+- **Render thread gets a copy** of `mjData` via `mj_copyData()` under a mutex. This is the
+  standard MuJoCo pattern — `mjData` is not thread-safe, so the render thread never touches
+  the physics `mjData` directly.
+- **ImGui state changes** (module switching, parameter tuning) are queued and applied on the
+  physics thread at the start of the next tick.
+
+### Scenario System
+
+- MJCF files live in `simulation/scenarios/`
+- Each scenario defines: terrain + robot(s) + obstacles + sensor configuration
+- Loaded at startup via command line or switched at runtime via ImGui
+- Multi-robot scenarios are native (multiple bodies in one MJCF)
 
 ### Simulation directory layout
 
 ```
 simulation/
-├── CMakeLists.txt
-├── README.md
-├── include/simulation/     # Public API headers (used by simulation internals)
-├── src/                    # World model, sim loop, Crow server, scenario loader
-├── tests/                  # Integration and unit tests
-└── docs/
-    └── design.md           # Simulation design decisions and extension guide
++-- CMakeLists.txt              # Single executable, links MuJoCo + ImGui + modules
++-- include/simulation/
+|   +-- bridge/                 # SensorAdapter, StateAdapter, ActuatorAdapter, ModelAdapter
+|   +-- pipeline/               # Module pipeline wiring + runtime switching
+|   +-- app/                    # GLFW window, ImGui panels, render loop
++-- src/
+|   +-- main.cpp                # Entry point: load MJCF, create window, run
+|   +-- bridge/                 # Bridge implementations
+|   +-- pipeline/               # Pipeline implementations
+|   +-- app/                    # App shell, ImGui panels, render
+|   +-- scenario_loader/        # Scenario loading logic
++-- scenarios/                  # MJCF model files
++-- tests/                      # Integration tests (headless MuJoCo)
++-- docs/
+    +-- design.md
 ```
-
----
-
-## Frontends (`workspace/frontends/`)
-
-> **Critical rule:** Frontends communicate with the simulation backend exclusively through
-> the WebSocket and REST API. They must not link against any simulation or robotics module
-> libraries. This ensures each frontend remains independently deployable and independently
-> testable.
-
-### Native frontend (`workspace/frontends/native/`)
-
-- **Language:** C++20
-- **GUI framework:** ImGui with SDL2 + OpenGL backend (or GLFW + OpenGL)
-- Connects to the simulation WebSocket for continuous state updates
-- Sends commands via REST using a lightweight HTTP client (e.g. cpp-httplib)
-- Renders the 2D robot world with ImGui's `ImDrawList` API
-- Suitable for local development, debugging, and visualization on the host machine
-
-### Web frontend (`workspace/frontends/web/`)
-
-- **Language:** TypeScript
-- **Framework:** React
-- **Visualization:** HTML5 Canvas (2D rendering), upgradeable to WebGL / Three.js for 3D
-- Connects to the simulation WebSocket with the browser-native `WebSocket` API
-- Sends commands via `fetch()` REST calls
-- Designed to be embedded on a personal homepage or portfolio site as a live demo
 
 ---
 
@@ -291,7 +349,7 @@ simulation/
   or value types. Prefer value semantics where possible.
 - **Error handling:** Use `std::expected<T, E>` for recoverable errors in library code.
   Reserve exceptions for programmer errors (precondition violations).
-- **Testing:** Every module has a `tests/` directory. Tests use **Catch2** or **GoogleTest**.
+- **Testing:** Every module has a `tests/` directory. Tests use **Catch2**.
   New code should not decrease coverage.
 
 ---
@@ -312,57 +370,101 @@ simulation/
 
 ```
 workspace/
-├── architecture.md            ← This file (read before writing code)
-├── CMakeLists.txt             ← Root build: wires all submodules together
-├── robotics/
-│   ├── README.md
-│   ├── common/                ← Shared types and math primitives
-│   ├── control/
-│   │   ├── pid/
-│   │   ├── pure_pursuit/
-│   │   └── mpc/
-│   ├── perception/
-│   │   ├── lidar_processing/
-│   │   ├── occupancy_grid/
-│   │   ├── ray_casting/
-│   │   └── obstacle_detection/
-│   ├── state_estimation/
-│   │   ├── ekf/
-│   │   ├── particle_filter/
-│   │   ├── ekf_slam/
-│   │   └── lidar_slam/
-│   └── motion_planning/
-│       ├── global_planning/
-│       │   ├── astar/
-│       │   ├── dijkstra/
-│       │   └── rrt/
-│       ├── local_planning/
-│       │   └── dwa/
-│       ├── trajectory_planning/
-│       │   ├── velocity_profiling/
-│       │   ├── spline_fitting/
-│       │   ├── teb/
-│       │   └── time_optimal/
-│       └── multi_robot/
-│           ├── orca/
-│           ├── priority_planning/
-│           ├── cbs/
-│           ├── dmpc/
-│           └── mader/
-├── simulation/                ← Simulation backend server
-│   ├── README.md
-│   ├── include/simulation/
-│   ├── src/
-│   ├── tests/
-│   └── docs/
-└── frontends/
-    ├── README.md
-    ├── native/                ← ImGui C++ desktop app
-    │   ├── README.md
-    │   └── src/
-    └── web/                   ← TypeScript/React web app
-        ├── README.md
-        └── src/
++-- architecture.md            <- This file (read before writing code)
++-- CMakeLists.txt             <- Root build: wires all submodules together
++-- robotics/
+|   +-- README.md
+|   +-- common/                <- Shared types and math primitives
+|   |   +-- types_3d/          <- Pose3D, Transform3D, Quaternion, Twist3D, Wrench, TerrainPose
+|   |   +-- sensors/           <- LidarScan, ImuReading, CameraFrame, DepthFrame, ForceTorqueSensor
+|   |   +-- kinematics/        <- IKinematicModel, differential-drive, unicycle, Ackermann, swerve
+|   |   +-- robot/             <- VehicleParams, MotorParams, TireParams, WheelConfig
+|   |   +-- environment/       <- TerrainProperties, SlipDetector
+|   |   +-- logging/           <- ILogger, SpdlogLogger
+|   |   +-- transforms/        <- 2D transforms + 3D conversion utilities
+|   |   +-- noise_models/      <- GaussianNoise, UniformNoise, OutlierInjector
+|   +-- control/
+|   |   +-- pid/
+|   |   +-- pure_pursuit/
+|   |   +-- mpc/
+|   |   +-- cbf/
+|   |   +-- adaptive/
+|   |   +-- frenet/
+|   |   +-- lqr/
+|   |   +-- stanley/
+|   |   +-- mppi/
+|   |   +-- feedback_linearization/
+|   |   +-- lqg/
+|   +-- perception/
+|   |   +-- lidar_processing/
+|   |   +-- occupancy_grid/
+|   |   +-- ray_casting/
+|   |   +-- obstacle_detection/
+|   |   +-- feature_extraction/
+|   |   +-- visual_odometry/
+|   |   +-- imu_processing/
+|   |   +-- place_recognition/
+|   |   +-- stereo_depth/
+|   |   +-- depth_camera/
+|   |   +-- object_detection_3d/
+|   |   +-- lane_detection/
+|   |   +-- semantic_segmentation/
+|   +-- state_estimation/
+|   |   +-- ekf/
+|   |   +-- particle_filter/
+|   |   +-- ekf_slam/
+|   |   +-- lidar_slam/
+|   |   +-- visual_slam/
+|   |   +-- ukf/
+|   |   +-- pose_graph/
+|   |   +-- visual_inertial_odometry/
+|   |   +-- factor_graph/
+|   +-- motion_planning/
+|   |   +-- global_planning/
+|   |   |   +-- astar/
+|   |   |   +-- dijkstra/
+|   |   |   +-- rrt/
+|   |   |   +-- prm/
+|   |   |   +-- informed_rrt_star/
+|   |   |   +-- lattice_planner/
+|   |   +-- local_planning/
+|   |   |   +-- dwa/
+|   |   |   +-- potential_field/
+|   |   +-- trajectory_planning/
+|   |   |   +-- velocity_profiling/
+|   |   |   +-- spline_fitting/
+|   |   |   +-- teb/
+|   |   |   +-- time_optimal/
+|   |   |   +-- polynomial/
+|   |   +-- multi_robot/
+|   |       +-- orca/
+|   |       +-- priority_planning/
+|   |       +-- cbs/
+|   |       +-- dmpc/
+|   |       +-- mader/
+|   +-- fleet_management/
+|       +-- vda5050/
+|       +-- task_allocation/
+|       +-- fleet_monitor/
+|       +-- battery_management/
+|       +-- charging_station/
++-- simulation/                <- MuJoCo simulation + integrated visualization
+|   +-- CMakeLists.txt
+|   +-- include/simulation/
+|   |   +-- bridge/
+|   |   +-- pipeline/
+|   |   +-- app/
+|   +-- src/
+|   |   +-- main.cpp
+|   |   +-- bridge/
+|   |   +-- pipeline/
+|   |   +-- app/
+|   |   +-- scenario_loader/
+|   +-- scenarios/             <- MJCF model files
+|   +-- tests/
+|   +-- docs/
++-- cmake/
+    +-- deps.cmake             <- FetchContent: MuJoCo, Eigen, Catch2, spdlog, ImGui, etc.
 ```
 
 ---
@@ -371,16 +473,18 @@ workspace/
 
 ### Prerequisites
 
-- CMake ≥ 3.20
+- CMake >= 3.20
 - A C++20-capable compiler: GCC 12+, Clang 15+, or MSVC 2022+
 - Git (FetchContent downloads deps on first configure)
-- For `frontends/native`: OpenGL development headers (`libgl1-mesa-dev` on Debian/Ubuntu)
+- OpenGL development headers (`libgl1-mesa-dev` on Debian/Ubuntu)
 - For `trajectory_planning/teb` (when implementing): `libsuitesparse-dev`
+
+MuJoCo is fetched via FetchContent; GLFW comes transitively via MuJoCo's CMake build.
 
 ### Full workspace build
 
 ```bash
-# Configure (first run downloads all FetchContent dependencies — allow a few minutes)
+# Configure (first run downloads all FetchContent dependencies -- allow a few minutes)
 cmake -B build -S workspace -DCMAKE_BUILD_TYPE=Release
 
 # Build everything
@@ -414,7 +518,7 @@ cmake --build build-pid -j$(nproc)
 
 ### IDE / clangd support
 
-`compile_commands.json` is generated by default.  
+`compile_commands.json` is generated by default.
 Point clangd at the build directory:
 
 ```bash
@@ -426,8 +530,7 @@ ln -s build/compile_commands.json workspace/compile_commands.json
 ### Third-party dependency management
 
 All dependencies are fetched via CMake's `FetchContent` in `workspace/cmake/deps.cmake`.
-No vcpkg manifest, Conan recipe, or system packages are required (except OpenGL headers for
-the native frontend).  
+No vcpkg manifest, Conan recipe, or system packages are required (except OpenGL headers).
 To add a new dependency:
 
 1. Add a `FetchContent_Declare` block in `cmake/deps.cmake`, guarded with
