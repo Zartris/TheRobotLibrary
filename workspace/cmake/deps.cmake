@@ -68,10 +68,11 @@ if(NOT TARGET spdlog::spdlog)
         GIT_TAG        v1.15.0
         GIT_SHALLOW    TRUE
     )
-    set(SPDLOG_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-    set(SPDLOG_BUILD_BENCH    OFF CACHE BOOL "" FORCE)
-    set(SPDLOG_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
-    set(SPDLOG_INSTALL        OFF CACHE BOOL "" FORCE)
+    set(SPDLOG_BUILD_EXAMPLES  OFF CACHE BOOL "" FORCE)
+    set(SPDLOG_BUILD_BENCH     OFF CACHE BOOL "" FORCE)
+    set(SPDLOG_BUILD_TESTS     OFF CACHE BOOL "" FORCE)
+    set(SPDLOG_INSTALL         OFF CACHE BOOL "" FORCE)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(spdlog)
     # sdflib (transitive via MuJoCo) fetches spdlog under the alias 'spdlog_lib'
     # and calls add_subdirectory(), which would create a duplicate 'spdlog' target.
