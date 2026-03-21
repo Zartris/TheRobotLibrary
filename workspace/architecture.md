@@ -45,7 +45,7 @@ TheRobotLibrary is built around two tiers combined into a single executable:
 ```
 
 **Dependency rule (strictly enforced):**
-- Robotics modules -> depend only on `common` (Eigen-based, no MuJoCo)
+- Robotics modules -> depend on `common`; cross-domain deps prohibited (control must not depend on perception). Intra-domain composition allowed where explicitly designed (e.g., `control/lqg` uses `lqr` + `ekf`). No MuJoCo dependency.
 - Simulation -> depends on MuJoCo, robotics modules, ImGui, GLFW
 
 ---
@@ -479,7 +479,7 @@ workspace/
 - OpenGL development headers (`libgl1-mesa-dev` on Debian/Ubuntu)
 - For `trajectory_planning/teb` (when implementing): `libsuitesparse-dev`
 
-MuJoCo is fetched via FetchContent; GLFW comes transitively via MuJoCo's CMake build.
+MuJoCo and GLFW are both fetched via FetchContent in `deps.cmake`. GLFW is fetched explicitly because `MUJOCO_BUILD_SIMULATE=OFF` prevents MuJoCo from providing it.
 
 ### Full workspace build
 

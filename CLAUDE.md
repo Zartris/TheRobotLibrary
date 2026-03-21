@@ -44,7 +44,7 @@ docker exec -it TheRobotLibrary bash
 TheRobotLibrary is a modular C++ robotics library with two tiers combined into a single executable:
 
 ### Tier 1: Robotics Modules (`workspace/robotics/`)
-Self-contained, reusable C++ libraries. Modules may only depend on `common` — never on each other or simulation. Pure C++20/Eigen, no MuJoCo dependency. Domains: `common`, `control`, `perception`, `state_estimation`, `motion_planning`, `fleet_management`.
+Self-contained, reusable C++ libraries. Cross-domain dependencies are prohibited (e.g., control must not depend on perception). Intra-domain composition is allowed where explicitly designed (e.g., `control/lqg` uses `control/lqr` + `state_estimation/ekf`). All modules depend on `common`. Pure C++20/Eigen, no MuJoCo dependency. Domains: `common`, `control`, `perception`, `state_estimation`, `motion_planning`, `fleet_management`.
 
 ### Tier 2: Simulation (`workspace/simulation/`)
 A single executable combining MuJoCo physics, GLFW windowing, MuJoCo 3D rendering, and ImGui control panels. Links against robotics modules via a bridge layer. No network API — all interaction through the integrated UI. Can run headless for CI.
@@ -122,7 +122,7 @@ All modules must use `common/logging/` (`ILogger` + `SpdlogLogger`) before being
 - **Module task files** live in `repo-plans/modules/<module>.md` and move to `repo-plans/modules/done/` when complete.
 - **MuJoCo's `mjData` is not thread-safe** — the render thread uses `mj_copyData()` under a mutex. Never access physics `mjData` from the render thread directly.
 - **MJCF files in `simulation/scenarios/` are the source of truth for robot parameters.** The `ModelAdapter` extracts `VehicleParams` and sensor configs from the loaded `mjModel` at startup. Modules never read MJCF directly.
-- **GLFW comes transitively via MuJoCo** — do not add a separate GLFW FetchContent block in `deps.cmake`.
+- **GLFW is fetched explicitly in `deps.cmake`** because `MUJOCO_BUILD_SIMULATE=OFF` prevents MuJoCo from fetching it. All GLFW dependency management is centralized in `deps.cmake` — do not add additional GLFW FetchContent blocks elsewhere.
 
 ## Key Reference Files
 

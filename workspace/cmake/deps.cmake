@@ -16,8 +16,10 @@ include(FetchContent)
 
 # Prevent FetchContent dependencies from registering their own tests
 # even when the parent project has BUILD_TESTING=ON.
+# Use CACHE FORCE because many deps call option(BUILD_TESTING ...) which
+# reads/writes the cache entry and would re-enable tests otherwise.
 set(_saved_BUILD_TESTING ${BUILD_TESTING})
-set(BUILD_TESTING OFF)
+set(BUILD_TESTING OFF CACHE BOOL "Temporarily disabled for FetchContent deps" FORCE)
 
 # ---------------------------------------------------------------------------
 # Eigen 3.4.0 — header-only linear algebra
@@ -109,7 +111,7 @@ if(NOT TARGET osqp::osqp)
 endif()
 
 # ---------------------------------------------------------------------------
-# MuJoCo (latest 3.x stable) — physics engine (simulation backend)
+# MuJoCo (latest 3.x stable) — physics engine (simulation app)
 # MuJoCo brings its own transitive deps: abseil, lodepng, tinyxml2, ccd, qhull.
 # If FetchContent causes target conflicts, fall back to ExternalProject_Add
 # or system install with find_package(mujoco). Validate in M0.
@@ -228,4 +230,4 @@ endif()
 # endif()
 
 # Restore BUILD_TESTING for our own project's tests
-set(BUILD_TESTING ${_saved_BUILD_TESTING})
+set(BUILD_TESTING ${_saved_BUILD_TESTING} CACHE BOOL "Build unit tests" FORCE)
