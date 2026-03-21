@@ -14,6 +14,11 @@
 
 include(FetchContent)
 
+# Prevent FetchContent dependencies from registering their own tests
+# even when the parent project has BUILD_TESTING=ON.
+set(_saved_BUILD_TESTING ${BUILD_TESTING})
+set(BUILD_TESTING OFF)
+
 # ---------------------------------------------------------------------------
 # Eigen 3.4.0 — header-only linear algebra
 # Used by: common (re-exported), ekf, particle_filter, ekf_slam, lidar_slam,
@@ -221,3 +226,6 @@ endif()
 #     set(BLASFEO_TARGET       GENERIC CACHE STRING "" FORCE)
 #     FetchContent_MakeAvailable(acados)
 # endif()
+
+# Restore BUILD_TESTING for our own project's tests
+set(BUILD_TESTING ${_saved_BUILD_TESTING})
