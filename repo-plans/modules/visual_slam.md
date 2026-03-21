@@ -78,15 +78,15 @@ cd build && ctest -R visual_slam --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[T
 ### Phase 5 — Simulation Integration
 
 - [ ] Sim assembles pipeline: `CameraRenderer` → `FeatureExtractor` → `VisualOdometry` → `VisualSlam` each tick
-- [ ] `VisualSlam` output (pose, landmark map) added to WebSocket state message
+- [ ] `VisualSlam` output (pose, landmark map) added to bridge state adapter
 - [ ] Unknown-map scenario: robot explores corridor with camera, builds feature map end-to-end
 - [ ] Module itself does not link against simulation
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
-- [ ] (M9) Camera view panel showing live `CameraFrame`
-- [ ] (M9) Feature tracks overlay on camera view
-- [ ] (M9) Visual SLAM landmark map projected onto 2D top-down view
+- [ ] Camera view panel showing live `CameraFrame`
+- [ ] Feature tracks overlay on camera view
+- [ ] Visual SLAM landmark map projected onto 2D top-down view
 - [ ] Mini-demo: robot explores with camera, builds feature map, closes loop
 
 ### Phase 7 — Docs Polish

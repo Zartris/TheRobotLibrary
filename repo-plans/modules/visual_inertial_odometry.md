@@ -34,7 +34,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("visual_inertial_odometry")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, predict/update cycle, error paths)
@@ -52,7 +52,7 @@ cd build && ctest -R visual_inertial_odometry --output-on-failure 2>&1 | grep "\
 
 - [ ] SLAM pipeline slot: `ImuPreintegrator` + `VisualOdometry` + `VisualInertialOdometry`
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] VIO trajectory trace alongside raw VO trace
 - [ ] Bias drift panel

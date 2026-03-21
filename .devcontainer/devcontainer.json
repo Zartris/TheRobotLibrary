@@ -1,0 +1,28 @@
+{
+  "name": "TheRobotLibrary Dev",
+  "dockerComposeFile": "../docker/docker-compose.dev.yml",
+  "service": "sandbox",
+  "workspaceFolder": "/repo",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "llvm-vs-code-extensions.vscode-clangd",
+        "ms-vscode.cmake-tools",
+        "matepek.vscode-catch2-test-adapter"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "C_Cpp.intelliSenseEngine": "disabled",
+        "clangd.arguments": [
+          "--background-index",
+          "--clang-tidy",
+          "--compile-commands-dir=${workspaceFolder}/build"
+        ],
+        "cmake.buildDirectory": "${workspaceFolder}/build",
+        "cmake.sourceDirectory": "${workspaceFolder}/workspace",
+        "cmake.buildType": "Debug"
+      }
+    }
+  },
+  "remoteUser": "${localEnv:USER}"
+}

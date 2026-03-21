@@ -33,7 +33,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("ukf")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, sigma-point spread, residual norm)
@@ -49,9 +49,9 @@ cd build && ctest -R ukf --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TRACE\]"
 
 ### Phase 5 — Simulation Integration
 
-- [ ] Registerable as alternative state estimator alongside EKF via `PUT /api/robot/estimator {"type":"ukf"}`
+- [ ] Registerable as alternative state estimator alongside EKF via ImGui module selector (estimator type: "ukf")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render state covariance ellipse (same panel as EKF)
 

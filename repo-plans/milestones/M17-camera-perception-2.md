@@ -55,7 +55,7 @@ Block-matching stereo disparity estimation and disparity-to-depth conversion.
   - Edge case: block size larger than image → returns error via `std::expected`
 - [ ] Phase 4.5: `ILogger`, disparity search range + match quality at `DEBUG`, per-row solve time at `TRACE`
 - [ ] Sim note: stereo integration requires two camera viewpoints offset by baseline. M17 scope covers offline/synthetic testing; live sim stereo rendering deferred to post-M17 sim upgrade.
-- [ ] Frontend: depth map false-colour overlay; disparity histogram panel
+- [ ] ImGui panel: depth map false-colour overlay; disparity histogram panel
 
 ---
 
@@ -63,7 +63,7 @@ Block-matching stereo disparity estimation and disparity-to-depth conversion.
 
 - [ ] `perception/place_recognition` module: interface, implementation, tests
 - [ ] `perception/stereo_depth` module: interface, implementation, tests
-- [ ] Frontend shows depth map false-colour overlay and disparity histogram
+- [ ] Simulation app shows depth map false-colour overlay and disparity histogram
 - [ ] Place recognizer integration note documented for post-M17 pose_graph wiring
 - [ ] All modules pass Phase 4.5 — Observability gate
 

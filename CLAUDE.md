@@ -23,11 +23,14 @@ ctest --test-dir build --output-on-failure
 # Run a single test binary (after build)
 ./build/robotics/control/pid/tests/pid_tests
 
+# Run the simulation app (after build)
+./build/simulation/simulation_app
+
 # Format code (run from workspace/)
 clang-format -i <file>
 ```
 
-**Dependencies** are all managed via CMake FetchContent — no vcpkg or Conan needed. See [workspace/cmake/deps.cmake](workspace/cmake/deps.cmake) for the full list.
+**Dependencies** are all managed via CMake FetchContent — no vcpkg or Conan needed. See [workspace/cmake/deps.cmake](workspace/cmake/deps.cmake) for the full list (MuJoCo, Eigen, Catch2, spdlog, ImGui, OSQP, nlohmann/json, etc.).
 
 **Docker dev environment:**
 ```bash
@@ -38,28 +41,22 @@ docker exec -it TheRobotLibrary bash
 
 ## Architecture
 
-TheRobotLibrary is a modular C++ robotics library with three strictly separated tiers:
+TheRobotLibrary is a modular C++ robotics library with two tiers combined into a single executable:
 
 ### Tier 1: Robotics Modules (`workspace/robotics/`)
-Self-contained, reusable C++ libraries. Modules may only depend on `common` — never on each other, simulation, or frontends. Domains: `common`, `control`, `perception`, `state_estimation`, `motion_planning`, `fleet_management`.
+Self-contained, reusable C++ libraries. Cross-domain dependencies are prohibited (e.g., control must not depend on perception). Intra-domain composition is allowed where explicitly designed (e.g., `control/lqg` uses `control/lqr` + `state_estimation/ekf`). All modules depend on `common`. Pure C++20/Eigen, no MuJoCo dependency. Domains: `common`, `control`, `perception`, `state_estimation`, `motion_planning`, `fleet_management`.
 
-### Tier 2: Simulation Backend (`workspace/simulation/`)
-A standalone Crow (HTTP + WebSocket) server. Maintains world state, runs a 50 Hz sim loop, streams state at 30 Hz. May link against robotics modules. REST API at `http://host:8080/api/*`, WebSocket at `ws://host:8080/state`.
-
-### Tier 3: Frontends (`workspace/frontends/`)
-- **Native:** C++ desktop app (ImGui + SDL2 + OpenGL)
-- **Web:** TypeScript/React with HTML5 Canvas
-
-**Frontends NEVER link against simulation or robotics libraries.** All communication is network-only via WebSocket + REST.
+### Tier 2: Simulation (`workspace/simulation/`)
+A single executable combining MuJoCo physics, GLFW windowing, MuJoCo 3D rendering, and ImGui control panels. Links against robotics modules via a bridge layer. No network API — all interaction through the integrated UI. Can run headless for CI.
 
 ### Dependency Rule
 ```
-Robotics modules → only depend on common
-Simulation       → may depend on robotics modules
-Frontends        → network API only (no library links)
+Robotics modules -> only depend on common (Eigen-based, no MuJoCo)
+Simulation       -> depends on MuJoCo, robotics modules, ImGui, GLFW
 ```
+
 ### Workflow
-- **Use superpowers workflow for all new features, modules, and milestones:** Brainstorm → plan → execute → review.
+- **Use superpowers workflow for all new features, modules, and milestones:** Brainstorm -> plan -> execute -> review.
 - During brainstorm, always have a recommended answer ready when asking questions — don't leave choices open-ended.
 - Specs go in `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
 - Plans go in `docs/superpowers/plans/YYYY-MM-DD-<topic>-milestones.md`
@@ -69,13 +66,13 @@ Frontends        → network API only (no library links)
 Every module follows this layout:
 ```
 <module>/
-├── CMakeLists.txt
-├── README.md
-├── include/<module>/   # public headers only
-├── src/                # implementation files
-├── tests/              # Catch2 unit tests + CMakeLists.txt
-└── docs/
-    └── theory.md       # math/algorithm explanation
++-- CMakeLists.txt
++-- README.md
++-- include/<module>/   # public headers only
++-- src/                # implementation files
++-- tests/              # Catch2 unit tests + CMakeLists.txt
++-- docs/
+    +-- theory.md       # math/algorithm explanation
 ```
 
 Each module produces a CMake `STATIC` or `INTERFACE` target named `<module>` with alias `robotlib::<module>`. Tests are conditionally included: `if(BUILD_TESTING AND EXISTS tests/CMakeLists.txt)`.
@@ -120,15 +117,18 @@ All modules must use `common/logging/` (`ILogger` + `SpdlogLogger`) before being
   ln -sf ../../.github/hooks/commit-msg .git/hooks/commit-msg
   ```
 - **Before claiming all tasks done**, re-read the task tracker file and list any items NOT marked complete.
-- **`common/` has sub-modules:** `kinematics/` (IKinematicModel, IDynamicModel), `robot/` (VehicleParams, MotorParams, TireParams, WheelConfig), `environment/` (TerrainProperties, SlipDetector), `logging/`, `transforms/`, `noise_models/`. Header-only types only — no logic.
+- **`common/` has sub-modules:** `types_3d/` (Pose3D, Quaternion, Transform3D, Twist3D, Wrench, TerrainPose), `sensors/` (LidarScan, ImuReading, CameraFrame, DepthFrame, ForceTorqueSensor), `kinematics/` (IKinematicModel, IDynamicModel), `robot/` (VehicleParams, MotorParams, TireParams, WheelConfig), `environment/` (TerrainProperties, SlipDetector), `logging/`, `transforms/`, `noise_models/`. Header-only types only — no logic.
 - **TerrainMap lives in simulation**, not common. Only `TerrainProperties` (the struct) lives in `common/environment/`.
 - **Module task files** live in `repo-plans/modules/<module>.md` and move to `repo-plans/modules/done/` when complete.
+- **MuJoCo's `mjData` is not thread-safe** — the render thread uses `mj_copyData()` under a mutex. Never access physics `mjData` from the render thread directly.
+- **MJCF files in `simulation/scenarios/` are the source of truth for robot parameters.** The `ModelAdapter` extracts `VehicleParams` and sensor configs from the loaded `mjModel` at startup. Modules never read MJCF directly.
+- **GLFW is fetched explicitly in `deps.cmake`** because `MUJOCO_BUILD_SIMULATE=OFF` prevents MuJoCo from fetching it. All GLFW dependency management is centralized in `deps.cmake` — do not add additional GLFW FetchContent blocks elsewhere.
 
 ## Key Reference Files
 
-- [workspace/architecture.md](workspace/architecture.md) — system design, API specs, module index (read before adding a new module)
-- [workspace/cmake/deps.cmake](workspace/cmake/deps.cmake) — all third-party dependencies (Eigen, Catch2, Crow, OSQP, nlohmann/json, etc.)
-- [repo-plans/README.md](repo-plans/README.md) — M0–M24 milestone roadmap
+- [workspace/architecture.md](workspace/architecture.md) — system design, type system, module index (read before adding a new module)
+- [workspace/cmake/deps.cmake](workspace/cmake/deps.cmake) — all third-party dependencies (MuJoCo, Eigen, Catch2, OSQP, nlohmann/json, spdlog, ImGui, etc.)
+- [repo-plans/README.md](repo-plans/README.md) — M0-M24 milestone roadmap
 - [repo-plans/modules/](repo-plans/modules/) — per-module 7-phase task files (one per module, moved to done/ when complete)
 - [repo-plans/todos.md](repo-plans/todos.md) — active work items
 - [docs/superpowers/specs/](docs/superpowers/specs/) — design specs (brainstorm output)

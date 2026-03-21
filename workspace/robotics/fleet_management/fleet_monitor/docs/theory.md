@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The fleet monitor aggregates per-robot VDA 5050 `State` messages into a single `FleetState` snapshot accessible to the FMS, task allocator, battery manager, and REST API. It is the single source of truth about the fleet at any given time.
+The fleet monitor aggregates per-robot VDA 5050 `State` messages into a single `FleetState` snapshot accessible to the FMS, task allocator, battery manager, and simulation app. It is the single source of truth about the fleet at any given time.
 
 ## Data Model
 
@@ -40,7 +40,7 @@ The default `heartbeat_period` is 1 second (configurable). Offline robots are ex
 
 ## Thread Safety
 
-`IFleetMonitor` implementations must be thread-safe. The REST API thread reads `getFleetState()` concurrently with the simulation update thread calling `update()`. Use a reader-writer lock (`std::shared_mutex`) to avoid blocking reads for the common case.
+`IFleetMonitor` implementations must be thread-safe. The simulation app's ImGui render thread reads `getFleetState()` concurrently with the simulation update thread calling `update()`. Use a reader-writer lock (`std::shared_mutex`) to avoid blocking reads for the common case.
 
 ## References
 

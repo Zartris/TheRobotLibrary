@@ -81,15 +81,14 @@ cd build && ctest -R vehicle_dynamics --output-on-failure 2>&1 | grep "\[DEBUG\]
 - [ ] Sim gains `physics_mode` config: `"kinematic"` (default) or `"dynamic"`
 - [ ] In dynamic mode, sim calls `IDynamicModel::step()` instead of `IKinematicModel::step()`
 - [ ] `TerrainMap` (sim-owned) loaded from scenario JSON; sim looks up `TerrainProperties` for robot's current cell
-- [ ] `DynamicState` added to WebSocket state stream when in dynamic mode
-- [ ] REST API: `PUT /api/sim/physics_mode {"mode": "kinematic" | "dynamic"}`
+- [ ] `DynamicState` added to bridge state adapter when in dynamic mode
+- [ ] ImGui panel: physics mode toggle ("kinematic" | "dynamic")
 - [ ] Integration test: sim runs with dynamic model active, state is valid
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Dynamic state overlay: slip angles, tire forces, terrain mu displayed
 - [ ] Toggle visibility from UI panel
-- [ ] (Later — M9) Mirror rendering in web frontend Canvas 2D
 
 ### Phase 7 — Docs Polish
 

@@ -75,9 +75,9 @@ cd build && ctest -R visual_odometry --output-on-failure 2>&1 | grep "\[DEBUG\]\
 - [ ] `VisualOdometry` used by sim integration test `test_vo_integration` (in `workspace/simulation/tests/`)
 - [ ] Module itself does not link against simulation — sim links the module
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
-- [ ] (M6.5 / M9) VO trajectory trace overlay on top-down map view
+- [ ] (M6.5) VO trajectory trace overlay on top-down map view
 
 ### Phase 7 — Docs Polish
 

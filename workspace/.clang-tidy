@@ -1,0 +1,287 @@
+---
+# clang-tidy configuration for TheRobotLibrary (C++20)
+# Run: clang-tidy <file> -- -std=c++20 -I<include-dirs>
+# CI: run via cmake --build with -DCMAKE_CXX_CLANG_TIDY=clang-tidy
+
+Checks: >
+  clang-diagnostic-*,
+  clang-analyzer-*,
+  modernize-avoid-bind,
+  modernize-avoid-c-arrays,
+  modernize-concat-nested-namespaces,
+  modernize-deprecated-headers,
+  modernize-deprecated-ios-base-aliases,
+  modernize-loop-convert,
+  modernize-make-shared,
+  modernize-make-unique,
+  modernize-pass-by-value,
+  modernize-raw-string-literal,
+  modernize-redundant-void-arg,
+  modernize-replace-auto-ptr,
+  modernize-replace-disallow-copy-and-assign-macro,
+  modernize-replace-random-shuffle,
+  modernize-return-braced-init-list,
+  modernize-shrink-to-fit,
+  modernize-type-traits,
+  modernize-unary-static-assert,
+  modernize-use-auto,
+  modernize-use-bool-literals,
+  modernize-use-constraints,
+  modernize-use-default-member-init,
+  modernize-use-emplace,
+  modernize-use-equals-default,
+  modernize-use-equals-delete,
+  modernize-use-nodiscard,
+  modernize-use-noexcept,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-ranges,
+  modernize-use-scoped-enum,
+  modernize-use-starts-ends-with,
+  modernize-use-std-format,
+  modernize-use-std-numbers,
+  modernize-use-std-print,
+  modernize-use-transparent-functors,
+  modernize-use-uncaught-exceptions,
+  modernize-use-using,
+  -modernize-use-trailing-return-type,
+  readability-avoid-const-params-in-decls,
+  readability-avoid-nested-conditional-operator,
+  readability-avoid-return-with-void-value,
+  readability-braces-around-statements,
+  readability-const-return-type,
+  readability-container-contains,
+  readability-container-data-pointer,
+  readability-container-size-empty,
+  readability-convert-member-functions-to-static,
+  readability-delete-null-pointer,
+  readability-duplicate-include,
+  readability-else-after-return,
+  readability-enum-initial-value,
+  readability-function-cognitive-complexity,
+  readability-implicit-bool-conversion,
+  readability-inconsistent-declaration-parameter-name,
+  readability-isolate-declaration,
+  readability-make-member-function-const,
+  readability-math-missing-parentheses,
+  readability-misleading-indentation,
+  readability-misplaced-array-index,
+  readability-identifier-naming,
+  readability-named-parameter,
+  readability-non-const-parameter,
+  readability-operators-representation,
+  readability-qualified-auto,
+  readability-redundant-access-specifiers,
+  readability-redundant-casting,
+  readability-redundant-control-flow,
+  readability-redundant-declaration,
+  readability-redundant-function-ptr-dereference,
+  readability-redundant-inline-specifier,
+  readability-redundant-member-init,
+  readability-redundant-preprocessor,
+  readability-redundant-smartptr-get,
+  readability-redundant-string-cstr,
+  readability-redundant-string-init,
+  readability-reference-to-constructed-temporary,
+  readability-simplify-boolean-expr,
+  readability-simplify-subscript-expr,
+  readability-static-accessed-through-instance,
+  readability-static-definition-in-anonymous-namespace,
+  readability-string-compare,
+  readability-suspicious-call-argument,
+  readability-uniqueptr-delete-release,
+  readability-use-anyofallof,
+  readability-use-std-min-max,
+  -readability-identifier-length,
+  -readability-magic-numbers,
+  performance-avoid-endl,
+  performance-faster-string-find,
+  performance-for-range-copy,
+  performance-implicit-conversion-in-loop,
+  performance-inefficient-algorithm,
+  performance-inefficient-string-concatenation,
+  performance-inefficient-vector-operation,
+  performance-move-const-arg,
+  performance-move-constructor-init,
+  performance-no-automatic-move,
+  performance-no-int-to-ptr,
+  performance-noexcept-destructor,
+  performance-noexcept-move-constructor,
+  performance-noexcept-swap,
+  performance-trivially-destructible,
+  performance-type-promotion-in-math-fn,
+  performance-unnecessary-copy-initialization,
+  performance-unnecessary-value-param,
+  bugprone-argument-comment,
+  bugprone-assert-side-effect,
+  bugprone-assignment-in-if-condition,
+  bugprone-bad-signal-to-kill-thread,
+  bugprone-bool-pointer-implicit-conversion,
+  bugprone-branch-clone,
+  bugprone-casting-through-void,
+  bugprone-compare-pointer-to-member-virtual-function,
+  bugprone-copy-constructor-init,
+  bugprone-crtp-constructor-accessibility,
+  bugprone-dangling-handle,
+  bugprone-empty-catch,
+  bugprone-exception-escape,
+  bugprone-fold-init-type,
+  bugprone-forward-declaration-namespace,
+  bugprone-forwarding-reference-overload,
+  bugprone-implicit-widening-of-multiplication-result,
+  bugprone-inc-dec-in-conditions,
+  bugprone-incorrect-enable-if,
+  bugprone-incorrect-roundings,
+  bugprone-infinite-loop,
+  bugprone-integer-division,
+  bugprone-lambda-function-name,
+  bugprone-macro-parentheses,
+  bugprone-macro-repeated-side-effects,
+  bugprone-misplaced-operator-in-strlen-in-alloc,
+  bugprone-misplaced-pointer-arithmetic-in-alloc,
+  bugprone-misplaced-widening-cast,
+  bugprone-move-forwarding-reference,
+  bugprone-multi-level-implicit-pointer-conversion,
+  bugprone-multiple-new-in-one-expression,
+  bugprone-multiple-statement-macro,
+  bugprone-narrowing-conversions,
+  bugprone-no-escape,
+  bugprone-not-null-terminated-result,
+  bugprone-optional-value-conversion,
+  bugprone-parent-virtual-call,
+  bugprone-posix-return,
+  bugprone-redundant-branch-condition,
+  bugprone-reserved-identifier,
+  bugprone-shared-ptr-array-mismatch,
+  bugprone-signal-handler,
+  bugprone-signed-char-misuse,
+  bugprone-sizeof-container,
+  bugprone-sizeof-expression,
+  bugprone-spuriously-wake-up-functions,
+  bugprone-standalone-empty,
+  bugprone-string-constructor,
+  bugprone-string-integer-assignment,
+  bugprone-string-literal-with-embedded-nul,
+  bugprone-stringview-nullptr,
+  bugprone-suspicious-enum-usage,
+  bugprone-suspicious-include,
+  bugprone-suspicious-memory-comparison,
+  bugprone-suspicious-memset-usage,
+  bugprone-suspicious-missing-comma,
+  bugprone-suspicious-realloc-usage,
+  bugprone-suspicious-semicolon,
+  bugprone-suspicious-string-compare,
+  bugprone-swapped-arguments,
+  bugprone-switch-missing-default-case,
+  bugprone-terminating-continue,
+  bugprone-throw-keyword-missing,
+  bugprone-too-small-loop-variable,
+  bugprone-undefined-memory-manipulation,
+  bugprone-undelegated-constructor,
+  bugprone-unhandled-exception-at-new,
+  bugprone-unhandled-self-assignment,
+  bugprone-unique-ptr-array-mismatch,
+  bugprone-unsafe-functions,
+  bugprone-unused-local-non-trivial-variable,
+  bugprone-unused-raii,
+  bugprone-unused-return-value,
+  bugprone-use-after-move,
+  bugprone-virtual-near-miss,
+  misc-confusable-identifiers,
+  misc-const-correctness,
+  misc-coroutine-hostile-raii,
+  misc-definitions-in-headers,
+  misc-header-include-cycle,
+  misc-include-cleaner,
+  misc-misleading-bidirectional,
+  misc-misleading-identifier,
+  misc-misplaced-const,
+  misc-new-delete-overloads,
+  misc-non-copyable-objects,
+  misc-redundant-expression,
+  misc-static-assert,
+  misc-throw-by-value-catch-by-reference,
+  misc-unconventional-assign-operator,
+  misc-uniqueptr-reset-release,
+  misc-unused-alias-decls,
+  misc-unused-parameters,
+  misc-unused-using-decls,
+  misc-use-anonymous-namespace,
+  misc-use-internal-linkage,
+  -misc-non-private-member-variables-in-classes
+
+# Treat warnings as advisory (not errors) — CI can promote to errors separately
+WarningsAsErrors: ""
+
+# Only report findings in workspace source files (excludes third-party deps)
+HeaderFilterRegex: "^.*/workspace/.*\\.(h|hpp)$"
+
+# Extra compiler arguments for all translation units
+ExtraArgs:
+  - -std=c++20
+
+CheckOptions:
+  # Allow short loop/index variable names (i, j, k, x, y, z, n, e, v, it)
+  - key: readability-identifier-length.MinimumVariableNameLength
+    value: "2"
+  - key: readability-identifier-length.MinimumParameterNameLength
+    value: "2"
+  - key: readability-identifier-length.MinimumLoopCounterNameLength
+    value: "1"
+
+  # Cognitive complexity threshold — raise slightly to allow typical robotics math
+  - key: readability-function-cognitive-complexity.Threshold
+    value: "30"
+  - key: readability-function-cognitive-complexity.IgnoreMacros
+    value: "true"
+
+  # modernize-use-auto: only replace obvious types (pointer/iterator returns)
+  - key: modernize-use-auto.MinTypeNameLength
+    value: "8"
+  - key: modernize-use-auto.RemoveStars
+    value: "false"
+
+  # Performance: don't warn on small trivially-copyable types (< 64 bytes)
+  - key: performance-for-range-copy.WarnOnAllAutoCopies
+    value: "false"
+  - key: performance-unnecessary-value-param.AllowedTypes
+    value: ""
+
+  # misc-const-correctness: pointer values too, not just references
+  - key: misc-const-correctness.AnalyzeValues
+    value: "true"
+  - key: misc-const-correctness.AnalyzeReferences
+    value: "true"
+  - key: misc-const-correctness.WarnPointersAsValues
+    value: "false"
+
+  # Naming convention: PascalCase types, camelCase functions/methods,
+  # m_camelCase member variables, UPPER_SNAKE_CASE constants/macros
+  - key: readability-identifier-naming.ClassCase
+    value: "CamelCase"
+  - key: readability-identifier-naming.StructCase
+    value: "CamelCase"
+  - key: readability-identifier-naming.EnumCase
+    value: "CamelCase"
+  - key: readability-identifier-naming.EnumConstantCase
+    value: "UPPER_CASE"
+  - key: readability-identifier-naming.FunctionCase
+    value: "camelCase"
+  - key: readability-identifier-naming.MethodCase
+    value: "camelCase"
+  - key: readability-identifier-naming.MemberCase
+    value: "camelCase"
+  - key: readability-identifier-naming.MemberPrefix
+    value: "m_"
+  - key: readability-identifier-naming.ConstantCase
+    value: "UPPER_CASE"
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: "UPPER_CASE"
+  - key: readability-identifier-naming.NamespaceCase
+    value: "lower_case"
+  - key: readability-identifier-naming.TemplateParameterCase
+    value: "CamelCase"
+  - key: readability-identifier-naming.TypeAliasCase
+    value: "CamelCase"
+  - key: readability-identifier-naming.TypedefCase
+    value: "CamelCase"

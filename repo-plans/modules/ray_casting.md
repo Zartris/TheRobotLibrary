@@ -30,7 +30,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("ray_casting")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths)
@@ -48,9 +48,9 @@ cd build && ctest -R ray_casting --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[T
 
 - [ ] Used by simulation to generate simulated lidar data (M1-J)
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
-- [ ] Lidar rays rendered in native frontend (M1-L)
+- [ ] Lidar rays rendered in simulation app (M1-L)
 
 ### Phase 7 — Docs Polish
 

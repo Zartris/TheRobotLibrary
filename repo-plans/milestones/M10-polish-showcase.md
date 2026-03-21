@@ -1,7 +1,7 @@
 # M10 — Polish & Showcase
 
 **Status:** Not Started  
-**Dependencies:** M8, M9 (can begin partially after M8; full completion requires all milestones done)  
+**Dependencies:** M8 (can begin partially after M8; full completion requires all milestones done)  
 **Scope:** Turn working codebase into a presentable, distributable project.
 
 ---
@@ -55,11 +55,11 @@ The project is portfolio-ready: live documentation site, demo GIFs, standalone e
 - [ ] Architecture overview with diagram
 - [ ] "Available Modules" table with status per module
 
-### Web Deployment
+### Recorded Demos
 
-- [ ] Web frontend deployed to GitHub Pages or Netlify
-- [ ] README links to live demo
-- [ ] Build pipeline automated in CI
+- [ ] Recorded simulation demos published (video or GIF)
+- [ ] README links to demo recordings
+- [ ] Demo recordings generated as part of CI or manual capture
 
 ---
 
@@ -69,7 +69,7 @@ The project is portfolio-ready: live documentation site, demo GIFs, standalone e
 2. `cmake --install` + `find_package` work in a clean consumer project
 3. Demo GIFs in README show end-to-end navigation
 4. All CI checks green, coverage ≥ 80%
-5. Web demo accessible via URL
+5. Recorded demos accessible via README links
 6. A new developer can go from zero to running demo in < 10 minutes
 7. All modules pass Phase 4.5 — Observability gate (confirmed during M1–M10 delivery; verified in CI)
 

@@ -53,6 +53,6 @@ hierarchy before diving into a specific sub-area.
 ## Dependency rule
 
 All sub-modules depend only on `common`. No sub-module may depend on another planning
-sub-module, on `simulation`, or on `frontends`. If a planner needs a map representation,
+sub-module, on `simulation`, or on the simulation app. If a planner needs a map representation,
 it accepts `occupancy_grid::OccupancyGrid` from `perception/occupancy_grid/` by value or
 reference through the `common` interface; it does not link against `perception`.

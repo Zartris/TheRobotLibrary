@@ -30,7 +30,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("lidar_processing")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths)
@@ -48,7 +48,7 @@ cd build && ctest -R lidar_processing --output-on-failure 2>&1 | grep "\[DEBUG\]
 
 - [ ] Filters raw simulated lidar before occupancy grid update (M1-K)
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 _No direct visualization — filtering is invisible. Raw vs filtered scans could be toggled later._
 

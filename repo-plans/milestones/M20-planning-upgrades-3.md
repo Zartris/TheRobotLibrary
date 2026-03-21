@@ -29,8 +29,8 @@ Artificial potential field planner. Combines an attractive parabolic/conic field
   - Goal coincides with repulsive field: returns `std::nullopt`; no division by zero
   - `d_0 = 0` (no repulsion): pure attractive field; straight-line motion
 - [ ] Phase 4.5: `ILogger`, net force magnitude + stall detection at `DEBUG`, per-step potential gradient at `TRACE`
-- [ ] Sim: selectable via `PUT /api/robot/local_planner {"type":"potential_field"}`
-- [ ] Frontend: render potential field gradient vectors (arrow overlay, optional toggle)
+- [ ] Sim: selectable via ImGui local planner dropdown
+- [ ] ImGui panel: render potential field gradient vectors (arrow overlay, optional toggle)
 
 ### motion_planning/global_planning/informed_rrt_star
 
@@ -46,8 +46,8 @@ Informed RRT*. Runs standard RRT* until the first feasible path is found, then s
   - C-space obstacle: path correctly avoids obstacle; cost strictly non-increasing across iterations
   - No feasible path: returns `std::nullopt`; no crash
 - [ ] Phase 4.5: `ILogger`, `c_best` improvement + PHS volume reduction at `DEBUG`, PHS sampling time at `TRACE`
-- [ ] Sim: selectable via `PUT /api/robot/global_planner {"type":"informed_rrt_star"}`
-- [ ] Frontend: render PHS ellipse overlay; show `c_best` convergence curve in side panel
+- [ ] Sim: selectable via ImGui global planner dropdown
+- [ ] ImGui panel: render PHS ellipse overlay; show `c_best` convergence curve in side panel
 
 ---
 

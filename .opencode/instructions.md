@@ -2,11 +2,10 @@
 
 ## Architecture
 
-TheRobotLibrary is a modular C++20 robotics library with three strictly separated tiers:
+TheRobotLibrary is a modular C++20 robotics library with two tiers combined into a single executable:
 
-- **Tier 1 — Robotics modules** (`workspace/robotics/`): Self-contained libraries. May only depend on `common`. Never on each other, simulation, or frontends.
-- **Tier 2 — Simulation backend** (`workspace/simulation/`): Crow HTTP/WebSocket server, 50 Hz sim loop, 30 Hz state streaming. May link robotics modules.
-- **Tier 3 — Frontends** (`workspace/frontends/`): Native (ImGui+SDL2) and Web (TypeScript/React). Network-only communication — never link against simulation or robotics libraries.
+- **Tier 1 — Robotics modules** (`workspace/robotics/`): Self-contained libraries. May only depend on `common`. Never on each other or simulation. No MuJoCo dependency.
+- **Tier 2 — Simulation** (`workspace/simulation/`): MuJoCo physics with integrated GLFW/ImGui visualization (single executable). Links against robotics modules via a bridge layer. No network API.
 
 ## Code Conventions
 

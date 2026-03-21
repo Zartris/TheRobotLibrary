@@ -33,7 +33,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("lane_detection")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, detected line count + polynomial fit residual)
@@ -51,7 +51,7 @@ cd build && ctest -R lane_detection --output-on-failure 2>&1 | grep "\[DEBUG\]\|
 
 - [ ] Sim note: operates on pre-computed binary edge images; sim edge rendering deferred to post-M22 extension
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render left/right lane polynomial curves overlaid on camera image
 

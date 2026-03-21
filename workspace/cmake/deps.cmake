@@ -14,6 +14,13 @@
 
 include(FetchContent)
 
+# Prevent FetchContent dependencies from registering their own tests
+# even when the parent project has BUILD_TESTING=ON.
+# Use CACHE FORCE because many deps call option(BUILD_TESTING ...) which
+# reads/writes the cache entry and would re-enable tests otherwise.
+set(_saved_BUILD_TESTING ${BUILD_TESTING})
+set(BUILD_TESTING OFF CACHE BOOL "Temporarily disabled for FetchContent deps" FORCE)
+
 # ---------------------------------------------------------------------------
 # Eigen 3.4.0 — header-only linear algebra
 # Used by: common (re-exported), ekf, particle_filter, ekf_slam, lidar_slam,
@@ -60,6 +67,35 @@ if(NOT TARGET nlohmann_json::nlohmann_json)
 endif()
 
 # ---------------------------------------------------------------------------
+# spdlog v1.15.0 — header-only fast logging (common/logging, simulation)
+# ---------------------------------------------------------------------------
+if(NOT TARGET spdlog::spdlog)
+    FetchContent_Declare(spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog.git
+        GIT_TAG        v1.15.0
+        GIT_SHALLOW    TRUE
+    )
+    set(SPDLOG_BUILD_EXAMPLES  OFF CACHE BOOL "" FORCE)
+    set(SPDLOG_BUILD_BENCH     OFF CACHE BOOL "" FORCE)
+    set(SPDLOG_BUILD_TESTS     OFF CACHE BOOL "" FORCE)
+    set(SPDLOG_INSTALL         OFF CACHE BOOL "" FORCE)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(spdlog)
+    # sdflib (transitive via MuJoCo) fetches spdlog under the alias 'spdlog_lib'
+    # and calls add_subdirectory(), which would create a duplicate 'spdlog' target.
+    # Pre-declare spdlog_lib pointing at our already-fetched source so that
+    # sdflib's spdlog_lib_POPULATED check is true and it skips add_subdirectory.
+    FetchContent_Declare(spdlog_lib
+        SOURCE_DIR ${spdlog_SOURCE_DIR}
+        BINARY_DIR ${spdlog_BINARY_DIR}
+    )
+    FetchContent_GetProperties(spdlog_lib)
+    if(NOT spdlog_lib_POPULATED)
+        FetchContent_Populate(spdlog_lib)
+    endif()
+endif()
+
+# ---------------------------------------------------------------------------
 # OSQP v0.6.3 — Embedded QP solver (multi_robot/dmpc, general QP needs)
 # Note: MPC uses acados (see below) for NMPC. OSQP retained for simpler QP
 # problems (DMPC per-robot subproblems, trajectory optimization QPs).
@@ -75,11 +111,12 @@ if(NOT TARGET osqp::osqp)
 endif()
 
 # ---------------------------------------------------------------------------
-# MuJoCo (latest 3.x stable) — physics engine (simulation backend)
+# MuJoCo (latest 3.x stable) — physics engine (simulation app)
 # MuJoCo brings its own transitive deps: abseil, lodepng, tinyxml2, ccd, qhull.
 # If FetchContent causes target conflicts, fall back to ExternalProject_Add
 # or system install with find_package(mujoco). Validate in M0.
-# GLFW comes transitively via MuJoCo.
+# NOTE: GLFW does NOT come transitively when MUJOCO_BUILD_SIMULATE=OFF.
+# We fetch GLFW separately below for ImGui.
 # ---------------------------------------------------------------------------
 if(NOT TARGET mujoco)
     FetchContent_Declare(mujoco
@@ -98,10 +135,27 @@ if(NOT TARGET mujoco)
 endif()
 
 # ---------------------------------------------------------------------------
+# GLFW 3.4 — windowing + OpenGL context (simulation app, ImGui backend)
+# MuJoCo only fetches GLFW when MUJOCO_BUILD_SIMULATE=ON (which we disable).
+# We need GLFW for our own ImGui integration, so fetch it explicitly.
+# ---------------------------------------------------------------------------
+if(NOT TARGET glfw)
+    FetchContent_Declare(glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw.git
+        GIT_TAG        3.4
+        GIT_SHALLOW    TRUE
+    )
+    set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_DOCS     OFF CACHE BOOL "" FORCE)
+    set(GLFW_INSTALL        OFF CACHE BOOL "" FORCE)
+    set(GLFW_BUILD_WAYLAND  OFF CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(glfw)
+endif()
+
+# ---------------------------------------------------------------------------
 # Dear ImGui (docking branch) — immediate-mode GUI (simulation app)
 # ImGui has no official CMakeLists; we create a STATIC target manually.
-# NOTE: Must appear after MuJoCo in this file — ImGui links glfw which
-# comes transitively via MuJoCo's FetchContent.
 # Pin to a specific docking branch commit hash for reproducibility once validated.
 # ---------------------------------------------------------------------------
 if(NOT TARGET imgui::imgui)
@@ -174,3 +228,6 @@ endif()
 #     set(BLASFEO_TARGET       GENERIC CACHE STRING "" FORCE)
 #     FetchContent_MakeAvailable(acados)
 # endif()
+
+# Restore BUILD_TESTING for our own project's tests
+set(BUILD_TESTING ${_saved_BUILD_TESTING} CACHE BOOL "Build unit tests" FORCE)

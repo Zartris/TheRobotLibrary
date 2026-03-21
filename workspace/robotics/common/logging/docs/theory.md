@@ -2,7 +2,7 @@
 
 ## Motivation
 
-AI coding agents and automated CI pipelines have no access to a graphical frontend. Every correctness indicator that a human developer would read from a visualiser must also be emitted as a machine-readable log line or metric. This document defines the logging conventions that make every robotlib module observable without a display.
+AI coding agents and automated CI pipelines have no access to the simulation app. Every correctness indicator that a human developer would read from a visualiser must also be emitted as a machine-readable log line or metric. This document defines the logging conventions that make every robotlib module observable without a display.
 
 ## ILogger Contract
 

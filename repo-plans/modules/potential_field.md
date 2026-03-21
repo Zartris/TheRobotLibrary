@@ -32,7 +32,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("potential_field")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, net force magnitude + stall detection)
@@ -48,9 +48,9 @@ cd build && ctest -R potential_field --output-on-failure 2>&1 | grep "\[DEBUG\]\
 
 ### Phase 5 — Simulation Integration
 
-- [ ] Selectable via `PUT /api/robot/local_planner {"type":"potential_field"}`
+- [ ] Selectable via ImGui module selector (local planner type: "potential_field")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render potential field gradient vectors (arrow overlay, optional toggle)
 

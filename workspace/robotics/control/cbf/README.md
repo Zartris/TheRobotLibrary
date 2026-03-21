@@ -36,9 +36,8 @@ auto twist = safe_ctrl.compute(current_state, goal_pose, dt);
 
 ## Hot-swap
 
-Select via REST: `PUT /api/robot/controller {"type":"cbf","wraps":"pid"}`
-
-The `"wraps"` field specifies the nominal controller underneath the safety filter.
+Select the active controller via the simulation app's ImGui panel. The `"wraps"` field
+in the controller config specifies the nominal controller underneath the safety filter.
 
 ## Theory
 

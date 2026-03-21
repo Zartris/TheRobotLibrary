@@ -11,7 +11,7 @@ Get the simplest version of every layer running end-to-end first (M1), then upgr
 | # | Name | Focus | Status |
 |---|------|-------|--------|
 | **M0** | [Dev Infrastructure](milestones/M0-dev-infrastructure.md) | AI agent configs, devcontainer, CI/CD, linting, fleet_management scaffold | Not Started |
-| **M1** | [Minimum Viable Robot](milestones/M1-minimum-viable-robot.md) | common + lidar + grid + A* + DWA + PID + EKF + sim + frontend | Not Started |
+| **M1** | [Minimum Viable Robot](milestones/M1-minimum-viable-robot.md) | common + lidar + grid + A* + DWA + PID + EKF + MuJoCo sim + ImGui | Not Started |
 | **M2** | [Hardening & Testing](milestones/M2-hardening-testing.md) | ≥80% coverage, 3+ integration scenarios, interface freeze | Not Started |
 | **M3** | [Control Upgrades](milestones/M3-control-upgrades.md) | pure_pursuit, MPC (acados), CBF safety filter, additional kinematics | Not Started |
 | **M3.5** | [Vehicle Dynamics](milestones/M3.5-vehicle-dynamics.md) | Bicycle dynamic model, DC motor, terrain interaction, param identification | Not Started |
@@ -21,8 +21,7 @@ Get the simplest version of every layer running end-to-end first (M1), then upgr
 | **M6.5** | [SLAM](milestones/M6.5-slam.md) | EKF-SLAM + lidar SLAM + camera-based visual SLAM | Not Started |
 | **M7** | [Advanced Planning](milestones/M7-advanced-planning.md) | Dijkstra, RRT*, spline fitting, TEB, time-optimal | Not Started |
 | **M8** | [Multi-Robot](milestones/M8-multi-robot.md) | N-robot sim + ORCA → priority → CBS → DMPC → MADER | Not Started |
-| **M9** | [Web Frontend](milestones/M9-web-frontend.md) | TypeScript/React Canvas 2D app, deployable static site | Not Started |
-| **M10** | [Polish & Showcase](milestones/M10-polish-showcase.md) | Docs site, examples, packaging, demo GIFs | Not Started |
+| **M10** | [Polish & Showcase](milestones/M10-polish-showcase.md) | Docs site, examples, packaging, recorded demos | Not Started |
 | **M11** | [Advanced Control](milestones/M11-advanced-control.md) | Adaptive PID, RLS parameter estimator, Frenet controller | Not Started |
 | **M12** | [Fleet Management](milestones/M12-fleet-management.md) | VDA 5050, task allocation, fleet monitor, battery management | Not Started |
 | **M13** | [Classical & Optimal Control](milestones/M13-classical-optimal-control.md) | LQR (DARE-based state feedback), Stanley path tracker | Not Started |
@@ -67,13 +66,12 @@ M0 (infra)
            │    └→ M23 (lattice & semantic) ←── M6
            ├→ M8 (multi-robot) ←── M3, M7    → M12 (fleet management)
            │                                       └→ M24 (fleet operations)
-           ├→ M9 (web frontend)
-           └→ M10 (polish & showcase) ←── M8, M9
+           └→ M10 (polish & showcase) ←── M8
 ```
 
 M3.5 requires M3 (Ackermann/swerve kinematic variants for KinematicAdapter testing). M3.5 does not block M4/M5/M6/M7 — they branch from M2 independently.
 
-After M2, milestones M3–M5 and M9 can be developed **in parallel** since they touch independent domains. M6 (visual perception) requires M4 (occupancy grid + ray casting for the 2.5D camera renderer). M6.5 (SLAM) requires both M5 (state estimation interfaces) and M6 (feature extraction + visual odometry + camera types). M7 can start after M4 (needs costmaps). M8 needs M3 + M7. M11 requires M3 (stable control interfaces). M12 requires M8 (N-robot sim infrastructure). M13 requires M3 (IController interface); M11 recommended. M14 requires M5 (IStateEstimator interface). M15 requires M6 and M14 (both). M16 requires M7 (IGlobalPlanner interface) and M4 (OccupancyGrid). M17 requires M6 (feature_extraction, common/camera.hpp). M10 can begin partially after M8; full completion requires all milestones.
+After M2, milestones M3–M5 can be developed **in parallel** since they touch independent domains. M6 (visual perception) requires M4 (occupancy grid + ray casting for the 2.5D camera renderer). M6.5 (SLAM) requires both M5 (state estimation interfaces) and M6 (feature extraction + visual odometry + camera types). M7 can start after M4 (needs costmaps). M8 needs M3 + M7. M11 requires M3 (stable control interfaces). M12 requires M8 (N-robot sim infrastructure). M13 requires M3 (IController interface); M11 recommended. M14 requires M5 (IStateEstimator interface). M15 requires M6 and M14 (both). M16 requires M7 (IGlobalPlanner interface) and M4 (OccupancyGrid). M17 requires M6 (feature_extraction, common/camera.hpp). M10 can begin partially after M8; full completion requires all milestones.
 
 **M18–M24 additional dependencies:**
 M18 requires M3 (IController); M13 recommended. M19 requires M6 (common/camera.hpp types) and M4 (3D detection extends obstacle_detection). M20 requires M7 (planning interfaces) and M4 (OccupancyGrid). M21 requires M14 for factor_graph (GN optimizer patterns); noise_models has no external dependencies. M22 requires M13 (LQRController) for lqg and M6+M4 for lane_detection. M23 requires M7 (IGlobalPlanner) for lattice_planner and M6 (RgbImage types) for semantic_segmentation. M24 requires M12 (fleet infrastructure). M18 and M22 can run in parallel after M13; M19 and M20 can run in parallel after M6+M4; M21 is independent of M18–M20 and M22–M23; M24 is independent of M18–M23.

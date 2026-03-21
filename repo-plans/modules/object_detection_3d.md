@@ -34,7 +34,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("object_detection_3d")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, cluster count + per-cluster point count)
@@ -52,7 +52,7 @@ cd build && ctest -R object_detection_3d --output-on-failure 2>&1 | grep "\[DEBU
 
 - [ ] Integrate with lidar point cloud pipeline; 3D objects renderable as oriented boxes
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render oriented bounding boxes with class label overlays in 3D scene view
 

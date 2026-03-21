@@ -34,7 +34,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("factor_graph")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, iteration count + final residual norm)
@@ -52,9 +52,9 @@ cd build && ctest -R factor_graph --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[
 
 - [ ] Integration note: `PoseGraph (M14)` can optionally be re-implemented as a thin wrapper over `FactorGraph` post-M21; not a requirement of M21 itself
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
-- [ ] No frontend visualization required for this infrastructure module
+- [ ] No visualization required for this infrastructure module
 
 ### Phase 7 — Docs Polish
 

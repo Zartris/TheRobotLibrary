@@ -34,7 +34,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("pose_graph")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, iteration count, residual norm)
@@ -51,11 +51,11 @@ cd build && ctest -R pose_graph --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[TR
 ### Phase 5 — Simulation Integration
 
 - [ ] Available as optional loop closure backend for `lidar_slam` and `visual_slam` (M6.5)
-- [ ] No direct REST endpoint — consumed as a library by SLAM modules
+- [ ] No direct ImGui entry — consumed as a library by SLAM modules
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
-- [ ] N/A for M14 — post-M14, SLAM frontends can render the optimized pose graph
+- [ ] N/A for M14 — post-M14, simulation app can render the optimized pose graph
 
 ### Phase 7 — Docs Polish
 

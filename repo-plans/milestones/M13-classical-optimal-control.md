@@ -34,8 +34,8 @@ design and optimal state feedback — the conceptual sibling to MPC.
   - Provided A/B matrices for double integrator → analytic K matches theoretical solution
   - Stability: eigenvalues of `(A - BK)` lie strictly inside unit circle
 - [ ] Phase 4.5: `ILogger`, state transitions at `DEBUG`, DARE solve time at `TRACE`
-- [ ] Sim: selectable via `PUT /api/robot/controller {"type":"lqr"}`
-- [ ] Frontend: render Q/R gain panel + current control effort
+- [ ] Sim: selectable via ImGui controller dropdown
+- [ ] ImGui panel: render Q/R gain panel + current control effort
 
 ### control/stanley
 
@@ -53,8 +53,8 @@ but also applicable to differential-drive via Ackermann approximation.
   - Zero velocity: softening ε prevents division by zero; output bounded
   - Reversing: heading error flips sign correctly
 - [ ] Phase 4.5: `ILogger`, CTE + heading error logged at `DEBUG`, per-step σ at `TRACE`
-- [ ] Sim: selectable via `PUT /api/robot/controller {"type":"stanley"}`
-- [ ] Frontend: cross-track error overlay (same style as `frenet` from M11)
+- [ ] Sim: selectable via ImGui controller dropdown
+- [ ] ImGui panel: cross-track error overlay (same style as `frenet` from M11)
 
 ---
 
@@ -62,9 +62,9 @@ but also applicable to differential-drive via Ackermann approximation.
 
 - [ ] `control/lqr` module: interface, implementation, tests
 - [ ] `control/stanley` module: interface, implementation, tests
-- [ ] Both controllers hot-swappable via REST mid-run without crash
+- [ ] Both controllers hot-swappable via ImGui mid-run without crash
 - [ ] LQR: Q/R weighting behaviour verified quantitatively in tests
-- [ ] Stanley: CTE overlay rendered in frontend
+- [ ] Stanley: CTE overlay rendered in simulation app
 - [ ] All modules pass Phase 4.5 — Observability gate
 
 ---
@@ -74,7 +74,7 @@ but also applicable to differential-drive via Ackermann approximation.
 1. LQR drives linearized double-integrator to zero; eigenvalues of `(A-BK)` inside unit circle
 2. LQR Q/R weighting behaviour verified quantitatively in tests
 3. Stanley tracks straight and curved paths within CTE tolerance
-4. Both controllers hot-swappable via REST mid-run without crash
+4. Both controllers hot-swappable via ImGui mid-run without crash
 5. All unit tests pass, CI green
 6. All modules pass Phase 4.5 — Observability gate (state transitions at `DEBUG`, metrics at `TRACE`)
 

@@ -34,7 +34,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("depth_camera")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, valid pixel count + hole-fill pass count)
@@ -52,7 +52,7 @@ cd build && ctest -R depth_camera --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[
 
 - [ ] Sim note: live RGB-D rendering deferred; offline/synthetic testing covered by unit tests
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] False-colour depth overlay panel (hot = close, cool = far)
 

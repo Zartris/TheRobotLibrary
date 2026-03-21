@@ -82,11 +82,11 @@ Time-optimal trajectory generation (TOPP-RA / minimum-snap).
 
 ---
 
-## Sim & Frontend Integration
+## Sim & ImGui Integration
 
-- [ ] Planner hot-swap: `PUT /api/robot/global_planner {"type": "dijkstra"|"rrt"}`
+- [ ] Planner hot-swap: ImGui global planner dropdown selector
 - [ ] Trajectory planner selection in pipeline
-- [ ] Frontend: visualize planned paths from each planner, curvature profile, velocity profile
+- [ ] ImGui panel: visualize planned paths from each planner, curvature profile, velocity profile
 - [ ] Mini-demo: compare A* (jagged) → RRT* (smooth) → spline post-processed → TEB-optimized
 
 ---
@@ -96,13 +96,13 @@ Time-optimal trajectory generation (TOPP-RA / minimum-snap).
 - [ ] 5 modules: dijkstra, rrt, spline_fitting, teb, time_optimal
 - [ ] All with unit tests
 - [ ] Planner swap in sim
-- [ ] Frontend comparison visualization
+- [ ] Simulation app comparison visualization
 - [ ] Demo: planner comparison on same scenario
 
 ## Exit Criteria
 
 1. All planners navigate standard scenarios
-2. Swap via REST without crash
+2. Swap via ImGui selector without crash
 3. TEB produces smoother/faster paths than A* + trapezoidal
 4. All unit tests pass
 5. All modules pass Phase 4.5 — Observability gate (state transitions logged at DEBUG, hot-loop metrics at TRACE)

@@ -34,7 +34,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("lattice_planner")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, reset, mode changes, error paths, graph node/edge counts + A* expansion count)
@@ -50,9 +50,9 @@ cd build && ctest -R lattice_planner --output-on-failure 2>&1 | grep "\[DEBUG\]\
 
 ### Phase 5 — Simulation Integration
 
-- [ ] Selectable via `PUT /api/robot/global_planner {"type":"lattice"}`
+- [ ] Selectable via ImGui module selector (global planner type: "lattice")
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Render lattice graph (grey edges) + planned path (highlighted) + heading arrows at each node
 

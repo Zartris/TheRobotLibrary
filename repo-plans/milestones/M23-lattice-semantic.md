@@ -30,8 +30,8 @@ State lattice planner over a discrete `(x, y, θ)` grid with pre-computed kinema
   - Lattice resolution: coarser grid → faster planning (measured); path within 20% of fine-grid result
   - Heading continuity: consecutive primitive start/end headings align within heading discretization tolerance
 - [ ] Phase 4.5: `ILogger`, graph node/edge counts + A* expansion count at `DEBUG`, primitive generation time at `TRACE`
-- [ ] Sim: selectable via `PUT /api/robot/global_planner {"type":"lattice"}`
-- [ ] Frontend: render lattice graph (grey edges) + planned path (highlighted) + heading arrows at each node
+- [ ] Sim: selectable via ImGui global planner dropdown
+- [ ] ImGui panel: render lattice graph (grey edges) + planned path (highlighted) + heading arrows at each node
 
 ### perception/semantic_segmentation
 

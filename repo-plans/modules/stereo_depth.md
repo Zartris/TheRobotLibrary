@@ -34,7 +34,7 @@
 ### Phase 4.5 — Observability
 
 > **This phase gates module completion.** Both human developers and AI agents must be able
-> to verify correct behavior through logs and metrics — not just frontend visuals.
+> to verify correct behavior through logs and metrics — not just visual inspection.
 
 - [ ] `ILogger` injected into module constructor via `common::getLogger("stereo_depth")` (mockable in tests)
 - [ ] All state transitions logged at `DEBUG` level (init, disparity search range, match quality)
@@ -53,7 +53,7 @@ cd build && ctest -R stereo_depth --output-on-failure 2>&1 | grep "\[DEBUG\]\|\[
 - [ ] M17 scope covers offline/synthetic testing only
 - [ ] Live sim stereo rendering deferred to post-M17 sim upgrade (requires two camera viewpoints offset by baseline)
 
-### Phase 6 — Frontend Visualization
+### Phase 6 — Visualization
 
 - [ ] Depth map false-colour overlay
 - [ ] Disparity histogram panel

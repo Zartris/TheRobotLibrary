@@ -28,8 +28,8 @@ Linear Quadratic Gaussian controller. Wraps an `LQRController` (from M13) for st
   - LQR + perfect state observer (C = I): LQG reduces to pure LQR (verify numerically)
   - Wrong noise covariance (R_v underestimated by 10×): controller still stabilizes; documents behaviour
 - [ ] Phase 4.5: `ILogger`, covariance trace + control effort + EKF residual norm at `DEBUG`, EKF compute time at `TRACE`
-- [ ] Sim: selectable via `PUT /api/robot/controller {"type":"lqg"}`
-- [ ] Frontend: render estimated state covariance ellipse; control effort vs. time; estimation residual panel
+- [ ] Sim: selectable via ImGui controller dropdown
+- [ ] ImGui panel: render estimated state covariance ellipse; control effort vs. time; estimation residual panel
 
 ### perception/lane_detection
 
@@ -47,7 +47,7 @@ Lane marking extraction from binary edge images (e.g., Canny output). Applies Ho
   - Very narrow lane gap: both lanes still separated correctly if Hough threshold met
 - [ ] Phase 4.5: `ILogger`, detected line count + polynomial fit residual at `DEBUG`, Hough accumulator build time at `TRACE`
 - [ ] Sim note: lane_detection operates on pre-computed binary edge images; sim edge rendering deferred to post-M22 extension
-- [ ] Frontend: render left/right lane polynomial curves overlaid on camera image
+- [ ] ImGui panel: render left/right lane polynomial curves overlaid on camera image
 
 ---
 
@@ -57,7 +57,7 @@ Lane marking extraction from binary edge images (e.g., Canny output). Applies Ho
 - [ ] `perception/lane_detection` module: interface, implementation, tests
 - [ ] LQG separation principle verified numerically in tests
 - [ ] Lane detection: straight + curved synthetic lanes detected within tolerance
-- [ ] Both modules hot-swappable in sim via REST
+- [ ] Both modules hot-swappable in sim via ImGui
 - [ ] All modules pass Phase 4.5 — Observability gate
 
 ---
@@ -69,7 +69,7 @@ Lane marking extraction from binary edge images (e.g., Canny output). Applies Ho
 3. Lane detection: straight synthetic lanes detected with coefficient error < 5%
 4. Curved lane: polynomial fit within tolerance; curvature correctly extracted
 5. Missing lane: reports `validity = false` cleanly
-6. Both modules hot-swappable in sim via REST
+6. Both modules hot-swappable in sim via ImGui
 7. All unit tests pass, CI green
 8. All modules pass Phase 4.5 — Observability gate (state transitions at `DEBUG`, metrics at `TRACE`)
 
