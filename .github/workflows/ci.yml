@@ -59,8 +59,9 @@ jobs:
 
       - name: Run tests
         run: |
-          # Only run our project's tests, not FetchContent dependency tests
-          # (Eigen registers 900+ BLAS/LAPACK tests that require Fortran runtime)
+          # Only run our project's tests (transforms_tests, pid_tests, etc.)
+          # Eigen registers 900+ tests via FetchContent that we cannot suppress.
+          # Use --tests-regex to match only our test executables.
           ctest --test-dir build --output-on-failure \
-            --exclude-regex "^(sblat|dblat|cblat|zblat|rand|meta|numext|NonLinear|NumericalDiff|autodiff|special_)" \
+            --tests-regex "_tests" \
             --no-tests=ignore
