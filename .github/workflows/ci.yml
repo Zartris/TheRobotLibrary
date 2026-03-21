@@ -58,4 +58,9 @@ jobs:
         run: cmake --build build -j$(nproc)
 
       - name: Run tests
-        run: ctest --test-dir build --output-on-failure --no-tests=ignore
+        run: |
+          # Only run our project's tests, not FetchContent dependency tests
+          # (Eigen registers 900+ BLAS/LAPACK tests that require Fortran runtime)
+          ctest --test-dir build --output-on-failure \
+            --exclude-regex "^(sblat|dblat|cblat|zblat|rand|meta|numext|NonLinear|NumericalDiff|autodiff|special_)" \
+            --no-tests=ignore
