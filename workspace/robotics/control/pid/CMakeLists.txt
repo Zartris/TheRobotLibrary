@@ -24,7 +24,7 @@ target_include_directories(pid ${_vis}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(pid ${_vis} common)
+target_link_libraries(pid ${_vis} common common_logging)
 target_compile_features(pid ${_vis} cxx_std_20)
 
 add_library(robotlib::pid ALIAS pid)

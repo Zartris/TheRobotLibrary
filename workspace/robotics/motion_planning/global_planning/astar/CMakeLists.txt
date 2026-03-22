@@ -20,7 +20,7 @@ target_include_directories(astar ${_vis}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(astar ${_vis} common)
+target_link_libraries(astar ${_vis} common common_logging)
 target_compile_features(astar ${_vis} cxx_std_20)
 
 add_library(robotlib::astar ALIAS astar)
