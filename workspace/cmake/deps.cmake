@@ -128,7 +128,21 @@ if(NOT TARGET mujoco)
     set(MUJOCO_BUILD_SIMULATE OFF CACHE BOOL "" FORCE)
     set(MUJOCO_BUILD_TESTS    OFF CACHE BOOL "" FORCE)
     set(MUJOCO_BUILD_PYTHON   OFF CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(mujoco)
+    # Populate MuJoCo source first, then patch out IPO before configuring.
+    # MujocoOptions.cmake forces CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON for
+    # non-Debug builds, producing slim-LTO objects that GNU ld cannot link.
+    FetchContent_GetProperties(mujoco)
+    if(NOT mujoco_POPULATED)
+        FetchContent_Populate(mujoco)
+        # Patch: disable IPO in MujocoOptions.cmake
+        file(READ "${mujoco_SOURCE_DIR}/cmake/MujocoOptions.cmake" _mj_opts)
+        string(REPLACE
+            "set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)"
+            "# IPO disabled by TheRobotLibrary\n  # set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)"
+            _mj_opts "${_mj_opts}")
+        file(WRITE "${mujoco_SOURCE_DIR}/cmake/MujocoOptions.cmake" "${_mj_opts}")
+        add_subdirectory("${mujoco_SOURCE_DIR}" "${mujoco_BINARY_DIR}")
+    endif()
     # NOTE: MuJoCo FetchContent exports target as 'mujoco' (no namespace).
     # When using find_package(mujoco) it exports 'mujoco::mujoco'.
     # Verify the actual target name during M0 validation.
