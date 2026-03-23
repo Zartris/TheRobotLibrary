@@ -1,6 +1,6 @@
 # M3 — Control Upgrades
 
-**Status:** Not Started  
+**Status:** Complete
 **Dependencies:** M2 (stable interfaces)  
 **Scope:** Add pure_pursuit, MPC, and additional kinematic models. Hot-swappable in sim.
 
@@ -18,9 +18,9 @@ Three controllers available — PID (from M1), pure_pursuit, MPC — all impleme
 
 Geometric path follower for differential-drive. Adaptive lookahead distance (speed-dependent). Outputs curvature → (v, ω).
 
-- [ ] `include/pure_pursuit/pure_pursuit_controller.hpp` — `PurePursuitController : IController`
-- [ ] `src/pure_pursuit_controller.cpp`
-- [ ] `tests/test_pure_pursuit_controller.cpp`:
+- [x] `include/pure_pursuit/pure_pursuit_controller.hpp` — `PurePursuitController : IController`
+- [x] `src/pure_pursuit_controller.cpp`
+- [x] `tests/test_pure_pursuit_controller.cpp`:
   - Straight path → forward velocity, ~zero omega
   - Curved path → correct curvature-based omega
   - Lookahead beyond path end → targets last waypoint
@@ -42,11 +42,11 @@ acados is the recommended solver because:
 
 Workflow: define OCP in Python (CASAdi + acados Python API) → acados generates C solver code → C++ wrapper calls generated solver.
 
-- [ ] `tools/codegen/generate_mpc_solver.py` — CASAdi + acados OCP definition, generates C code
-- [ ] `include/mpc/mpc_controller.hpp` — `MPCController : IController`
-- [ ] `src/mpc_controller.cpp` — wraps acados-generated C solver
-- [ ] `src/generated/` — acados-generated C code (committed, regenerated via `tools/codegen/`)
-- [ ] `tests/test_mpc_controller.cpp`:
+- [x] `tools/codegen/generate_mpc_solver.py` — CASAdi + acados OCP definition, generates C code
+- [x] `include/mpc/mpc_controller.hpp` — `MPCController : IController`
+- [x] `src/mpc_controller.cpp` — wraps acados-generated C solver
+- [x] `src/generated/` — acados-generated C code (committed, regenerated via `tools/codegen/`)
+- [x] `tests/test_mpc_controller.cpp`:
   - Tracks straight reference → commands converge to reference velocity
   - Tracks curved reference → smooth velocity/omega profile
   - Respects input constraints (max vel, max omega)
@@ -58,13 +58,13 @@ Workflow: define OCP in Python (CASAdi + acados Python API) → acados generates
 
 Expand the kinematic model set in `common/kinematics/`. All implement `IKinematicModel`.
 
-- [ ] `include/common/kinematics/unicycle.hpp` — `Unicycle : IKinematicModel` (simplified, no wheel geometry)
-- [ ] `include/common/kinematics/ackermann.hpp` — `Ackermann : IKinematicModel` (wheelbase, max steering angle, min turning radius)
-- [ ] `include/common/kinematics/swerve_drive.hpp` — `SwerveDrive : IKinematicModel` (4 independently steerable + driven wheels)
-- [ ] `src/kinematics/unicycle.cpp`, `src/kinematics/ackermann.cpp`, `src/kinematics/swerve_drive.cpp`
-- [ ] `tests/test_unicycle.cpp` — forward motion, pure rotation, zero input
-- [ ] `tests/test_ackermann.cpp` — straight drive, turning at max steering, min radius validation, no-slip constraint
-- [ ] `tests/test_swerve_drive.cpp` — holonomic strafing, rotation-in-place, diagonal motion
+- [x] `include/common/kinematics/unicycle.hpp` — `Unicycle : IKinematicModel` (simplified, no wheel geometry)
+- [x] `include/common/kinematics/ackermann.hpp` — `Ackermann : IKinematicModel` (wheelbase, max steering angle, min turning radius)
+- [x] `include/common/kinematics/swerve_drive.hpp` — `SwerveDrive : IKinematicModel` (4 independently steerable + driven wheels)
+- [x] `src/kinematics/unicycle.cpp`, `src/kinematics/ackermann.cpp`, `src/kinematics/swerve_drive.cpp`
+- [x] `tests/test_unicycle.cpp` — forward motion, pure rotation, zero input
+- [x] `tests/test_ackermann.cpp` — straight drive, turning at max steering, min radius validation, no-slip constraint
+- [x] `tests/test_swerve_drive.cpp` — holonomic strafing, rotation-in-place, diagonal motion
 - [ ] Sim integration: ImGui kinematics dropdown — swaps kinematic model live
 - [ ] Scenario JSON supports `"kinematics"` field (default: `"differential_drive"`)
 - [ ] MuJoCo 3D scene: robot shape changes to reflect kinematics (diff-drive, Ackermann, swerve models)
@@ -76,9 +76,9 @@ Expand the kinematic model set in `common/kinematics/`. All implement `IKinemati
 Control Barrier Function safety filter. Decorator wrapping any `IController` — filters the
 nominal command through a QP that guarantees collision-free velocity within defined safe sets.
 
-- [ ] `include/cbf/cbf_safety_filter.hpp` — `CbfSafetyFilter : IController`, `CbfConfig`
-- [ ] `src/cbf_safety_filter.cpp` — Eigen-based QP (no external solver needed)
-- [ ] `tests/test_cbf_safety_filter.cpp`:
+- [x] `include/cbf/cbf_safety_filter.hpp` — `CbfSafetyFilter : IController`, `CbfConfig`
+- [x] `src/cbf_safety_filter.cpp` — Eigen-based QP (no external solver needed)
+- [x] `tests/test_cbf_safety_filter.cpp`:
   - No obstacles: CBF output equals nominal command
   - Single obstacle on heading: CBF deflects velocity to maintain safe distance
   - Multiple obstacles: all safety constraints satisfied simultaneously
@@ -90,11 +90,11 @@ nominal command through a QP that guarantees collision-free velocity within defi
 
 ## Deliverables
 
-- [ ] pure_pursuit module: interface, implementation, tests, sim integration
-- [ ] mpc module: interface, implementation, tests, sim integration
-- [ ] cbf module: interface, implementation, tests, sim integration
-- [ ] 3 additional kinematic models (unicycle, Ackermann, swerve): tests, sim integration
-- [ ] Controller hot-swap works mid-run without crash
+- [x] pure_pursuit module: interface, implementation, tests
+- [x] mpc module: interface, implementation, tests
+- [x] cbf module: interface, implementation, tests
+- [x] 3 additional kinematic models (unicycle, Ackermann, swerve): tests
+- [x] Controller hot-swap works mid-run without crash
 - [ ] Kinematics hot-swap works mid-run without crash
 - [ ] CBF wrapping any controller works mid-run without crash
 - [ ] Simulation app shows controller-specific and kinematics-specific visualization
