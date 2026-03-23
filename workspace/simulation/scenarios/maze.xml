@@ -1,0 +1,63 @@
+<mujoco model="maze">
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" rgb1="0.8 0.8 0.8" rgb2="0.6 0.6 0.6" width="512" height="512"/>
+    <material name="grid_mat" texture="grid" texrepeat="8 8" reflectance="0.1"/>
+  </asset>
+
+  <worldbody>
+    <!-- Ground plane -->
+    <geom name="ground" type="plane" size="10 10 0.1" material="grid_mat"/>
+
+    <!-- Boundary walls -->
+    <body name="walls" pos="0 0 0.25">
+      <geom name="wall_north" type="box" pos="0 5 0" size="5 0.05 0.25" rgba="0.5 0.3 0.2 1"/>
+      <geom name="wall_south" type="box" pos="0 -5 0" size="5 0.05 0.25" rgba="0.5 0.3 0.2 1"/>
+      <geom name="wall_east" type="box" pos="5 0 0" size="0.05 5 0.25" rgba="0.5 0.3 0.2 1"/>
+      <geom name="wall_west" type="box" pos="-5 0 0" size="0.05 5 0.25" rgba="0.5 0.3 0.2 1"/>
+    </body>
+
+    <!-- Internal maze wall: horizontal barrier from x=-4 to x=2 at y=0 -->
+    <!-- Center at (-1, 0), half-length 3.0 in x, half-thickness 0.1 in y -->
+    <!-- Gap on the right side (x > 2) for the robot to pass through -->
+    <body name="maze_wall1" pos="-1 0 0.25">
+      <geom name="maze_wall1_geom" type="box" size="3.0 0.1 0.25" rgba="0.6 0.4 0.2 1"/>
+    </body>
+
+    <!-- Differential drive robot at (-2, -2) -->
+    <body name="robot_chassis" pos="-2 -2 0.1">
+      <joint name="robot_free" type="free"/>
+      <geom name="chassis" type="box" size="0.15 0.1 0.05" mass="2.0" rgba="0.2 0.4 0.8 1"/>
+
+      <!-- Left wheel -->
+      <body name="left_wheel" pos="-0.15 0.12 -0.03">
+        <joint name="left_wheel_joint" type="hinge" axis="0 1 0"/>
+        <geom name="left_wheel_geom" type="cylinder" size="0.05 0.02" rgba="0.3 0.3 0.3 1"
+              euler="90 0 0"/>
+      </body>
+
+      <!-- Right wheel -->
+      <body name="right_wheel" pos="-0.15 -0.12 -0.03">
+        <joint name="right_wheel_joint" type="hinge" axis="0 1 0"/>
+        <geom name="right_wheel_geom" type="cylinder" size="0.05 0.02" rgba="0.3 0.3 0.3 1"
+              euler="90 0 0"/>
+      </body>
+
+      <!-- Caster wheel (passive) -->
+      <body name="caster" pos="0.12 0 -0.04">
+        <geom name="caster_geom" type="sphere" size="0.02" rgba="0.5 0.5 0.5 1"/>
+      </body>
+    </body>
+
+    <!-- Goal marker at (0, 3) — on the other side of the horizontal wall -->
+    <body name="goal_marker" pos="0 3 0.05">
+      <geom name="goal_geom" type="cylinder" size="0.1 0.05" rgba="0.2 0.8 0.2 0.5"/>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <velocity name="left_motor" joint="left_wheel_joint" kv="1"/>
+    <velocity name="right_motor" joint="right_wheel_joint" kv="1"/>
+  </actuator>
+</mujoco>
