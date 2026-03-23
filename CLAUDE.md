@@ -102,7 +102,7 @@ All modules must use `common/logging/` (`ILogger` + `SpdlogLogger`) before being
 
 - **Auto-format:** Any `.cpp`/`.hpp`/`.h` edit automatically runs `clang-format` (config: `workspace/.clang-format`)
 - **deps.cmake guard:** Edits to `workspace/cmake/deps.cmake` are blocked until explicitly confirmed
-- **Co-Authored-By check:** After any `git commit`, warns if AI attribution trailer slipped through
+- **Co-Authored-By check:** After any `git commit`, warns if AI attribution trailer slipped through, this is for all commit or PR create, everything git related! I DONT WANT TO SEE ANY CLAUDE OR ANY OTHER AI MENTIONED.
 - **Task completion reminder:** Fires at end of each response — re-read tracker before declaring done
 
 ## Skills
