@@ -1,5 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <logging/get_logger.hpp>
+#include <testing/recording_logger.hpp>
 #include <velocity_profiling/trapezoidal_profiler.hpp>
 
 using namespace robotlib;
@@ -75,4 +77,29 @@ TEST_CASE("Trapezoidal sharp turns - velocity reduced", "[velocity_profiling]") 
         maxStraightVel = std::max(maxStraightVel, result[i].velocity);
     }
     REQUIRE(velAtTurn <= maxStraightVel + 1e-6);
+}
+
+TEST_CASE("TrapezoidalProfiler logging and observability", "[velocity_profiling][logging]") {
+    auto cleanup = std::shared_ptr<void>(nullptr,
+        [](void*) { robotlib::clearLoggerRegistry(); });
+
+    auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();
+    robotlib::registerLogger("velocity_profiling", mockLogger);
+
+    TrapezoidalProfiler profiler;
+
+    // Verify DEBUG log on initialization
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::DEBUG, "TrapezoidalProfiler initialized"));
+
+    // Verify no errors during nominal construction
+    REQUIRE(mockLogger->hasNoErrors());
+
+    // Run profile and check TRACE timing log
+    Path path;
+    for (int i = 0; i <= 20; ++i) path.push_back({i * 0.1, 0.0, 0.0});
+    VelocityConstraints constraints{1.0, 0.5, 0.5};
+    profiler.profile(path, constraints);
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::TRACE, "us"));
 }

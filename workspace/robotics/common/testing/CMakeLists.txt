@@ -1,0 +1,4 @@
+add_library(common_testing INTERFACE)
+add_library(robotlib::common_testing ALIAS common_testing)
+target_include_directories(common_testing INTERFACE include)
+target_link_libraries(common_testing INTERFACE common_logging)

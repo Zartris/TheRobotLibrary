@@ -73,7 +73,7 @@ Twist HeadingSpeedController::compute(const Pose2D& current, const Pose2D& targe
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::ostringstream oss;
     oss << "PID compute: " << us << " us, heading_err=" << headingError << " dist_err=" << distError;
-    m_logger->debug(oss.str());
+    m_logger->trace(oss.str());
 
     return cmd;
 }

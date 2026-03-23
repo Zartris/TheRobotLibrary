@@ -9,6 +9,18 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "4.0")
     set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 endif()
 
+# ---------------------------------------------------------------------------
+# Coverage build type (GCC/Clang gcov + lcov)
+# ---------------------------------------------------------------------------
+option(ENABLE_COVERAGE "Enable gcov/lcov coverage instrumentation" OFF)
+if(ENABLE_COVERAGE)
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    message(FATAL_ERROR "Coverage requires GCC or Clang")
+  endif()
+  add_compile_options(--coverage -O0 -g)
+  add_link_options(--coverage)
+endif()
+
 # ── C++ standard ────────────────────────────────────────────────────────────
 set(CMAKE_CXX_STANDARD          20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -38,3 +50,51 @@ include(cmake/deps.cmake)
 # ── Sub-directories ──────────────────────────────────────────────────────────
 add_subdirectory(robotics)
 add_subdirectory(simulation)
+
+# ---------------------------------------------------------------------------
+# Coverage report target
+# ---------------------------------------------------------------------------
+if(ENABLE_COVERAGE)
+  find_program(LCOV_PATH lcov)
+  find_program(GENHTML_PATH genhtml)
+  if(NOT LCOV_PATH OR NOT GENHTML_PATH)
+    message(FATAL_ERROR "ENABLE_COVERAGE is ON but lcov/genhtml not found. Install lcov.")
+  endif()
+
+  # Auto-detect gcov tool matching the compiler
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    get_filename_component(_CXX_NAME "${CMAKE_CXX_COMPILER}" NAME)
+    string(REGEX REPLACE "^g\\+\\+" "gcov" GCOV_TOOL "${_CXX_NAME}")
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    find_program(LLVM_COV_PATH llvm-cov)
+    if(LLVM_COV_PATH)
+      # lcov expects a gcov-compatible interface; llvm-cov provides this via 'gcov' subcommand
+      # We need a wrapper script since --gcov-tool expects a single executable
+      file(WRITE "${CMAKE_BINARY_DIR}/llvm-gcov.sh" "#!/bin/sh\nexec ${LLVM_COV_PATH} gcov \"$@\"\n")
+      file(CHMOD "${CMAKE_BINARY_DIR}/llvm-gcov.sh" PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
+      set(GCOV_TOOL "${CMAKE_BINARY_DIR}/llvm-gcov.sh")
+    else()
+      message(FATAL_ERROR "ENABLE_COVERAGE with Clang requires llvm-cov. Install it or use GCC.")
+    endif()
+  else()
+    set(GCOV_TOOL "gcov")
+  endif()
+
+  add_custom_target(coverage
+    COMMENT "Generating HTML coverage report"
+    COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR}
+            --capture --output-file ${CMAKE_BINARY_DIR}/coverage.info
+            --gcov-tool ${GCOV_TOOL}
+            --ignore-errors mismatch
+    COMMAND ${LCOV_PATH} --remove ${CMAKE_BINARY_DIR}/coverage.info
+            '*/_deps/*' '/usr/*' '*/tests/*'
+            --output-file ${CMAKE_BINARY_DIR}/coverage_filtered.info
+            --ignore-errors unused
+    COMMAND ${GENHTML_PATH} ${CMAKE_BINARY_DIR}/coverage_filtered.info
+            --output-directory ${CMAKE_BINARY_DIR}/coverage_html
+            --title "TheRobotLibrary Coverage"
+            --legend --show-details
+    COMMAND ${CMAKE_COMMAND} -E echo
+            "Coverage report: ${CMAKE_BINARY_DIR}/coverage_html/index.html"
+  )
+endif()

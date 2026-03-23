@@ -11,6 +11,7 @@ class ILogger {
 public:
     virtual ~ILogger() = default;
 
+    virtual void trace(std::string_view msg) = 0;
     virtual void debug(std::string_view msg) = 0;
     virtual void info(std::string_view msg) = 0;
     virtual void warn(std::string_view msg) = 0;

@@ -100,7 +100,7 @@ std::optional<Path> AStarPlanner::plan(const Pose2D& start, const Pose2D& goal,
             std::ostringstream oss;
             oss << "A* found path: " << path.size() << " waypoints, "
                 << nodesExpanded << " nodes expanded in " << us << " us";
-            m_logger->debug(oss.str());
+            m_logger->trace(oss.str());
 
             return path;
         }

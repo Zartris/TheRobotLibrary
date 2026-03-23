@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <logging/get_logger.hpp>
 #include <occupancy_grid/occupancy_grid_map.hpp>
+#include <testing/recording_logger.hpp>
 #include <cmath>
 #include <numbers>
 
@@ -99,4 +101,34 @@ TEST_CASE("OccupancyGridMap reset clears all cells", "[occupancy_grid]") {
     for (const auto& c : grid.cells) {
         REQUIRE(c == 0);
     }
+}
+
+TEST_CASE("OccupancyGridMap logging and observability", "[occupancy_grid][logging]") {
+    auto cleanup = std::shared_ptr<void>(nullptr,
+        [](void*) { robotlib::clearLoggerRegistry(); });
+
+    auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();
+    robotlib::registerLogger("occupancy_grid", mockLogger);
+
+    OccupancyGridMap map(50, 50, 0.1);
+
+    // Verify DEBUG log on initialization (contains "OccupancyGridMap initialized")
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::DEBUG, "OccupancyGridMap initialized"));
+
+    // Verify no errors during nominal construction
+    REQUIRE(mockLogger->hasNoErrors());
+
+    // Run updateFromScan and check TRACE timing log
+    Pose2D robotPose{2.5, 2.5, 0.0};
+    LaserScan scan;
+    scan.angleMin = 0.0;
+    scan.angleMax = 0.0;
+    scan.angleIncrement = 1.0;
+    scan.rangeMin = 0.1;
+    scan.rangeMax = 10.0;
+    scan.ranges = {1.0f};
+    map.updateFromScan(robotPose, scan);
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::TRACE, "us"));
 }

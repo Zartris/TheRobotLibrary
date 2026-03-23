@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <logging/get_logger.hpp>
 #include <ray_casting/ray_caster.hpp>
+#include <testing/recording_logger.hpp>
 #include <numbers>
 
 using namespace robotlib;
@@ -65,4 +67,33 @@ TEST_CASE("castScan produces correct LaserScan structure", "[ray_casting]") {
     REQUIRE(scan.numRays() == 3);
     REQUIRE_THAT(scan.angleMin, Catch::Matchers::WithinAbs(-0.1, 1e-9));
     REQUIRE_THAT(scan.angleMax, Catch::Matchers::WithinAbs(0.1, 1e-9));
+}
+
+TEST_CASE("RayCaster logging and observability", "[ray_casting][logging]") {
+    auto cleanup = std::shared_ptr<void>(nullptr,
+        [](void*) { robotlib::clearLoggerRegistry(); });
+
+    auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();
+    robotlib::registerLogger("ray_casting", mockLogger);
+
+    RayCaster caster;
+
+    // Verify DEBUG log on initialization
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::DEBUG, "RayCaster initialized"));
+
+    // Verify no errors during nominal construction
+    REQUIRE(mockLogger->hasNoErrors());
+
+    // Run castScan and check TRACE timing log
+    OccupancyGrid grid(100, 100, 0.1);
+    for (auto& c : grid.cells) c = -1;
+    ScanConfig config;
+    config.angleMin = -0.1;
+    config.angleMax = 0.1;
+    config.angleIncrement = 0.1;
+    config.maxRange = 5.0;
+    caster.castScan(grid, {5.0, 5.0, 0.0}, config);
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::TRACE, "us"));
 }

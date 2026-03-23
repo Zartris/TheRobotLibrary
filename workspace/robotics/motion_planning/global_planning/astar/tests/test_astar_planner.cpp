@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <astar/astar_planner.hpp>
+#include <logging/get_logger.hpp>
+#include <testing/recording_logger.hpp>
 
 using namespace robotlib;
 
@@ -65,4 +67,28 @@ TEST_CASE("A* start in occupied cell", "[astar]") {
     auto path = planner.plan({0.5, 0.5, 0.0}, {4.0, 4.0, 0.0}, grid);
 
     REQUIRE_FALSE(path.has_value());
+}
+
+TEST_CASE("AStarPlanner logging and observability", "[astar][logging]") {
+    auto cleanup = std::shared_ptr<void>(nullptr,
+        [](void*) { robotlib::clearLoggerRegistry(); });
+
+    auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();
+    robotlib::registerLogger("astar", mockLogger);
+
+    AStarPlanner planner;
+
+    // Verify DEBUG log on initialization
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::DEBUG, "AStarPlanner initialized"));
+
+    // Verify no errors during nominal construction
+    REQUIRE(mockLogger->hasNoErrors());
+
+    // Run a plan call to produce TRACE timing log
+    auto grid = makeEmptyGrid();
+    auto path = planner.plan({0.5, 0.5, 0.0}, {4.0, 0.5, 0.0}, grid);
+    REQUIRE(path.has_value());
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::TRACE, "us"));
 }

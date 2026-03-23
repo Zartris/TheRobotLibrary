@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <ekf/ekf2d.hpp>
+#include <logging/get_logger.hpp>
+#include <testing/recording_logger.hpp>
 #include <numbers>
 
 using namespace robotlib;
@@ -74,4 +76,27 @@ TEST_CASE("EKF predict-update cycle converges", "[ekf]") {
 
     auto pose = ekf.getPose();
     REQUIRE_THAT(pose.x, Catch::Matchers::WithinAbs(trueX, 0.5));
+}
+
+TEST_CASE("EKF2D logging and observability", "[ekf][logging]") {
+    auto cleanup = std::shared_ptr<void>(nullptr,
+        [](void*) { robotlib::clearLoggerRegistry(); });
+
+    auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();
+    robotlib::registerLogger("ekf", mockLogger);
+
+    EKFConfig cfg;
+    EKF2D ekf(cfg);
+
+    // Verify DEBUG log on initialization
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::DEBUG, "EKF2D initialized"));
+
+    // Verify no errors during nominal construction
+    REQUIRE(mockLogger->hasNoErrors());
+
+    // Run predict and check TRACE timing log
+    ekf.predict({1.0, 0.0}, 0.1);
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::TRACE, "us"));
 }

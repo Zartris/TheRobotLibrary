@@ -23,6 +23,7 @@ public:
 
     ~SpdlogLogger() override;
 
+    void trace(std::string_view msg) override;
     void debug(std::string_view msg) override;
     void info(std::string_view msg) override;
     void warn(std::string_view msg) override;

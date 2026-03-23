@@ -15,3 +15,20 @@ target_compile_definitions(simulation_tests PRIVATE
 
 include(Catch)
 catch_discover_tests(simulation_tests)
+
+add_executable(integration_tests
+    test_integration.cpp
+)
+
+target_link_libraries(integration_tests PRIVATE
+    simulation_core
+    Catch2::Catch2WithMain
+    glfw
+    OpenGL::GL
+)
+
+target_compile_definitions(integration_tests PRIVATE
+    CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
+catch_discover_tests(integration_tests)

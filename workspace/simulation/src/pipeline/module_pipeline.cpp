@@ -1,5 +1,6 @@
 #include <simulation/pipeline/module_pipeline.hpp>
 #include <common/geometry.hpp>
+#include <common/interfaces/perception_context.hpp>
 #include <cmath>
 #include <sstream>
 #include <chrono>
@@ -112,8 +113,12 @@ Twist ModulePipeline::tick(const Pose2D& measuredPose, const Twist& measuredVelo
     // 3. Local planning
     Twist cmd;
     if (m_localPlanner) {
+        PerceptionContext ctx;
+        ctx.scan = scan;
+        ctx.grid = grid;
+        // ctx.trackedObstacles is empty (populated in M4)
         cmd = m_localPlanner->compute(currentPose, measuredVelocity,
-                                       m_globalPath, scan, grid);
+                                      m_globalPath, ctx);
     } else if (m_controller) {
         // Fall back to simple controller toward next waypoint
         // Find nearest waypoint ahead
@@ -133,7 +138,7 @@ Twist ModulePipeline::tick(const Pose2D& measuredPose, const Twist& measuredVelo
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::ostringstream oss;
     oss << "Pipeline tick: " << us << " us";
-    m_logger->debug(oss.str());
+    m_logger->trace(oss.str());
 
     return cmd;
 }

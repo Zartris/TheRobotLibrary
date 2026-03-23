@@ -50,7 +50,7 @@ void EKF2D::predict(const Twist& twist, double dt) {
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::ostringstream oss;
     oss << "predict #" << m_predictCount << ": " << us << " us";
-    m_logger->debug(oss.str());
+    m_logger->trace(oss.str());
 }
 
 void EKF2D::update(const Eigen::VectorXd& measurement, const Eigen::MatrixXd& H,
@@ -86,7 +86,7 @@ void EKF2D::update(const Eigen::VectorXd& measurement, const Eigen::MatrixXd& H,
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::ostringstream oss;
     oss << "update #" << m_updateCount << ": " << us << " us";
-    m_logger->debug(oss.str());
+    m_logger->trace(oss.str());
 }
 
 Pose2D EKF2D::getPose() const {

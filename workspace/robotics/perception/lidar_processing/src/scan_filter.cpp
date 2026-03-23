@@ -29,7 +29,7 @@ LaserScan ScanFilter::filterScan(const LaserScan& input) const {
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::ostringstream oss;
     oss << "filterScan: " << input.numRays() << " rays in " << us << " us";
-    m_logger->debug(oss.str());
+    m_logger->trace(oss.str());
 
     return output;
 }
