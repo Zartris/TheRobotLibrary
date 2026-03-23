@@ -45,13 +45,16 @@ void ScanFilter::clipRanges(LaserScan& scan) const {
 void ScanFilter::applyMedianFilter(LaserScan& scan) const {
     if (m_config.medianWindow < 3) return;
 
-    const int half = m_config.medianWindow / 2;
+    // Window must be odd; round up if even
+    const int winSize = (m_config.medianWindow % 2 == 0) ? m_config.medianWindow + 1
+                                                          : m_config.medianWindow;
+    const int half = winSize / 2;
     const int n = static_cast<int>(scan.ranges.size());
     std::vector<float> filtered(n);
 
     for (int i = 0; i < n; ++i) {
         std::vector<float> window;
-        window.reserve(m_config.medianWindow);
+        window.reserve(winSize);
         for (int j = i - half; j <= i + half; ++j) {
             int idx = std::clamp(j, 0, n - 1);
             if (!std::isnan(scan.ranges[idx])) {

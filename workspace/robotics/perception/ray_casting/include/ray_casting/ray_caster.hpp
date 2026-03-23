@@ -3,6 +3,7 @@
 #include <common/laser_scan.hpp>
 #include <common/types.hpp>
 #include <logging/get_logger.hpp>
+#include <numbers>
 #include <optional>
 
 namespace robotlib {
@@ -14,8 +15,8 @@ struct RayCastResult {
 };
 
 struct ScanConfig {
-    double angleMin{-M_PI};
-    double angleMax{M_PI};
+    double angleMin{-std::numbers::pi};
+    double angleMax{std::numbers::pi};
     double angleIncrement{0.01};
     double maxRange{30.0};
 };

@@ -5,6 +5,9 @@
 namespace robotlib::sim {
 
 Pose2D StateAdapter::extractPose2D(const mjModel* m, const mjData* d, int bodyId) {
+    if (bodyId < 0 || bodyId >= m->nbody) {
+        return Pose2D{};
+    }
     // MuJoCo stores body positions in d->xpos (3 per body)
     // and quaternions in d->xquat (4 per body)
     const double* pos = d->xpos + 3 * bodyId;

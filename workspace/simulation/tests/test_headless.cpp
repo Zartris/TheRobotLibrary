@@ -14,8 +14,10 @@
 #include <velocity_profiling/trapezoidal_profiler.hpp>
 
 #include <mujoco/mujoco.h>
+#include <cmath>
 #include <filesystem>
 #include <string>
+#include <vector>
 
 using namespace robotlib;
 using namespace robotlib::sim;

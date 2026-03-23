@@ -34,6 +34,12 @@ bool AppShell::loadModel() {
 
     m_model->opt.timestep = m_config.simTimestep;
     m_data = mj_makeData(m_model);
+    if (!m_data) {
+        m_logger->error("mj_makeData returned null — allocation failure");
+        mj_deleteModel(m_model);
+        m_model = nullptr;
+        return false;
+    }
 
     m_vehicleParams = ModelAdapter::extractVehicleParams(m_model);
 

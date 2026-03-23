@@ -2,14 +2,15 @@
 #include <common/laser_scan.hpp>
 #include <common/types.hpp>
 #include <mujoco/mujoco.h>
+#include <numbers>
 #include <vector>
 
 namespace robotlib::sim {
 
 struct SimLidarConfig {
     int numRays{180};
-    double angleMin{-M_PI};
-    double angleMax{M_PI};
+    double angleMin{-std::numbers::pi};
+    double angleMax{std::numbers::pi};
     double rangeMax{10.0};
 };
 

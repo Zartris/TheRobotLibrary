@@ -66,8 +66,9 @@ void EKF2D::update(const Eigen::VectorXd& measurement, const Eigen::MatrixXd& H,
     // Innovation covariance
     Eigen::MatrixXd S = H * m_P * H.transpose() + R;
 
-    // Kalman gain
-    Eigen::MatrixXd K = m_P * H.transpose() * S.inverse();
+    // Kalman gain — solve via LDLT decomposition (more stable than explicit inverse)
+    // K = P * H^T * S^{-1}  ⟺  K^T = S^{-1} * H * P  (S and P are symmetric)
+    Eigen::MatrixXd K = S.ldlt().solve(H * m_P).transpose();
 
     // State update
     m_state += K * y;

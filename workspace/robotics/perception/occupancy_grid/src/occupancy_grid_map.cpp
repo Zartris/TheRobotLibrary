@@ -55,7 +55,9 @@ void OccupancyGridMap::updateFromScan(const Pose2D& robotPose, const LaserScan& 
 
     for (int i = 0; i < scan.numRays(); ++i) {
         float range = scan.ranges[i];
-        if (std::isnan(range) || range < scan.rangeMin || range > scan.rangeMax) continue;
+        // range >= rangeMax means "no obstacle detected" — mark free cells but skip occupied endpoint
+        if (std::isnan(range) || range < scan.rangeMin) continue;
+        bool hasHit = (range < scan.rangeMax);
 
         double angle = robotPose.theta + scan.angleAt(i);
         double hitX = robotPose.x + range * std::cos(angle);
@@ -66,8 +68,8 @@ void OccupancyGridMap::updateFromScan(const Pose2D& robotPose, const LaserScan& 
         // Mark cells along the ray as free
         markRay(rx, ry, hx, hy);
 
-        // Mark endpoint as occupied
-        if (m_grid.isValid(hx, hy)) {
+        // Only mark endpoint as occupied when there was an actual hit
+        if (hasHit && m_grid.isValid(hx, hy)) {
             auto& cell = m_grid.at(hx, hy);
             cell = static_cast<int8_t>(std::clamp(
                 static_cast<int>(cell) + m_config.logOddsHit,
