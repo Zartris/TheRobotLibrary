@@ -53,6 +53,9 @@ TEST_CASE("DifferentialDrive logging on construction", "[common][kinematics]") {
 }
 
 TEST_CASE("DifferentialDrive logs initialization at DEBUG level", "[common][logging]") {
+    // RAII guard ensures registry cleanup even if assertions fail
+    auto cleanup = std::shared_ptr<void>(nullptr, [](void*) { robotlib::clearLoggerRegistry(); });
+
     // Register mock logger before constructing DifferentialDrive.
     // The module uses getLogger("common.differential_drive") internally.
     auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();
@@ -67,7 +70,4 @@ TEST_CASE("DifferentialDrive logs initialization at DEBUG level", "[common][logg
 
     // Verify no errors during construction
     REQUIRE(mockLogger->hasNoErrors());
-
-    // Clean up registry so other tests are unaffected
-    robotlib::clearLoggerRegistry();
 }
