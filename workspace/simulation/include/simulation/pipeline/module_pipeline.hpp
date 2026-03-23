@@ -11,6 +11,8 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace robotlib::sim {
 
@@ -34,6 +36,24 @@ public:
     const Path& getGlobalPath() const { return m_globalPath; }
     bool isGoalReached() const;
 
+    /// Create and set a controller by name. Returns false if name unknown.
+    bool selectController(const std::string& name);
+
+    /// Create and set a kinematic model by name. Returns false if name unknown.
+    bool selectKinematicModel(const std::string& name);
+
+    /// Get available controller names
+    static std::vector<std::string> availableControllers();
+
+    /// Get available kinematic model names
+    static std::vector<std::string> availableKinematicModels();
+
+    /// Get currently selected controller name
+    const std::string& currentControllerName() const { return m_controllerName; }
+
+    /// Get currently selected kinematic model name
+    const std::string& currentKinematicModelName() const { return m_kinematicModelName; }
+
 private:
     std::unique_ptr<IController> m_controller;
     std::unique_ptr<IGlobalPlanner> m_globalPlanner;
@@ -45,6 +65,9 @@ private:
     Path m_globalPath;
     bool m_needsReplan{true};
     double m_goalTolerance{0.3};
+
+    std::string m_controllerName{"pid"};
+    std::string m_kinematicModelName{"differential_drive"};
 
     std::shared_ptr<ILogger> m_logger;
 };

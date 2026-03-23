@@ -44,6 +44,9 @@ target_link_libraries(simulation_core PUBLIC
     astar
     dwa
     velocity_profiling
+    pure_pursuit
+    mpc
+    cbf
 )
 
 # GUI/rendering deps only needed for interactive mode (linked via app_shell.cpp)
