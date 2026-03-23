@@ -5,6 +5,7 @@ add_executable(astar_tests
 target_link_libraries(astar_tests PRIVATE
     astar
     common_logging
+    common_testing
     Catch2::Catch2WithMain
 )
 

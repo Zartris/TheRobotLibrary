@@ -5,6 +5,7 @@ add_executable(ekf_tests
 target_link_libraries(ekf_tests PRIVATE
     ekf
     common_logging
+    common_testing
     Catch2::Catch2WithMain
 )
 

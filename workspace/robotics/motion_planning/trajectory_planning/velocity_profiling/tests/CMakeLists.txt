@@ -5,6 +5,7 @@ add_executable(velocity_profiling_tests
 target_link_libraries(velocity_profiling_tests PRIVATE
     velocity_profiling
     common_logging
+    common_testing
     Catch2::Catch2WithMain
 )
 

@@ -5,6 +5,7 @@ add_executable(lidar_processing_tests
 target_link_libraries(lidar_processing_tests PRIVATE
     lidar_processing
     common_logging
+    common_testing
     Catch2::Catch2WithMain
 )
 

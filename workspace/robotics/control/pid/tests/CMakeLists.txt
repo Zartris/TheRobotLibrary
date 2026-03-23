@@ -5,6 +5,7 @@ add_executable(pid_tests
 target_link_libraries(pid_tests PRIVATE
     pid
     common_logging
+    common_testing
     Catch2::Catch2WithMain
 )
 

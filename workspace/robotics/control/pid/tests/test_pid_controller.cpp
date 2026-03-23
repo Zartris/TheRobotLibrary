@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <logging/get_logger.hpp>
 #include <pid/pid_controller.hpp>
+#include <testing/recording_logger.hpp>
 #include <numbers>
 
 using namespace robotlib;
@@ -86,4 +88,30 @@ TEST_CASE("HeadingSpeedController compute", "[pid]") {
     // Goal is straight ahead: heading error ~0, should drive forward
     REQUIRE(cmd.linear > 0.0);
     REQUIRE_THAT(cmd.angular, Catch::Matchers::WithinAbs(0.0, 0.1));
+}
+
+TEST_CASE("HeadingSpeedController logging and observability", "[pid][logging]") {
+    auto cleanup = std::shared_ptr<void>(nullptr,
+        [](void*) { robotlib::clearLoggerRegistry(); });
+
+    auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();
+    robotlib::registerLogger("pid", mockLogger);
+
+    PIDConfig hCfg{1.0, 0.0, 0.0, 10.0, 10.0};
+    PIDConfig sCfg{1.0, 0.0, 0.0, 10.0, 10.0};
+    HeadingSpeedController controller(hCfg, sCfg);
+
+    // Verify DEBUG log on initialization
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::DEBUG, "HeadingSpeedController initialized"));
+
+    // Verify no errors during nominal construction
+    REQUIRE(mockLogger->hasNoErrors());
+
+    // Run a compute call and check TRACE timing log
+    Pose2D current{0.0, 0.0, 0.0};
+    Pose2D target{1.0, 0.0, 0.0};
+    controller.compute(current, target, 0.1);
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::TRACE, "us"));
 }

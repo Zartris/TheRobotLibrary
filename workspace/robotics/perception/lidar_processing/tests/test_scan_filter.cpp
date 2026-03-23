@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <lidar_processing/scan_filter.hpp>
+#include <logging/get_logger.hpp>
+#include <testing/recording_logger.hpp>
 #include <cmath>
 #include <limits>
 
@@ -74,4 +76,29 @@ TEST_CASE("ScanFilter logging on construction", "[lidar_processing]") {
     scan.ranges = {1.0f};
     auto result = filter.filterScan(scan);
     REQUIRE(result.ranges.size() == 1);
+}
+
+TEST_CASE("ScanFilter logging and observability", "[lidar_processing][logging]") {
+    auto cleanup = std::shared_ptr<void>(nullptr,
+        [](void*) { robotlib::clearLoggerRegistry(); });
+
+    auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();
+    robotlib::registerLogger("lidar_processing", mockLogger);
+
+    FilterConfig cfg{0.5, 10.0, 3};
+    ScanFilter filter(cfg);
+
+    // Verify DEBUG log on initialization (contains "ScanFilter initialized")
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::DEBUG, "ScanFilter initialized"));
+
+    // Verify no errors during nominal construction
+    REQUIRE(mockLogger->hasNoErrors());
+
+    // Run filterScan and check TRACE timing log
+    LaserScan scan;
+    scan.ranges = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
+    filter.filterScan(scan);
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::TRACE, "us"));
 }

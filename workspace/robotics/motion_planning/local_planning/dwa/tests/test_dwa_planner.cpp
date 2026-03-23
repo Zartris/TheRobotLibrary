@@ -1,6 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <dwa/dwa_planner.hpp>
+#include <logging/get_logger.hpp>
+#include <testing/recording_logger.hpp>
 #include <numbers>
 
 using namespace robotlib;
@@ -83,4 +85,30 @@ TEST_CASE("DWA respects dynamic window", "[dwa]") {
 
     // Linear velocity shouldn't exceed acceleration * dt from current
     REQUIRE(std::abs(cmd.linear) <= cfg.linearAccel * cfg.simDt + 1e-6);
+}
+
+TEST_CASE("DWAPlanner logging and observability", "[dwa][logging]") {
+    auto cleanup = std::shared_ptr<void>(nullptr,
+        [](void*) { robotlib::clearLoggerRegistry(); });
+
+    auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();
+    robotlib::registerLogger("dwa", mockLogger);
+
+    DWAPlanner planner;
+
+    // Verify DEBUG log on initialization
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::DEBUG, "DWAPlanner initialized"));
+
+    // Verify no errors during nominal construction
+    REQUIRE(mockLogger->hasNoErrors());
+
+    // Run compute and check TRACE timing log
+    Pose2D pose{0.0, 0.0, 0.0};
+    Twist vel{0.0, 0.0};
+    Path path = {{5.0, 0.0, 0.0}};
+    PerceptionContext ctx;
+    planner.compute(pose, vel, path, ctx);
+    REQUIRE(mockLogger->hasMessageContaining(
+        robotlib::testing::LogEntry::Level::TRACE, "us"));
 }

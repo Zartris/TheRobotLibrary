@@ -5,6 +5,7 @@ add_executable(ray_casting_tests
 target_link_libraries(ray_casting_tests PRIVATE
     ray_casting
     common_logging
+    common_testing
     Catch2::Catch2WithMain
 )
 

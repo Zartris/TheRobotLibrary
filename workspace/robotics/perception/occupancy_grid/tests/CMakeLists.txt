@@ -5,6 +5,7 @@ add_executable(occupancy_grid_tests
 target_link_libraries(occupancy_grid_tests PRIVATE
     occupancy_grid
     common_logging
+    common_testing
     Catch2::Catch2WithMain
 )
 
