@@ -65,7 +65,7 @@ if(ENABLE_COVERAGE)
             --gcov-tool gcov-13
             --ignore-errors mismatch
     COMMAND ${LCOV_PATH} --remove ${CMAKE_BINARY_DIR}/coverage.info
-            '*/build/_deps/*' '/usr/*' '*/test*' '*/tests/*'
+            '*/_deps/*' '/usr/*' '*/tests/*'
             --output-file ${CMAKE_BINARY_DIR}/coverage_filtered.info
             --ignore-errors unused
     COMMAND ${GENHTML_PATH} ${CMAKE_BINARY_DIR}/coverage_filtered.info
