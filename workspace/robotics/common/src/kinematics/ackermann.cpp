@@ -20,7 +20,7 @@ Pose2D Ackermann::step(const Pose2D& state, const Twist& control, double dt) {
     const double delta = std::clamp(control.angular, -m_maxSteeringAngle, m_maxSteeringAngle);
 
     Pose2D result;
-    if (std::abs(delta) < 1e-6) {
+    if (std::abs(delta) < 1e-6 || std::abs(v) < 1e-9) {
         // Straight-line motion
         result.x = state.x + v * std::cos(state.theta) * dt;
         result.y = state.y + v * std::sin(state.theta) * dt;
