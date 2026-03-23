@@ -82,25 +82,24 @@ double DWAPlanner::scoreCost(const Trajectory& traj, const Path& globalPath,
            m_config.velocityWeight * velCost;
 }
 
-Twist DWAPlanner::compute(const Pose2D& pose, const Twist& currentVelocity,
-                           const Path& globalPath, const LaserScan& scan,
-                           const OccupancyGrid& /*grid*/) {
+Twist DWAPlanner::compute(const Pose2D& pose, const Twist& vel,
+                           const Path& path, const PerceptionContext& ctx) {
     auto startTime = std::chrono::high_resolution_clock::now();
 
-    if (globalPath.empty()) {
+    if (path.empty()) {
         m_logger->debug("DWA: empty global path, returning zero twist");
         return Twist{0.0, 0.0};
     }
 
     // Dynamic window
     double minV = std::max(-m_config.maxLinearVel,
-                           currentVelocity.linear - m_config.linearAccel * m_config.simDt);
+                           vel.linear - m_config.linearAccel * m_config.simDt);
     double maxV = std::min(m_config.maxLinearVel,
-                           currentVelocity.linear + m_config.linearAccel * m_config.simDt);
+                           vel.linear + m_config.linearAccel * m_config.simDt);
     double minW = std::max(-m_config.maxAngularVel,
-                           currentVelocity.angular - m_config.angularAccel * m_config.simDt);
+                           vel.angular - m_config.angularAccel * m_config.simDt);
     double maxW = std::min(m_config.maxAngularVel,
-                           currentVelocity.angular + m_config.angularAccel * m_config.simDt);
+                           vel.angular + m_config.angularAccel * m_config.simDt);
 
     Twist bestCmd{0.0, 0.0};
     double bestCost = std::numeric_limits<double>::max();
@@ -112,7 +111,7 @@ Twist DWAPlanner::compute(const Pose2D& pose, const Twist& currentVelocity,
         for (int wi = 0; wi < m_config.angularSamples; ++wi) {
             Twist candidateVel{minV + vi * dv, minW + wi * dw};
             auto traj = simulateTrajectory(pose, candidateVel);
-            double cost = scoreCost(traj, globalPath, scan, pose);
+            double cost = scoreCost(traj, path, ctx.scan, pose);
 
             if (cost < bestCost) {
                 bestCost = cost;

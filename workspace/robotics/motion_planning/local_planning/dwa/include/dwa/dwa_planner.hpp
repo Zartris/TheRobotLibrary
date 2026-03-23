@@ -1,5 +1,6 @@
 #pragma once
 #include <common/interfaces/i_local_planner.hpp>
+#include <common/interfaces/perception_context.hpp>
 #include <logging/get_logger.hpp>
 #include <memory>
 #include <vector>
@@ -25,9 +26,8 @@ class DWAPlanner : public ILocalPlanner {
 public:
     explicit DWAPlanner(const DWAConfig& config = {});
 
-    Twist compute(const Pose2D& pose, const Twist& currentVelocity,
-                  const Path& globalPath, const LaserScan& scan,
-                  const OccupancyGrid& grid) override;
+    Twist compute(const Pose2D& pose, const Twist& vel,
+                  const Path& path, const PerceptionContext& ctx) override;
 
 private:
     struct Trajectory {
