@@ -9,6 +9,18 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL "4.0")
     set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 endif()
 
+# ---------------------------------------------------------------------------
+# Coverage build type (GCC/Clang gcov + lcov)
+# ---------------------------------------------------------------------------
+option(ENABLE_COVERAGE "Enable gcov/lcov coverage instrumentation" OFF)
+if(ENABLE_COVERAGE)
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    message(FATAL_ERROR "Coverage requires GCC or Clang")
+  endif()
+  add_compile_options(--coverage -O0 -g)
+  add_link_options(--coverage)
+endif()
+
 # ── C++ standard ────────────────────────────────────────────────────────────
 set(CMAKE_CXX_STANDARD          20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -38,3 +50,29 @@ include(cmake/deps.cmake)
 # ── Sub-directories ──────────────────────────────────────────────────────────
 add_subdirectory(robotics)
 add_subdirectory(simulation)
+
+# ---------------------------------------------------------------------------
+# Coverage report target
+# ---------------------------------------------------------------------------
+if(ENABLE_COVERAGE)
+  find_program(LCOV_PATH lcov REQUIRED)
+  find_program(GENHTML_PATH genhtml REQUIRED)
+
+  add_custom_target(coverage
+    COMMENT "Generating HTML coverage report"
+    COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR}
+            --capture --output-file ${CMAKE_BINARY_DIR}/coverage.info
+            --gcov-tool gcov-13
+            --ignore-errors mismatch
+    COMMAND ${LCOV_PATH} --remove ${CMAKE_BINARY_DIR}/coverage.info
+            '*/build/_deps/*' '/usr/*' '*/test*' '*/tests/*'
+            --output-file ${CMAKE_BINARY_DIR}/coverage_filtered.info
+            --ignore-errors unused
+    COMMAND ${GENHTML_PATH} ${CMAKE_BINARY_DIR}/coverage_filtered.info
+            --output-directory ${CMAKE_BINARY_DIR}/coverage_html
+            --title "TheRobotLibrary Coverage"
+            --legend --show-details
+    COMMAND ${CMAKE_COMMAND} -E echo
+            "Coverage report: ${CMAKE_BINARY_DIR}/coverage_html/index.html"
+  )
+endif()
