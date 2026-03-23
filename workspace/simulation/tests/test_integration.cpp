@@ -27,6 +27,28 @@
 using namespace robotlib;
 using namespace robotlib::sim;
 
+// --- RAII helpers ---
+
+/// RAII wrapper for MuJoCo model + data (exception-safe cleanup in tests).
+struct MjScope {
+    mjModel* m{nullptr};
+    mjData* d{nullptr};
+
+    MjScope(const std::string& path) {
+        char error[1000] = "";
+        m = mj_loadXML(path.c_str(), nullptr, error, sizeof(error));
+        if (m) d = mj_makeData(m);
+    }
+
+    ~MjScope() {
+        if (d) mj_deleteData(d);
+        if (m) mj_deleteModel(m);
+    }
+
+    MjScope(const MjScope&) = delete;
+    MjScope& operator=(const MjScope&) = delete;
+};
+
 // --- Helpers ---
 
 static std::string findScenario(const std::string& name) {
@@ -133,11 +155,9 @@ TEST_CASE("Integration: Open room navigation", "[integration][headless]") {
     auto path = findScenario("open_room.xml");
     REQUIRE(std::filesystem::exists(path));
 
-    char error[1000] = "";
-    mjModel* m = mj_loadXML(path.c_str(), nullptr, error, sizeof(error));
-    REQUIRE(m != nullptr);
-    mjData* d = mj_makeData(m);
-    REQUIRE(d != nullptr);
+    MjScope mj(path);
+    REQUIRE(mj.m != nullptr);
+    REQUIRE(mj.d != nullptr);
 
     ModulePipeline pipeline;
     wireFullPipeline(pipeline);
@@ -153,23 +173,18 @@ TEST_CASE("Integration: Open room navigation", "[integration][headless]") {
     markWall(grid, 2.75, -1.35, 3.25, -0.65);
 
     Pose2D goal{4.0, 4.0, 0.0};
-    bool reached = runNavigation(m, d, pipeline, grid, goal, 60.0, 0.02);
+    bool reached = runNavigation(mj.m, mj.d, pipeline, grid, goal, 60.0, 0.02);
 
     CHECK(reached);
-
-    mj_deleteData(d);
-    mj_deleteModel(m);
 }
 
 TEST_CASE("Integration: Maze navigation", "[integration][headless]") {
     auto path = findScenario("maze.xml");
     REQUIRE(std::filesystem::exists(path));
 
-    char error[1000] = "";
-    mjModel* m = mj_loadXML(path.c_str(), nullptr, error, sizeof(error));
-    REQUIRE(m != nullptr);
-    mjData* d = mj_makeData(m);
-    REQUIRE(d != nullptr);
+    MjScope mj(path);
+    REQUIRE(mj.m != nullptr);
+    REQUIRE(mj.d != nullptr);
 
     ModulePipeline pipeline;
     wireFullPipeline(pipeline);
@@ -181,23 +196,18 @@ TEST_CASE("Integration: Maze navigation", "[integration][headless]") {
     markWall(grid, -4.0, -0.1, 2.0, 0.1);
 
     Pose2D goal{0.0, 3.0, 0.0};
-    bool reached = runNavigation(m, d, pipeline, grid, goal, 90.0, 0.02);
+    bool reached = runNavigation(mj.m, mj.d, pipeline, grid, goal, 90.0, 0.02);
 
     CHECK(reached);
-
-    mj_deleteData(d);
-    mj_deleteModel(m);
 }
 
 TEST_CASE("Integration: L-shaped room navigation", "[integration][headless]") {
     auto path = findScenario("l_shaped_room.xml");
     REQUIRE(std::filesystem::exists(path));
 
-    char error[1000] = "";
-    mjModel* m = mj_loadXML(path.c_str(), nullptr, error, sizeof(error));
-    REQUIRE(m != nullptr);
-    mjData* d = mj_makeData(m);
-    REQUIRE(d != nullptr);
+    MjScope mj(path);
+    REQUIRE(mj.m != nullptr);
+    REQUIRE(mj.d != nullptr);
 
     ModulePipeline pipeline;
     wireFullPipeline(pipeline);
@@ -209,44 +219,39 @@ TEST_CASE("Integration: L-shaped room navigation", "[integration][headless]") {
     markWall(grid, 0.0, 0.0, 5.0, 5.0);
 
     Pose2D goal{-3.0, 3.0, 0.0};
-    bool reached = runNavigation(m, d, pipeline, grid, goal, 90.0, 0.02);
+    bool reached = runNavigation(mj.m, mj.d, pipeline, grid, goal, 90.0, 0.02);
 
     CHECK(reached);
-
-    mj_deleteData(d);
-    mj_deleteModel(m);
 }
 
 TEST_CASE("Integration: Module swap mid-run doesn't crash", "[integration][headless]") {
     auto path = findScenario("open_room.xml");
     REQUIRE(std::filesystem::exists(path));
 
-    char error[1000] = "";
-    mjModel* m = mj_loadXML(path.c_str(), nullptr, error, sizeof(error));
-    REQUIRE(m != nullptr);
-    mjData* d = mj_makeData(m);
-    REQUIRE(d != nullptr);
+    MjScope mj(path);
+    REQUIRE(mj.m != nullptr);
+    REQUIRE(mj.d != nullptr);
 
     ModulePipeline pipeline;
     wireFullPipeline(pipeline);
 
     auto grid = makeGrid(5.0, 0.25);
-    auto params = ModelAdapter::extractVehicleParams(m);
+    auto params = ModelAdapter::extractVehicleParams(mj.m);
     SimLidarConfig lidarCfg;
 
     pipeline.setGoal({4.0, 4.0, 0.0});
 
     // Run for 5 seconds
     double lastPipelineTime = 0.0;
-    while (d->time < 5.0) {
-        mj_step(m, d);
-        if (d->time - lastPipelineTime >= 0.02) {
-            auto pose = StateAdapter::extractPose2D(m, d, params.bodyId);
-            auto twist = StateAdapter::extractTwist(m, d, params.bodyId);
-            auto scan = SensorAdapter::generateLidar(m, d, params.bodyId, lidarCfg);
+    while (mj.d->time < 5.0) {
+        mj_step(mj.m, mj.d);
+        if (mj.d->time - lastPipelineTime >= 0.02) {
+            auto pose = StateAdapter::extractPose2D(mj.m, mj.d, params.bodyId);
+            auto twist = StateAdapter::extractTwist(mj.m, mj.d, params.bodyId);
+            auto scan = SensorAdapter::generateLidar(mj.m, mj.d, params.bodyId, lidarCfg);
             auto cmd = pipeline.tick(pose, twist, scan, grid, 0.02);
-            ActuatorAdapter::applyTwist(m, d, cmd, params);
-            lastPipelineTime = d->time;
+            ActuatorAdapter::applyTwist(mj.m, mj.d, cmd, params);
+            lastPipelineTime = mj.d->time;
         }
     }
 
@@ -257,21 +262,18 @@ TEST_CASE("Integration: Module swap mid-run doesn't crash", "[integration][headl
     pipeline.setEstimator(std::make_unique<EKF2D>());
 
     // Continue running for 5 more seconds
-    while (d->time < 10.0) {
-        mj_step(m, d);
-        if (d->time - lastPipelineTime >= 0.02) {
-            auto pose = StateAdapter::extractPose2D(m, d, params.bodyId);
-            auto twist = StateAdapter::extractTwist(m, d, params.bodyId);
-            auto scan = SensorAdapter::generateLidar(m, d, params.bodyId, lidarCfg);
+    while (mj.d->time < 10.0) {
+        mj_step(mj.m, mj.d);
+        if (mj.d->time - lastPipelineTime >= 0.02) {
+            auto pose = StateAdapter::extractPose2D(mj.m, mj.d, params.bodyId);
+            auto twist = StateAdapter::extractTwist(mj.m, mj.d, params.bodyId);
+            auto scan = SensorAdapter::generateLidar(mj.m, mj.d, params.bodyId, lidarCfg);
             auto cmd = pipeline.tick(pose, twist, scan, grid, 0.02);
-            ActuatorAdapter::applyTwist(m, d, cmd, params);
-            lastPipelineTime = d->time;
+            ActuatorAdapter::applyTwist(mj.m, mj.d, cmd, params);
+            lastPipelineTime = mj.d->time;
         }
     }
 
     // If we got here without crash, the test passes
-    REQUIRE(d->time >= 10.0);
-
-    mj_deleteData(d);
-    mj_deleteModel(m);
+    REQUIRE(mj.d->time >= 10.0);
 }

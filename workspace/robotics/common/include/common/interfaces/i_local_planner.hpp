@@ -12,7 +12,8 @@ namespace robotlib {
 /// Pre-conditions:
 ///   - path must not be empty (callers must check hasGoal/path)
 ///   - pose must be a valid (finite) Pose2D in the map frame
-///   - ctx.grid must be initialized (non-zero resolution)
+///   - ctx.grid should be initialized if the implementation uses it;
+///     not all implementations require the grid (e.g., scan-only planners)
 ///   - dt > 0 is assumed by implementations (not passed here; planners use
 ///     their own configured timestep for trajectory rollout)
 ///
