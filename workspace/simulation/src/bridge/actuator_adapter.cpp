@@ -3,15 +3,17 @@
 namespace robotlib::sim {
 
 void ActuatorAdapter::applyTwist(const mjModel* m, mjData* d, const Twist& twist,
-                                  double wheelRadius, double trackWidth) {
+                                  const SimVehicleParams& params) {
     // Convert twist to wheel velocities
-    double vl = (twist.linear - twist.angular * trackWidth / 2.0) / wheelRadius;
-    double vr = (twist.linear + twist.angular * trackWidth / 2.0) / wheelRadius;
+    double vl = (twist.linear - twist.angular * params.trackWidth / 2.0) / params.wheelRadius;
+    double vr = (twist.linear + twist.angular * params.trackWidth / 2.0) / params.wheelRadius;
 
-    // Apply to first two actuators (left, right wheel)
-    if (m->nu >= 2) {
-        d->ctrl[0] = vl;
-        d->ctrl[1] = vr;
+    // Apply to the extracted actuator indices
+    if (params.leftWheelActuator < m->nu) {
+        d->ctrl[params.leftWheelActuator] = vl;
+    }
+    if (params.rightWheelActuator < m->nu) {
+        d->ctrl[params.rightWheelActuator] = vr;
     }
 }
 

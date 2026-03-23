@@ -1,4 +1,5 @@
 #include <simulation/bridge/sensor_adapter.hpp>
+#include <algorithm>
 #include <cmath>
 #include <limits>
 

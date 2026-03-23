@@ -15,7 +15,6 @@ RayCastResult RayCaster::castRay(const OccupancyGrid& grid, const Point2D& origi
     const double dy = std::sin(angle);
 
     // Bresenham-style DDA ray traversal
-    auto [gx, gy] = grid.toGrid(origin.x, origin.y);
     const double stepSize = grid.resolution * 0.5;
     const int maxSteps = static_cast<int>(maxRange / stepSize) + 1;
 

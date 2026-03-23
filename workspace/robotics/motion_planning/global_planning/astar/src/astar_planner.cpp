@@ -1,5 +1,7 @@
 #include <astar/astar_planner.hpp>
 #include <common/geometry.hpp>
+#include <algorithm>
+#include <limits>
 #include <queue>
 #include <unordered_set>
 #include <sstream>

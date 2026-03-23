@@ -136,10 +136,17 @@ if(NOT TARGET mujoco)
         FetchContent_Populate(mujoco)
         # Patch: disable IPO in MujocoOptions.cmake
         file(READ "${mujoco_SOURCE_DIR}/cmake/MujocoOptions.cmake" _mj_opts)
+        set(_mj_opts_before "${_mj_opts}")
         string(REPLACE
             "set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)"
             "# IPO disabled by TheRobotLibrary\n  # set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)"
             _mj_opts "${_mj_opts}")
+        if(_mj_opts STREQUAL _mj_opts_before)
+            message(WARNING
+                "[deps.cmake] MuJoCo IPO patch did not match — "
+                "MujocoOptions.cmake may have changed. "
+                "Check for slim-LTO linker issues.")
+        endif()
         file(WRITE "${mujoco_SOURCE_DIR}/cmake/MujocoOptions.cmake" "${_mj_opts}")
         add_subdirectory("${mujoco_SOURCE_DIR}" "${mujoco_BINARY_DIR}")
     endif()

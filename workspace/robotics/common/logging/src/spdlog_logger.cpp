@@ -9,7 +9,7 @@ SpdlogLogger::SpdlogLogger(const std::string& name) {
     m_logger = spdlog::get(name);
     if (!m_logger) {
         m_logger = spdlog::stderr_color_mt(name);
-        m_logger->set_level(spdlog::level::trace);
+        m_logger->set_level(spdlog::level::info);
     }
 }
 

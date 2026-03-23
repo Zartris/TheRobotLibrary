@@ -34,9 +34,6 @@ target_include_directories(simulation_core PUBLIC
 
 target_link_libraries(simulation_core PUBLIC
     mujoco
-    imgui::imgui
-    OpenGL::GL
-    glfw
     common
     common_logging
     ekf
@@ -49,12 +46,19 @@ target_link_libraries(simulation_core PUBLIC
     velocity_profiling
 )
 
+# GUI/rendering deps only needed for interactive mode (linked via app_shell.cpp)
+target_link_libraries(simulation_core PRIVATE
+    imgui::imgui
+    OpenGL::GL
+    glfw
+)
+
 target_compile_features(simulation_core PUBLIC cxx_std_20)
 
 # Main executable
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
     add_executable(simulation_app src/main.cpp)
-    target_link_libraries(simulation_app PRIVATE simulation_core)
+    target_link_libraries(simulation_app PRIVATE simulation_core imgui::imgui OpenGL::GL glfw)
 endif()
 
 if(BUILD_TESTING AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/CMakeLists.txt")

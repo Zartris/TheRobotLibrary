@@ -101,6 +101,12 @@ Twist ModulePipeline::tick(const Pose2D& measuredPose, const Twist& measuredVelo
         }
     }
 
+    // Fallback: if no global planner is set, use a trivial path to the goal
+    if (m_globalPath.empty() && !m_globalPlanner && m_goal) {
+        m_globalPath = {*m_goal};
+        m_logger->debug("No global planner — using direct path to goal");
+    }
+
     if (m_globalPath.empty()) return {0.0, 0.0};
 
     // 3. Local planning

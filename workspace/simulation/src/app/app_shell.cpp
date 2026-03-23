@@ -1,6 +1,7 @@
 #include <simulation/app/app_shell.hpp>
 #include <common/geometry.hpp>
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <sstream>
 
 namespace robotlib::sim {
@@ -97,12 +98,18 @@ void AppShell::pipelineTick(double dt) {
     auto scan = SensorAdapter::generateLidar(m_model, m_data,
                                               m_vehicleParams.bodyId, m_lidarConfig);
 
-    // Use an empty grid for now (occupancy grid integration happens in pipeline)
-    OccupancyGrid grid;
+    // Provide a free-space grid covering the scenario area so A* can plan
+    if (m_grid.width == 0) {
+        constexpr double kArenaSize = 10.0;     // half-extent from flat_ground.xml
+        constexpr double kResolution = 0.25;
+        int cells = static_cast<int>(2.0 * kArenaSize / kResolution);
+        m_grid = OccupancyGrid(cells, cells, kResolution, {-kArenaSize, -kArenaSize});
+        // Mark all cells as free (negative log-odds)
+        std::fill(m_grid.cells.begin(), m_grid.cells.end(), -1);
+    }
 
-    auto cmd = m_pipeline.tick(pose, twist, scan, grid, dt);
-    ActuatorAdapter::applyTwist(m_model, m_data, cmd,
-                                m_vehicleParams.wheelRadius, m_vehicleParams.trackWidth);
+    auto cmd = m_pipeline.tick(pose, twist, scan, m_grid, dt);
+    ActuatorAdapter::applyTwist(m_model, m_data, cmd, m_vehicleParams);
 }
 
 void AppShell::runHeadless(double duration, double pipelineDt) {

@@ -1,5 +1,6 @@
 #include <velocity_profiling/trapezoidal_profiler.hpp>
 #include <common/geometry.hpp>
+#include <algorithm>
 #include <cmath>
 #include <sstream>
 #include <chrono>

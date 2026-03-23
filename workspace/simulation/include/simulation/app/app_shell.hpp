@@ -4,6 +4,7 @@
 #include <simulation/bridge/sensor_adapter.hpp>
 #include <simulation/bridge/actuator_adapter.hpp>
 #include <simulation/bridge/model_adapter.hpp>
+#include <common/occupancy_grid.hpp>
 #include <logging/get_logger.hpp>
 #include <mujoco/mujoco.h>
 #include <memory>
@@ -51,6 +52,7 @@ private:
     mjData* m_data{nullptr};
 
     ModulePipeline m_pipeline;
+    OccupancyGrid m_grid;
 
     std::atomic<bool> m_running{false};
     bool m_paused{false};

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <chrono>
+#include <limits>
 #include <sstream>
 
 namespace robotlib {
