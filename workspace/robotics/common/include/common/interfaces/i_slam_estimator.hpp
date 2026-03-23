@@ -27,6 +27,7 @@ struct Landmark {
 ///   same thread that drives predict/update.
 class ISlamEstimator : public IStateEstimator {
 public:
+    virtual ~ISlamEstimator() = default;
     virtual const OccupancyGrid& getMap() const = 0;
     virtual std::vector<Landmark> getLandmarks() const = 0;
 };

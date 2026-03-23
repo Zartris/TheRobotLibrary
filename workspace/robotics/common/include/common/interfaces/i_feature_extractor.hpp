@@ -6,9 +6,9 @@
 namespace robotlib {
 
 /// Feature point extracted from a sensor scan (used in M4 obstacle tracking).
-struct Feature {
+struct LidarFeature {
     Eigen::Vector2d position;  ///< In sensor frame (metres)
-    double intensity{0.0};
+    float intensity{0.0f};
     int id{-1};  ///< -1 = unassociated
 };
 
@@ -25,7 +25,7 @@ struct Feature {
 class IFeatureExtractor {
 public:
     virtual ~IFeatureExtractor() = default;
-    virtual std::vector<Feature> extract(const LaserScan& scan) = 0;
+    virtual std::vector<LidarFeature> extract(const LaserScan& scan) = 0;
 };
 
 }  // namespace robotlib

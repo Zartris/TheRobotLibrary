@@ -5,6 +5,15 @@
 
 namespace robotlib {
 
+struct TrackedObstacle {
+    double x{0.0};
+    double y{0.0};
+    double vx{0.0};
+    double vy{0.0};
+    double radius{0.5};
+    int track_id{-1};  ///< -1 = unassociated; stable ID assigned by M4 tracker
+};
+
 /// Forward-compatible perception bundle for local planners.
 /// Introduced in M2 to allow M4 to add obstacle tracking without
 /// breaking the ILocalPlanner interface.
@@ -13,14 +22,6 @@ namespace robotlib {
 ///   - scan and grid must be consistent (same coordinate frame)
 ///   - tracked_obstacles is empty until M4 populates it
 /// Post-conditions: none (read-only input bundle)
-struct TrackedObstacle {
-    double x{0.0};
-    double y{0.0};
-    double vx{0.0};
-    double vy{0.0};
-    double radius{0.5};
-};
-
 struct PerceptionContext {
     LaserScan scan;
     OccupancyGrid grid;

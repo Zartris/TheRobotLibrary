@@ -10,7 +10,7 @@ namespace robotlib {
 /// and returns an immediate velocity command safe for the next control cycle.
 ///
 /// Pre-conditions:
-///   - globalPath must not be empty (callers must check hasGoal/path)
+///   - path must not be empty (callers must check hasGoal/path)
 ///   - pose must be a valid (finite) Pose2D in the map frame
 ///   - ctx.grid must be initialized (non-zero resolution)
 ///   - dt > 0 is assumed by implementations (not passed here; planners use
