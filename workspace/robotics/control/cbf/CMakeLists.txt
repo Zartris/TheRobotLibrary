@@ -20,7 +20,7 @@ target_include_directories(cbf ${_vis}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(cbf ${_vis} common)
+target_link_libraries(cbf ${_vis} common common_logging)
 target_compile_features(cbf ${_vis} cxx_std_20)
 
 add_library(robotlib::cbf ALIAS cbf)
