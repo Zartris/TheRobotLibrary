@@ -83,7 +83,7 @@ void OccupancyGridMap::updateFromScan(const Pose2D& robotPose, const LaserScan& 
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::ostringstream oss;
     oss << "updateFromScan #" << m_updateCount << ": " << scan.numRays() << " rays in " << us << " us";
-    m_logger->debug(oss.str());
+    m_logger->trace(oss.str());
 }
 
 void OccupancyGridMap::reset() {

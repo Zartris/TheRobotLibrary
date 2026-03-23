@@ -15,6 +15,7 @@ SpdlogLogger::SpdlogLogger(const std::string& name) {
 
 SpdlogLogger::~SpdlogLogger() = default;
 
+void SpdlogLogger::trace(std::string_view msg) { m_logger->trace("{}", msg); }
 void SpdlogLogger::debug(std::string_view msg) { m_logger->debug("{}", msg); }
 void SpdlogLogger::info(std::string_view msg) { m_logger->info("{}", msg); }
 void SpdlogLogger::warn(std::string_view msg) { m_logger->warn("{}", msg); }

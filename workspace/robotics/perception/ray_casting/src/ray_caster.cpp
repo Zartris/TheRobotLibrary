@@ -62,7 +62,7 @@ LaserScan RayCaster::castScan(const OccupancyGrid& grid, const Pose2D& pose,
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::ostringstream oss;
     oss << "castScan: " << numRays << " rays in " << us << " us";
-    m_logger->debug(oss.str());
+    m_logger->trace(oss.str());
 
     return scan;
 }

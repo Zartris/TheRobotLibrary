@@ -94,7 +94,7 @@ TimedPath TrapezoidalProfiler::profile(const Path& path,
     std::ostringstream oss;
     oss << "TrapezoidalProfiler: " << path.size() << " waypoints, totalDist="
         << totalDist << " in " << us << " us";
-    m_logger->debug(oss.str());
+    m_logger->trace(oss.str());
 
     return result;
 }

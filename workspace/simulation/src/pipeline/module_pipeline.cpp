@@ -133,7 +133,7 @@ Twist ModulePipeline::tick(const Pose2D& measuredPose, const Twist& measuredVelo
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::ostringstream oss;
     oss << "Pipeline tick: " << us << " us";
-    m_logger->debug(oss.str());
+    m_logger->trace(oss.str());
 
     return cmd;
 }

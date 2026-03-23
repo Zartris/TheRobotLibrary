@@ -125,7 +125,7 @@ Twist DWAPlanner::compute(const Pose2D& pose, const Twist& currentVelocity,
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count();
     std::ostringstream oss;
     oss << "DWA compute: " << us << " us, best v=" << bestCmd.linear << " w=" << bestCmd.angular;
-    m_logger->debug(oss.str());
+    m_logger->trace(oss.str());
 
     return bestCmd;
 }
