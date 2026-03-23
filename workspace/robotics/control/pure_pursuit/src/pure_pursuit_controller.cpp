@@ -14,7 +14,6 @@ PurePursuitController::PurePursuitController(const PurePursuitConfig& config)
 
 void PurePursuitController::setPath(const Path& path) {
     m_path = path;
-    m_closestIdx = 0;
     std::ostringstream oss;
     oss << "Path set: " << path.size() << " waypoints";
     m_logger->debug(oss.str());
@@ -22,7 +21,6 @@ void PurePursuitController::setPath(const Path& path) {
 
 void PurePursuitController::reset() {
     m_path.clear();
-    m_closestIdx = 0;
     m_lookaheadPoint = {};
     m_logger->debug("PurePursuitController reset");
 }

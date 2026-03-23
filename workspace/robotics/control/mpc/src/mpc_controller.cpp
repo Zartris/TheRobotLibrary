@@ -161,7 +161,8 @@ Eigen::Vector2d MPCController::solveQP(const Pose2D& current, const Pose2D& targ
     return Ustar.head<2>();  // return first control input
 }
 
-Twist MPCController::compute(const Pose2D& current, const Pose2D& target, double dt) {
+Twist MPCController::compute(const Pose2D& current, const Pose2D& target, double /*dt*/) {
+    // dt is not used: MPC uses its internal m_config.dt timestep for prediction
     auto start = std::chrono::high_resolution_clock::now();
 
     // Check if already at goal

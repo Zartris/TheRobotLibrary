@@ -32,20 +32,21 @@ Geometric path follower for differential-drive. Adaptive lookahead distance (spe
 
 ### mpc
 
-Receding-horizon NMPC via **acados** (with CASAdi for OCP specification). Nonlinear kinematic model — works with any `IKinematicModel`.
+Receding-horizon **LTV-MPC** using a condensed QP formulation solved with Eigen's LLT (Cholesky) decomposition. The unicycle model is linearized around the current state at each step to form the LTV system. Works alongside any `IController`-compatible interface.
 
-acados is the recommended solver because:
-- Uses CASAdi internally for symbolic problem definition (great for learning MPC formulation)
-- Generates standalone C code optimized for real-time NMPC (portable, no runtime dependency on Python)
-- Handles nonlinear kinematics natively (Ackermann, swerve) — unlike linearized QP with OSQP
-- State-of-the-art for embedded/real-time robotics MPC (HPIPM backend)
+Implementation approach:
+- Linearizes discrete unicycle kinematics around the current operating point (LTV approximation)
+- Builds prediction matrices S and T via the condensed formulation (X = S·x₀ + T·U)
+- Solves unconstrained QP analytically via Cholesky: U* = −H⁻¹f, where H = TᵀQ̄T + R̄
+- Box constraints on v and ω applied post-solve via clamping (sufficient for nominal operation)
+- **OSQP is a documented future option** for adding hard inequality constraints (obstacle avoidance, actuator limits as true constraints)
 
-Workflow: define OCP in Python (CASAdi + acados Python API) → acados generates C solver code → C++ wrapper calls generated solver.
+> Note: `tools/codegen/generate_mpc_solver.py` and `src/generated/` (acados/CASAdi codegen workflow) were evaluated but not implemented — the Eigen LLT solver is sufficient for M3 and avoids the acados toolchain dependency.
 
-- [x] `tools/codegen/generate_mpc_solver.py` — CASAdi + acados OCP definition, generates C code
+- [ ] `tools/codegen/generate_mpc_solver.py` — deferred (acados/CASAdi codegen, future milestone)
 - [x] `include/mpc/mpc_controller.hpp` — `MPCController : IController`
-- [x] `src/mpc_controller.cpp` — wraps acados-generated C solver
-- [x] `src/generated/` — acados-generated C code (committed, regenerated via `tools/codegen/`)
+- [x] `src/mpc_controller.cpp` — LTV-MPC with Eigen dense QP (condensed formulation, LLT solver)
+- [ ] `src/generated/` — deferred (acados-generated C code, future milestone)
 - [x] `tests/test_mpc_controller.cpp`:
   - Tracks straight reference → commands converge to reference velocity
   - Tracks curved reference → smooth velocity/omega profile

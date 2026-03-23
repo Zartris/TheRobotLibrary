@@ -39,7 +39,6 @@ private:
     PurePursuitConfig m_config;
     Path m_path;
     Pose2D m_lookaheadPoint;
-    size_t m_closestIdx{0};  ///< Track progress along path
     std::shared_ptr<ILogger> m_logger;
 };
 
