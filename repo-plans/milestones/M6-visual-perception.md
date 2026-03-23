@@ -2,6 +2,8 @@
 
 **Status:** Not Started
 **Dependencies:** M4 (occupancy_grid + ray_casting used by 2.5D camera renderer)
+
+> Note: `occupancy_grid` moves from `perception/` to `mapping/` in M9.
 **Scope:** Perception infrastructure for visual SLAM: feature extraction, visual odometry, shared camera types, and a 2.5D textured simulation renderer.
 
 ---

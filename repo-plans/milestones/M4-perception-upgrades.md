@@ -40,6 +40,8 @@ Add RANSAC line extraction to the existing scan filter.
 
 ### occupancy_grid — Inflation layer
 
+> Note: `occupancy_grid` moves from `perception/` to `mapping/` in M9.
+
 Expand obstacles by robot radius for collision-safe planning.
 
 - [ ] Add `inflate()` method to `OccupancyGridMap`

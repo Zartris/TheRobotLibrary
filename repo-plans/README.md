@@ -21,6 +21,7 @@ Get the simplest version of every layer running end-to-end first (M1), then upgr
 | **M6.5** | [SLAM](milestones/M6.5-slam.md) | EKF-SLAM + lidar SLAM + camera-based visual SLAM | Not Started |
 | **M7** | [Advanced Planning](milestones/M7-advanced-planning.md) | Dijkstra, RRT*, spline fitting, TEB, time-optimal | Not Started |
 | **M8** | [Multi-Robot](milestones/M8-multi-robot.md) | N-robot sim + ORCA → priority → CBS → DMPC → MADER | Not Started |
+| **M9** | [Full 3D Navigation Pipeline](milestones/M9-full-3d-pipeline.md) | 3D mapping (voxel/TSDF/octree), EKF3D, 3D A*+DWA, 3D PID, quadrotor, new `mapping/` domain | Not Started |
 | **M10** | [Polish & Showcase](milestones/M10-polish-showcase.md) | Docs site, examples, packaging, recorded demos | Not Started |
 | **M11** | [Advanced Control](milestones/M11-advanced-control.md) | Adaptive PID, RLS parameter estimator, Frenet controller | Not Started |
 | **M12** | [Fleet Management](milestones/M12-fleet-management.md) | VDA 5050, task allocation, fleet monitor, battery management | Not Started |
@@ -66,10 +67,13 @@ M0 (infra)
            │    └→ M23 (lattice & semantic) ←── M6
            ├→ M8 (multi-robot) ←── M3, M7    → M12 (fleet management)
            │                                       └→ M24 (fleet operations)
+           ├→ M9 (full 3D pipeline) ←── M3
            └→ M10 (polish & showcase) ←── M8
 ```
 
 M3.5 requires M3 (Ackermann/swerve kinematic variants for KinematicAdapter testing). M3.5 does not block M4/M5/M6/M7 — they branch from M2 independently.
+
+M9 requires M2 (frozen interfaces) and M3 (all 2D kinematic models for 3D extension). M9 runs parallel to M4-M7.
 
 After M2, milestones M3–M5 can be developed **in parallel** since they touch independent domains. M6 (visual perception) requires M4 (occupancy grid + ray casting for the 2.5D camera renderer). M6.5 (SLAM) requires both M5 (state estimation interfaces) and M6 (feature extraction + visual odometry + camera types). M7 can start after M4 (needs costmaps). M8 needs M3 + M7. M11 requires M3 (stable control interfaces). M12 requires M8 (N-robot sim infrastructure). M13 requires M3 (IController interface); M11 recommended. M14 requires M5 (IStateEstimator interface). M15 requires M6 and M14 (both). M16 requires M7 (IGlobalPlanner interface) and M4 (OccupancyGrid). M17 requires M6 (feature_extraction, common/camera.hpp). M10 can begin partially after M8; full completion requires all milestones.
 
