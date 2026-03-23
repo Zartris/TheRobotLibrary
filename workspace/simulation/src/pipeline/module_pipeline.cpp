@@ -116,7 +116,7 @@ Twist ModulePipeline::tick(const Pose2D& measuredPose, const Twist& measuredVelo
         PerceptionContext ctx;
         ctx.scan = scan;
         ctx.grid = grid;
-        // ctx.tracked_obstacles is empty (populated in M4)
+        // ctx.trackedObstacles is empty (populated in M4)
         cmd = m_localPlanner->compute(currentPose, measuredVelocity,
                                       m_globalPath, ctx);
     } else if (m_controller) {

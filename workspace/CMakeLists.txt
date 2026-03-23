@@ -55,14 +55,25 @@ add_subdirectory(simulation)
 # Coverage report target
 # ---------------------------------------------------------------------------
 if(ENABLE_COVERAGE)
-  find_program(LCOV_PATH lcov REQUIRED)
-  find_program(GENHTML_PATH genhtml REQUIRED)
+  find_program(LCOV_PATH lcov)
+  find_program(GENHTML_PATH genhtml)
+  if(NOT LCOV_PATH OR NOT GENHTML_PATH)
+    message(FATAL_ERROR "ENABLE_COVERAGE is ON but lcov/genhtml not found. Install lcov.")
+  endif()
+
+  # Auto-detect gcov tool matching the compiler
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    get_filename_component(_CXX_NAME "${CMAKE_CXX_COMPILER}" NAME)
+    string(REGEX REPLACE "^g\\+\\+" "gcov" GCOV_TOOL "${_CXX_NAME}")
+  else()
+    set(GCOV_TOOL "gcov")
+  endif()
 
   add_custom_target(coverage
     COMMENT "Generating HTML coverage report"
     COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR}
             --capture --output-file ${CMAKE_BINARY_DIR}/coverage.info
-            --gcov-tool gcov-13
+            --gcov-tool ${GCOV_TOOL}
             --ignore-errors mismatch
     COMMAND ${LCOV_PATH} --remove ${CMAKE_BINARY_DIR}/coverage.info
             '*/_deps/*' '/usr/*' '*/tests/*'

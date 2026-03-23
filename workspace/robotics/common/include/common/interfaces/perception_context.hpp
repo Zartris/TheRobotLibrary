@@ -11,7 +11,7 @@ struct TrackedObstacle {
     double vx{0.0};
     double vy{0.0};
     double radius{0.5};
-    int track_id{-1};  ///< -1 = unassociated; stable ID assigned by M4 tracker
+    int trackId{-1};  ///< -1 = unassociated; stable ID assigned by M4 tracker
 };
 
 /// Forward-compatible perception bundle for local planners.
@@ -20,12 +20,12 @@ struct TrackedObstacle {
 ///
 /// Pre-conditions:
 ///   - scan and grid must be consistent (same coordinate frame)
-///   - tracked_obstacles is empty until M4 populates it
+///   - trackedObstacles is empty until M4 populates it
 /// Post-conditions: none (read-only input bundle)
 struct PerceptionContext {
     LaserScan scan;
     OccupancyGrid grid;
-    std::vector<TrackedObstacle> tracked_obstacles;  ///< Empty until M4
+    std::vector<TrackedObstacle> trackedObstacles;  ///< Empty until M4
 };
 
 }  // namespace robotlib
