@@ -30,6 +30,7 @@ endif()
 
 target_include_directories(common ${_vis}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/logging/include>
     $<INSTALL_INTERFACE:include>
 )
 # Eigen is PUBLIC so every consumer of common automatically gets Eigen headers

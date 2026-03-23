@@ -20,7 +20,7 @@ target_include_directories(lidar_processing ${_vis}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(lidar_processing ${_vis} common)   # Eigen via common
+target_link_libraries(lidar_processing ${_vis} common common_logging)   # Eigen via common
 target_compile_features(lidar_processing ${_vis} cxx_std_20)
 
 add_library(robotlib::lidar_processing ALIAS lidar_processing)

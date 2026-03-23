@@ -14,6 +14,10 @@ set(CMAKE_CXX_STANDARD          20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS        OFF)
 
+# ── Position-independent code (needed when linking static libs with shared) ──
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+
 # ── Compile database for clangd / IDE tooling ───────────────────────────────
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -24,12 +28,12 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
         Debug Release RelWithDebInfo MinSizeRel)
 endif()
 
-# ── Third-party dependencies (fetched once, shared by all sub-directories) ──
-include(cmake/deps.cmake)
-
 # ── Testing ──────────────────────────────────────────────────────────────────
 option(BUILD_TESTING "Build unit tests" ON)
 include(CTest)
+
+# ── Third-party dependencies (fetched once, shared by all sub-directories) ──
+include(cmake/deps.cmake)
 
 # ── Sub-directories ──────────────────────────────────────────────────────────
 add_subdirectory(robotics)
