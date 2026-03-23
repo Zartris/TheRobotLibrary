@@ -14,6 +14,51 @@ This milestone runs parallel to M4-M7 (independent domain) and establishes the 3
 
 ---
 
+## Sub-Phases
+
+M9 is split into ordered sub-phases, each independently testable:
+
+### M9-A: 3D Foundation
+- Domain restructure (create mapping/, move occupancy_grid)
+- 3D types validation (confirm types_3d/ completeness)
+- All 3D interfaces (IMap3D, IKinematicModel3D, IStateEstimator3D, IController3D, IGlobalPlanner3D, ILocalPlanner3D)
+- Path3D, PerceptionContext3D, TrackedObstacle3D types
+- Exit: all interfaces compile
+
+### M9-B: 3D Mapping
+- mapping/voxel_grid/ (3D occupancy grid + EDT)
+- mapping/octree/ (built from scratch)
+- mapping/voxel_mapping/ (voxblox wrapper — validate FetchContent first)
+- All implement IMap3D
+- Exit: all three map backends pass unit tests, interchangeable via IMap3D
+
+### M9-C: 3D State Estimation
+- state_estimation/ekf3d/ (15-state quaternion EKF)
+- Zero-to-hero EKF theory docs
+- Exit: EKF3D converges with simulated IMU + position updates
+
+### M9-D: 3D Planning & Control
+- motion_planning/global_planning/astar3d/
+- motion_planning/local_planning/dwa3d/
+- control/pid3d/
+- Exit: quadrotor plans and follows 3D path in unit tests
+
+### M9-E: 3D Kinematics
+- IKinematicModel3D interface
+- QuadrotorModel (native 3D)
+- TerrainFollower utility
+- DifferentialDrive3D, Unicycle3D, Ackermann3D, Swerve3D
+- Exit: all kinematic models pass unit tests
+
+### M9-F: Simulation Integration
+- Bridge 3D mode (Pose3D/Twist3D/point clouds)
+- 3 MJCF scenarios
+- ImGui 3D panels
+- Integration tests (quadrotor 3D nav, ground robot ramp, map swap, module swap)
+- Exit: full 3D pipeline runs end-to-end in sim
+
+---
+
 ## Domain Restructure: `mapping/`
 
 ### Rationale
@@ -38,6 +83,9 @@ workspace/robotics/mapping/
 All milestones referencing `perception/occupancy_grid` must be updated to `mapping/occupancy_grid`:
 - M1, M2, M4, M6.5, M7, and any module plan files
 - Roadmap README dependency graph updated to include M9
+- `workspace/architecture.md` — add `mapping` domain to dependency graph and module index, document new `mapping/` domain
+
+> **Coordination note:** The `occupancy_grid` move from `perception/` to `mapping/` must be completed in M9-A before any parallel milestone (M4, M7) modifies `occupancy_grid`. If M4 is in progress, coordinate the move to avoid merge conflicts. Alternatively, M9-A can be landed as a standalone PR before other M9 sub-phases begin.
 
 ---
 
@@ -56,12 +104,16 @@ common/interfaces/
 
 ### Key 3D Types (existing in common/types_3d/)
 
+> **Note:** These types already exist in the `types_3d/` sub-module under `common/`. They are defined in individual headers (`pose3d.hpp`, `twist3d.hpp`, `wrench.hpp`, `terrain_pose.hpp`, `quaternion.hpp`, `transform3d.hpp`) — not in a monolithic `types_3d.hpp`.
+
 | 2D (existing) | 3D (existing or new) |
 |---|---|
-| `Pose2D` | `Pose3D` (exists in types_3d/) |
-| `Twist` (linear, angular) | `Twist3D` (exists in types_3d/) |
+| `Pose2D` | `Pose3D` (exists in `common/types_3d/pose3d.hpp`) |
+| `Twist` (linear, angular) | `Twist3D` (exists in `common/types_3d/twist3d.hpp`) |
 | `Path` (vector of Pose2D) | `Path3D` (new — vector of Pose3D) |
 | `OccupancyGrid` | `IMap3D` (new — abstract interface) |
+
+`Path3D` defined as `using Path3D = std::vector<Pose3D>;` in `common/types_3d/pose3d.hpp` alongside `Pose3D`.
 
 ### IMap3D — Common 3D Map Interface
 
@@ -74,10 +126,76 @@ public:
     virtual bool isInBounds(double x, double y, double z) const = 0;
     virtual double resolution() const = 0;
     virtual Eigen::AlignedBox3d bounds() const = 0;
+    virtual void updateFromPointCloud(const std::vector<Eigen::Vector3d>& points,
+                                       const Eigen::Vector3d& sensorOrigin) = 0;
+    virtual std::optional<double> raycast(const Eigen::Vector3d& origin,
+                                           const Eigen::Vector3d& direction,
+                                           double maxRange) const = 0;
 };
 ```
 
 All three map backends (voxel grid, ESDF, octree) implement `IMap3D`. Planners depend only on `IMap3D`.
+
+### IStateEstimator3D
+
+```cpp
+class IStateEstimator3D {
+public:
+    virtual ~IStateEstimator3D() = default;
+    virtual void predict(const ImuReading& imu, double dt) = 0;
+    virtual void updatePosition(const Eigen::Vector3d& position, const Eigen::Matrix3d& R) = 0;
+    virtual void updatePose(const Pose3D& pose, const Eigen::MatrixXd& R) = 0;
+    virtual Pose3D getPose3D() const = 0;
+    virtual Eigen::MatrixXd getCovariance() const = 0;
+    virtual void reset(const Pose3D& pose) = 0;
+};
+```
+
+### IController3D
+
+```cpp
+class IController3D {
+public:
+    virtual ~IController3D() = default;
+    virtual Twist3D compute(const Pose3D& current, const Pose3D& target, double dt) = 0;
+    virtual void reset() = 0;
+};
+```
+
+### IGlobalPlanner3D
+
+```cpp
+class IGlobalPlanner3D {
+public:
+    virtual ~IGlobalPlanner3D() = default;
+    virtual std::optional<Path3D> plan(const Pose3D& start, const Pose3D& goal,
+                                        const IMap3D& map) = 0;
+};
+```
+
+### ILocalPlanner3D
+
+```cpp
+struct TrackedObstacle3D {
+    Eigen::Vector3d position{0.0, 0.0, 0.0};
+    Eigen::Vector3d velocity{0.0, 0.0, 0.0};
+    double radius{0.5};
+    int trackId{-1};
+};
+
+struct PerceptionContext3D {
+    const IMap3D* map{nullptr};
+    std::vector<Eigen::Vector3d> pointCloud;
+    std::vector<TrackedObstacle3D> trackedObstacles;  ///< Empty until populated
+};
+
+class ILocalPlanner3D {
+public:
+    virtual ~ILocalPlanner3D() = default;
+    virtual Twist3D compute(const Pose3D& pose, const Twist3D& vel,
+                            const Path3D& path, const PerceptionContext3D& ctx) = 0;
+};
+```
 
 ### IKinematicModel3D
 
@@ -86,7 +204,12 @@ class IKinematicModel3D {
 public:
     virtual ~IKinematicModel3D() = default;
     virtual Pose3D step(const Pose3D& state, const Twist3D& control, double dt) = 0;
-    virtual Twist3D getControlLimits3D() const = 0;
+    virtual int controlDim() const = 0;
+    struct ControlLimits3D {
+        Twist3D maxVelocity;
+        Twist3D maxAcceleration;
+    };
+    virtual ControlLimits3D getControlLimits3D() const = 0;
     virtual Twist3D toTwist3D(const Eigen::VectorXd& control) const = 0;
     virtual Eigen::VectorXd fromTwist3D(const Twist3D& twist) const = 0;
 };
@@ -103,12 +226,14 @@ A simple 3D occupancy grid. The 3D equivalent of our 2D `OccupancyGrid`.
 - `VoxelGrid : IMap3D` — flat `std::vector<int8_t>` indexed by (x,y,z)
 - Log-odds updates from 3D point clouds
 - `updateFromPointCloud(points, sensorOrigin)`
-- `isOccupied()`, `getDistance()` (brute-force nearest-occupied)
+- `isOccupied()`, `getDistance()` — pre-computed via Euclidean Distance Transform (EDT) on map update, making queries O(1). EDT recomputed incrementally on `updateFromPointCloud()`.
 - Theory docs: 3D discretization, log-odds sensor model in 3D, memory layout (flat vs nested), comparison with octree memory tradeoffs
 
 ### mapping/voxel_mapping/ — voxblox (third-party, FetchContent)
 
 Thin wrapper around voxblox. Our code is the adapter layer; the real value is the theory docs.
+
+> **Build note:** voxblox has transitive dependencies (Protobuf, glog) that may complicate FetchContent integration. If FetchContent proves infeasible, fallback plan: (a) implement a standalone TSDF/ESDF from scratch using only Eigen (the theory docs make this possible), or (b) use a lighter alternative like a minimal TSDF implementation extracted from Open3D. The build integration must be validated before implementation begins.
 
 - `TsdfMap : IMap3D` — wraps voxblox's TSDF layer, `integratePointCloud()`
 - `EsdfMap : IMap3D` — wraps voxblox's ESDF layer, `getDistance()` returns the Euclidean distance field
@@ -146,6 +271,7 @@ State vector: `[position(3), quaternion(4), velocity(3), gyro_bias(3), accel_bia
 - **Update sources:** Position measurement (GPS-like), full pose measurement (external tracking), odometry twist. Each is a separate `update()` overload.
 - **Bias estimation:** Gyro and accelerometer biases modeled as random walks. Filter estimates and corrects for sensor drift.
 - **Error-state formulation:** Error quaternion is a 3-vector (small-angle), so covariance is 15×15 (not 16×16). Quaternion re-normalized after each update.
+- **Angular velocity convention:** Uses body-frame angular velocity convention (gyroscope outputs are in body frame).
 - **Interface:** `EKF3D : IStateEstimator3D`
 
 ### Zero-to-hero docs structure:
@@ -195,6 +321,8 @@ State vector: `[position(3), quaternion(4), velocity(3), gyro_bias(3), accel_bia
 - Theory docs: PID in 3D, quaternion error computation, decoupled vs coupled axis control
 
 ### Kinematic Models — All extended to 3D
+
+> **Architecture note:** Concrete kinematic model implementations live in `common/kinematics/` following the established M1 pattern (e.g., `DifferentialDrive` has both `.hpp` and `.cpp` in common). While `common/` is generally for header-only types, kinematic models are an exception as they are shared across control, planning, and simulation domains and don't belong to any single domain.
 
 M9 depends on M3 so all 2D kinematic models are available before building 3D versions.
 
