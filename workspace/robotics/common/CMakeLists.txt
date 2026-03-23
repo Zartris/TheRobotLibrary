@@ -41,6 +41,7 @@ add_library(robotlib::common ALIAS common)
 
 # ── Sub-modules ──────────────────────────────────────────────────────────────
 add_subdirectory(logging)
+add_subdirectory(testing)
 add_subdirectory(transforms)
 add_subdirectory(noise_models)
 

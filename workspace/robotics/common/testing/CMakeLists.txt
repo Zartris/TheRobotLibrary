@@ -1,0 +1,3 @@
+add_library(common_testing INTERFACE)
+target_include_directories(common_testing INTERFACE include)
+target_link_libraries(common_testing INTERFACE common_logging)

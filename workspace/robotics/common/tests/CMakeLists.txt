@@ -8,6 +8,7 @@ add_executable(common_tests
 target_link_libraries(common_tests PRIVATE
     common
     common_logging
+    common_testing
     Catch2::Catch2WithMain
 )
 
