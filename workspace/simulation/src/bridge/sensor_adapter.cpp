@@ -15,6 +15,12 @@ LaserScan SensorAdapter::generateLidar(const mjModel* m, const mjData* d,
     scan.angleIncrement = (config.angleMax - config.angleMin) / std::max(1, config.numRays - 1);
     scan.ranges.resize(config.numRays);
 
+    if (bodyId < 0 || bodyId >= m->nbody) {
+        std::fill(scan.ranges.begin(), scan.ranges.end(),
+                  static_cast<float>(config.rangeMax));
+        return scan;
+    }
+
     // Get robot position and orientation
     const double* pos = d->xpos + 3 * bodyId;
     const double* quat = d->xquat + 4 * bodyId;

@@ -26,6 +26,7 @@ void EKF2D::predict(const Twist& twist, double dt) {
     if (std::abs(w) < 1e-6) {
         m_state(0) += v * std::cos(theta) * dt;
         m_state(1) += v * std::sin(theta) * dt;
+        m_state(2) = normalizeAngle(theta + w * dt);
     } else {
         m_state(0) += (v / w) * (std::sin(theta + w * dt) - std::sin(theta));
         m_state(1) += (v / w) * (-std::cos(theta + w * dt) + std::cos(theta));

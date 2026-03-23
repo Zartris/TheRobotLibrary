@@ -4,6 +4,8 @@ namespace robotlib::sim {
 
 void ActuatorAdapter::applyTwist(const mjModel* m, mjData* d, const Twist& twist,
                                   const SimVehicleParams& params) {
+    if (params.wheelRadius <= 0.0) return;
+
     // Convert twist to wheel velocities
     double vl = (twist.linear - twist.angular * params.trackWidth / 2.0) / params.wheelRadius;
     double vr = (twist.linear + twist.angular * params.trackWidth / 2.0) / params.wheelRadius;

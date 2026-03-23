@@ -21,6 +21,9 @@ Pose2D StateAdapter::extractPose2D(const mjModel* m, const mjData* d, int bodyId
 }
 
 Twist StateAdapter::extractTwist(const mjModel* m, const mjData* d, int bodyId) {
+    if (bodyId < 0 || bodyId >= m->nbody) {
+        return Twist{};
+    }
     // Body velocities in d->cvel (6 per body: 3 angular + 3 linear)
     const double* vel = d->cvel + 6 * bodyId;
     // vel[0..2] = angular velocity, vel[3..5] = linear velocity

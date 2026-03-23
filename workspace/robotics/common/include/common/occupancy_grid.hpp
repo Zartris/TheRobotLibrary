@@ -7,8 +7,8 @@
 namespace robotlib {
 
 enum class CellState : int8_t {
-    Unknown = -1,
-    Free = 0,
+    Free = -1,
+    Unknown = 0,
     Occupied = 1
 };
 
