@@ -20,7 +20,7 @@ class ModulePipeline {
 public:
     ModulePipeline();
 
-    /// Set a controller directly. Sets controllerName() to "custom".
+    /// Set a controller directly. Sets currentControllerName() to "custom".
     void setController(std::unique_ptr<IController> controller);
     void setGlobalPlanner(std::unique_ptr<IGlobalPlanner> planner);
     void setLocalPlanner(std::unique_ptr<ILocalPlanner> planner);

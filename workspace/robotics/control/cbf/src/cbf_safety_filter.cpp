@@ -32,6 +32,11 @@ Twist CbfSafetyFilter::compute(const Pose2D& current, const Pose2D& target, doub
 
     if (!m_nominal) {
         m_logger->error("CBF: no nominal controller set");
+        auto end = std::chrono::high_resolution_clock::now();
+        auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        std::ostringstream ossNull;
+        ossNull << "CBF compute: " << us << " us (null controller, returning zero)";
+        m_logger->trace(ossNull.str());
         return {0.0, 0.0};
     }
 

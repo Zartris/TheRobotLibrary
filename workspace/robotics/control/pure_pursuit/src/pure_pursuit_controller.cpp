@@ -1,6 +1,7 @@
 #include <pure_pursuit/pure_pursuit_controller.hpp>
 #include <common/geometry.hpp>
 #include <cmath>
+#include <numbers>
 #include <algorithm>
 #include <limits>
 #include <sstream>
@@ -41,7 +42,7 @@ Twist PurePursuitController::compute(const Pose2D& current, const Pose2D& target
         double headingError = normalizeAngle(targetAngle - current.theta);
 
         // If facing away from target, rotate in place rather than driving backward
-        if (std::abs(headingError) > M_PI / 2.0) {
+        if (std::abs(headingError) > std::numbers::pi / 2.0) {
             double omega = std::copysign(m_config.maxAngularVelocity * 0.5, headingError);
             omega = std::clamp(omega, -m_config.maxAngularVelocity, m_config.maxAngularVelocity);
             auto end = std::chrono::high_resolution_clock::now();
@@ -78,6 +79,11 @@ Twist PurePursuitController::compute(const Pose2D& current, const Pose2D& target
     double dx = target.x - current.x;
     double dy = target.y - current.y;
     if (std::sqrt(dx * dx + dy * dy) < m_config.goalTolerance) {
+        auto end = std::chrono::high_resolution_clock::now();
+        auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        std::ostringstream ossGoal;
+        ossGoal << "PurePursuit compute: " << us << " us (goal reached)";
+        m_logger->trace(ossGoal.str());
         return {0.0, 0.0};
     }
 

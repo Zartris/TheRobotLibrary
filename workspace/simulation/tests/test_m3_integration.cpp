@@ -72,7 +72,7 @@ TEST_CASE("Controller hot-swap: PID to PurePursuit mid-run", "[m3][integration][
     auto& pipeline = app.pipeline();
 
     // Start with PID
-    pipeline.selectController("pid");
+    REQUIRE(pipeline.selectController("pid"));
     pipeline.setEstimator(std::make_unique<EKF2D>());
     pipeline.setGoal({3.0, 3.0, 0.0});
 
@@ -81,7 +81,7 @@ TEST_CASE("Controller hot-swap: PID to PurePursuit mid-run", "[m3][integration][
     REQUIRE(app.data()->time > 1.5);
 
     // Swap to PurePursuit mid-run
-    pipeline.selectController("pure_pursuit");
+    REQUIRE(pipeline.selectController("pure_pursuit"));
 
     // Continue for 2 more seconds
     app.runHeadless(4.0, 0.02);
@@ -100,14 +100,14 @@ TEST_CASE("Controller hot-swap: PID to MPC mid-run", "[m3][integration][headless
     REQUIRE(app.initialize());
 
     auto& pipeline = app.pipeline();
-    pipeline.selectController("pid");
+    REQUIRE(pipeline.selectController("pid"));
     pipeline.setEstimator(std::make_unique<EKF2D>());
     pipeline.setGoal({3.0, 3.0, 0.0});
 
     app.runHeadless(2.0, 0.02);
 
     // Swap to MPC
-    pipeline.selectController("mpc");
+    REQUIRE(pipeline.selectController("mpc"));
     app.runHeadless(4.0, 0.02);
     REQUIRE(app.data()->time > 3.5);
 }
@@ -124,14 +124,14 @@ TEST_CASE("Controller hot-swap: PID to CBF-PID mid-run", "[m3][integration][head
     REQUIRE(app.initialize());
 
     auto& pipeline = app.pipeline();
-    pipeline.selectController("pid");
+    REQUIRE(pipeline.selectController("pid"));
     pipeline.setEstimator(std::make_unique<EKF2D>());
     pipeline.setGoal({3.0, 3.0, 0.0});
 
     app.runHeadless(2.0, 0.02);
 
     // Swap to CBF-wrapped PID
-    pipeline.selectController("cbf_pid");
+    REQUIRE(pipeline.selectController("cbf_pid"));
     app.runHeadless(4.0, 0.02);
     REQUIRE(app.data()->time > 3.5);
 }
@@ -173,7 +173,7 @@ TEST_CASE("Controller cycle through all types without crash", "[m3][integration]
 
     // Cycle through all controllers, running 1 second each
     for (const auto& name : ModulePipeline::availableControllers()) {
-        pipeline.selectController(name);
+        REQUIRE(pipeline.selectController(name));
         app.runHeadless(app.data()->time + 1.0, 0.02);
     }
 

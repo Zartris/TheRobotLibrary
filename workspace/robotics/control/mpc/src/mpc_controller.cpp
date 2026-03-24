@@ -49,6 +49,10 @@ Eigen::Vector2d MPCController::solveQP(const Pose2D& current, const Pose2D& targ
         m_logger->error("MPC horizon must be >= 1");
         return Eigen::Vector2d::Zero();
     }
+    if (m_config.dt <= 0.0) {
+        m_logger->error("MPC dt must be > 0");
+        return Eigen::Vector2d::Zero();
+    }
     const int nx = 3;  // state dim
     const int nu = 2;  // control dim
 
@@ -185,6 +189,11 @@ Twist MPCController::compute(const Pose2D& current, const Pose2D& target, double
     double dx = target.x - current.x;
     double dy = target.y - current.y;
     if (std::sqrt(dx * dx + dy * dy) < 0.1) {
+        auto end = std::chrono::high_resolution_clock::now();
+        auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+        std::ostringstream ossGoal;
+        ossGoal << "MPC compute: " << us << " us (goal reached)";
+        m_logger->trace(ossGoal.str());
         return {0.0, 0.0};
     }
 
