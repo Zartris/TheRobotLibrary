@@ -24,7 +24,6 @@ struct ObstacleDetectorConfig {
 
     // Tracking parameters
     double associationThreshold{0.5}; ///< Max distance to associate detection with track
-    int maxMissedFrames{5};           ///< Remove track after this many missed frames
 };
 
 class ObstacleDetector {
@@ -32,10 +31,12 @@ public:
     explicit ObstacleDetector(const ObstacleDetectorConfig& config = {});
 
     /// Detect and track obstacles from a laser scan.
-    /// @param scan  Laser scan data
-    /// @param pose  Robot pose (to transform scan points to world frame)
+    /// @param scan       Laser scan data
+    /// @param pose       Robot pose (to transform scan points to world frame)
+    /// @param timestamp  Scan timestamp in seconds (-1.0 = unknown)
     /// @return Detected and tracked obstacles in world frame
-    std::vector<DetectedObstacle> detect(const LaserScan& scan, const Pose2D& pose);
+    std::vector<DetectedObstacle> detect(const LaserScan& scan, const Pose2D& pose,
+                                         double timestamp = -1.0);
 
     /// Get currently tracked obstacles (without new detection)
     const std::vector<DetectedObstacle>& trackedObstacles() const { return m_tracks; }

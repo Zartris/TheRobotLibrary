@@ -198,7 +198,7 @@ void ObstacleDetector::associateAndUpdate(
 }
 
 std::vector<DetectedObstacle> ObstacleDetector::detect(
-    const LaserScan& scan, const Pose2D& pose) {
+    const LaserScan& scan, const Pose2D& pose, double timestamp) {
     auto start = std::chrono::high_resolution_clock::now();
 
     // 1. Convert scan to world-frame points
@@ -219,10 +219,16 @@ std::vector<DetectedObstacle> ObstacleDetector::detect(
     // 3. Convert clusters to obstacle detections
     auto detections = clustersToObstacles(points, labels);
 
-    // 4. Associate with tracks and update
-    constexpr double kDefaultDt = 0.1;
-    associateAndUpdate(detections, kDefaultDt);
-    m_lastTimestamp = 0.0;  // placeholder — real timestamp would come from scan header
+    // 4. Compute dt from timestamps
+    double dt = 0.1;  // default if no timestamp
+    if (timestamp >= 0.0 && m_lastTimestamp >= 0.0) {
+        dt = timestamp - m_lastTimestamp;
+        if (dt <= 0.0) dt = 0.1;
+    }
+    if (timestamp >= 0.0) m_lastTimestamp = timestamp;
+
+    // 5. Associate with tracks and update
+    associateAndUpdate(detections, dt);
 
     auto end = std::chrono::high_resolution_clock::now();
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();

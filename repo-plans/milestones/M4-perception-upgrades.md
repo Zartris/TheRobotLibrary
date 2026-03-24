@@ -16,7 +16,7 @@ Upgrade the perception pipeline from "basic lidar → grid" to a richer understa
 
 ### obstacle_detection
 
-DBSCAN clustering on lidar scan points + simple Kalman-filter-based obstacle tracking.
+DBSCAN clustering on lidar scan points + nearest-neighbor obstacle tracking with velocity estimation.
 
 - [x] `include/obstacle_detection/obstacle_detector.hpp` — `ObstacleDetector`
 - [x] `src/obstacle_detector.cpp`
