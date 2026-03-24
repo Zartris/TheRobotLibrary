@@ -46,3 +46,18 @@ target_compile_definitions(m3_integration_tests PRIVATE
     CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 )
 catch_discover_tests(m3_integration_tests)
+
+add_executable(m4_integration_tests
+    test_m4_integration.cpp
+)
+target_link_libraries(m4_integration_tests PRIVATE
+    simulation_core
+    obstacle_detection
+    Catch2::Catch2WithMain
+    glfw
+    OpenGL::GL
+)
+target_compile_definitions(m4_integration_tests PRIVATE
+    CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+catch_discover_tests(m4_integration_tests)

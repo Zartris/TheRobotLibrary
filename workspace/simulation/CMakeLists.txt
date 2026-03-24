@@ -40,6 +40,7 @@ target_link_libraries(simulation_core PUBLIC
     occupancy_grid
     ray_casting
     lidar_processing
+    obstacle_detection
     pid
     astar
     dwa

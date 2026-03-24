@@ -92,4 +92,47 @@ void OccupancyGridMap::reset() {
     m_logger->debug("OccupancyGridMap reset");
 }
 
+OccupancyGrid OccupancyGridMap::inflate(double radiusMetres) const {
+    auto start = std::chrono::high_resolution_clock::now();
+
+    double radius = std::max(0.0, radiusMetres);
+    OccupancyGrid inflated = m_grid;  // copy
+    int radiusCells = static_cast<int>(std::ceil(radius / m_grid.resolution));
+
+    // For each occupied cell, mark cells within radius as occupied
+    for (int y = 0; y < m_grid.height; ++y) {
+        for (int x = 0; x < m_grid.width; ++x) {
+            if (m_grid.cells[y * m_grid.width + x] <= 0) continue;  // not occupied
+
+            // Inflate in a square region, check circular distance
+            for (int dy = -radiusCells; dy <= radiusCells; ++dy) {
+                for (int dx = -radiusCells; dx <= radiusCells; ++dx) {
+                    int nx = x + dx;
+                    int ny = y + dy;
+                    if (!inflated.isValid(nx, ny)) continue;
+
+                    // Check if within circular radius
+                    double dist =
+                        std::sqrt(static_cast<double>(dx) * dx + static_cast<double>(dy) * dy) * m_grid.resolution;
+                    if (dist <= radiusMetres) {
+                        int idx = ny * inflated.width + nx;
+                        if (inflated.cells[idx] <= 0) {
+                            inflated.cells[idx] = 1;  // mark as occupied (inflation)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::ostringstream oss;
+    oss << "Inflate: " << us << " us, radius=" << radius << "m (" << radiusCells
+        << " cells)";
+    m_logger->trace(oss.str());
+
+    return inflated;
+}
+
 }  // namespace robotlib

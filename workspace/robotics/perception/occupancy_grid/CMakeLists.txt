@@ -20,7 +20,7 @@ target_include_directories(occupancy_grid ${_vis}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(occupancy_grid ${_vis} common)
+target_link_libraries(occupancy_grid ${_vis} common common_logging)
 target_compile_features(occupancy_grid ${_vis} cxx_std_20)
 
 add_library(robotlib::occupancy_grid ALIAS occupancy_grid)

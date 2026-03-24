@@ -1,5 +1,6 @@
 add_executable(occupancy_grid_tests
     test_occupancy_grid_map.cpp
+    test_inflation.cpp
 )
 
 target_link_libraries(occupancy_grid_tests PRIVATE

@@ -1,6 +1,6 @@
 # M4 — Perception Upgrades
 
-**Status:** Not Started  
+**Status:** Complete
 **Dependencies:** M2 (stable perception interfaces)  
 **Scope:** Obstacle detection, RANSAC line extraction, occupancy grid inflation, dynamic obstacles.
 
@@ -16,11 +16,11 @@ Upgrade the perception pipeline from "basic lidar → grid" to a richer understa
 
 ### obstacle_detection
 
-DBSCAN clustering on lidar scan points + simple Kalman-filter-based obstacle tracking.
+DBSCAN clustering on lidar scan points + nearest-neighbor obstacle tracking with velocity estimation.
 
-- [ ] `include/obstacle_detection/obstacle_detector.hpp` — `ObstacleDetector`
-- [ ] `src/obstacle_detector.cpp`
-- [ ] `tests/test_obstacle_detector.cpp`:
+- [x] `include/obstacle_detection/obstacle_detector.hpp` — `ObstacleDetector`
+- [x] `src/obstacle_detector.cpp`
+- [x] `tests/test_obstacle_detector.cpp`:
   - Cluster 3 distinct groups of points → 3 obstacles
   - Track obstacle across 5 frames → stable ID + velocity estimate
   - No clusters in empty scan → empty output
@@ -30,9 +30,9 @@ DBSCAN clustering on lidar scan points + simple Kalman-filter-based obstacle tra
 
 Add RANSAC line extraction to the existing scan filter.
 
-- [ ] `include/lidar_processing/line_extractor.hpp` — `extractLines()`
-- [ ] `src/line_extractor.cpp`
-- [ ] `tests/test_line_extractor.cpp`:
+- [x] `include/lidar_processing/line_extractor.hpp` — `extractLines()`
+- [x] `src/line_extractor.cpp`
+- [x] `tests/test_line_extractor.cpp`:
   - Scan against straight wall → single line with correct parameters
   - L-shaped wall → two lines
   - Noisy scan → lines extracted within tolerance
@@ -44,28 +44,28 @@ Add RANSAC line extraction to the existing scan filter.
 
 Expand obstacles by robot radius for collision-safe planning.
 
-- [ ] Add `inflate()` method to `OccupancyGridMap`
-- [ ] `tests/test_inflation.cpp`:
+- [x] Add `inflate()` method to `OccupancyGridMap`
+- [x] `tests/test_inflation.cpp`:
   - Single occupied cell + radius 3 → circle of inflated cells
   - Inflation doesn't exceed grid bounds
   - Re-inflation after map update works correctly
 
 ### Simulation — Dynamic obstacles
 
-- [ ] Add moving obstacle entities to world model (circles/rectangles, linear/circular motion)
-- [ ] Configurable in scenario JSON (`"dynamic_obstacles": [...]`)
-- [ ] Dynamic obstacles appear in lidar scans (via ray_casting)
-- [ ] Simulation app: render dynamic obstacles, detected obstacle bounding boxes, extracted lines, inflated grid overlay in MuJoCo 3D scene / ImGui telemetry panel
+- [x] Add moving obstacle entities to world model (circles/rectangles, linear/circular motion)
+- [x] Configurable in scenario JSON (`"dynamic_obstacles": [...]`)
+- [x] Dynamic obstacles appear in lidar scans (via ray_casting)
+- [x] Simulation app: render dynamic obstacles, detected obstacle bounding boxes, extracted lines, inflated grid overlay in MuJoCo 3D scene / ImGui telemetry panel
 
 ---
 
 ## Deliverables
 
-- [ ] obstacle_detection module: implementation + tests
-- [ ] RANSAC line extraction: implementation + tests
-- [ ] Inflation layer: implementation + tests
-- [ ] Dynamic obstacles in sim
-- [ ] Simulation app visualization for all new features
+- [x] obstacle_detection module: implementation + tests
+- [x] RANSAC line extraction: implementation + tests
+- [x] Inflation layer: implementation + tests
+- [x] Dynamic obstacles in sim
+- [x] Simulation app visualization for all new features
 
 ## Exit Criteria
 

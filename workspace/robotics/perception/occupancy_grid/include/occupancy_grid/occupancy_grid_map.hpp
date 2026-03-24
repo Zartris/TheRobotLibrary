@@ -22,6 +22,12 @@ public:
     void updateFromScan(const Pose2D& robotPose, const LaserScan& scan);
     void reset();
 
+    /// Create an inflated copy of the grid. Occupied cells are expanded by the given
+    /// radius (in metres). The original grid is not modified.
+    /// @param radiusMetres Inflation radius in metres (typically robot radius)
+    /// @return New OccupancyGrid with inflated obstacles
+    OccupancyGrid inflate(double radiusMetres) const;
+
     const OccupancyGrid& grid() const { return m_grid; }
     OccupancyGrid& grid() { return m_grid; }
 
