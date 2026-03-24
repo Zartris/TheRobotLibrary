@@ -20,7 +20,7 @@ target_include_directories(obstacle_detection ${_vis}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(obstacle_detection ${_vis} common)
+target_link_libraries(obstacle_detection ${_vis} common common_logging)
 target_compile_features(obstacle_detection ${_vis} cxx_std_20)
 
 add_library(robotlib::obstacle_detection ALIAS obstacle_detection)
