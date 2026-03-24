@@ -20,7 +20,7 @@ target_include_directories(pure_pursuit ${_vis}
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_link_libraries(pure_pursuit ${_vis} common)
+target_link_libraries(pure_pursuit ${_vis} common common_logging)
 target_compile_features(pure_pursuit ${_vis} cxx_std_20)
 
 add_library(robotlib::pure_pursuit ALIAS pure_pursuit)

@@ -1,6 +1,10 @@
 #include <simulation/pipeline/module_pipeline.hpp>
 #include <common/geometry.hpp>
 #include <common/interfaces/perception_context.hpp>
+#include <pid/pid_controller.hpp>
+#include <pure_pursuit/pure_pursuit_controller.hpp>
+#include <mpc/mpc_controller.hpp>
+#include <cbf/cbf_safety_filter.hpp>
 #include <cmath>
 #include <sstream>
 #include <chrono>
@@ -14,6 +18,7 @@ ModulePipeline::ModulePipeline()
 
 void ModulePipeline::setController(std::unique_ptr<IController> controller) {
     m_controller = std::move(controller);
+    m_controllerName = "custom";
     m_logger->debug("Controller set");
 }
 
@@ -141,6 +146,67 @@ Twist ModulePipeline::tick(const Pose2D& measuredPose, const Twist& measuredVelo
     m_logger->trace(oss.str());
 
     return cmd;
+}
+
+std::vector<std::string> ModulePipeline::availableControllers() {
+    return {"pid", "pure_pursuit", "mpc", "cbf_pid"};
+}
+
+std::vector<std::string> ModulePipeline::availableKinematicModels() {
+    return {"differential_drive", "unicycle", "ackermann", "swerve"};
+}
+
+bool ModulePipeline::selectController(const std::string& name) {
+    if (name == "pid") {
+        PIDConfig hCfg{2.0, 0.0, 0.1, 3.0, 2.0};
+        PIDConfig sCfg{1.0, 0.1, 0.0, 1.0, 1.0};
+        setController(std::make_unique<HeadingSpeedController>(hCfg, sCfg));
+    } else if (name == "pure_pursuit") {
+        PurePursuitConfig cfg;
+        cfg.lookaheadDistance = 0.8;
+        cfg.maxLinearVelocity = 0.8;
+        setController(std::make_unique<PurePursuitController>(cfg));
+    } else if (name == "mpc") {
+        MPCConfig cfg;
+        cfg.horizon = 10;
+        cfg.dt = 0.1;
+        setController(std::make_unique<MPCController>(cfg));
+    } else if (name == "cbf_pid") {
+        PIDConfig hCfg{2.0, 0.0, 0.1, 3.0, 2.0};
+        PIDConfig sCfg{1.0, 0.1, 0.0, 1.0, 1.0};
+        auto pid = std::make_unique<HeadingSpeedController>(hCfg, sCfg);
+        CbfConfig cbfCfg;
+        cbfCfg.safetyRadius = 0.5;
+        setController(std::make_unique<CbfSafetyFilter>(std::move(pid), cbfCfg));
+    } else {
+        m_logger->warn("Unknown controller: " + name);
+        return false;
+    }
+    m_controllerName = name;
+    std::ostringstream oss;
+    oss << "Controller selected: " << name;
+    m_logger->debug(oss.str());
+    return true;
+}
+
+bool ModulePipeline::selectKinematicModel(const std::string& name) {
+    auto models = availableKinematicModels();
+    bool found = false;
+    for (const auto& m : models) {
+        if (m == name) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        m_logger->warn("Unknown kinematic model: " + name);
+        return false;
+    }
+    m_kinematicModelName = name;
+    std::ostringstream oss;
+    oss << "Kinematic model selected: " << name;
+    m_logger->debug(oss.str());
+    return true;
 }
 
 }  // namespace robotlib::sim

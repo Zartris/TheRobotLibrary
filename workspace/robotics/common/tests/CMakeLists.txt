@@ -3,6 +3,9 @@ add_executable(common_tests
     test_transform2d.cpp
     test_geometry.cpp
     test_differential_drive.cpp
+    test_unicycle.cpp
+    test_ackermann.cpp
+    test_swerve_drive.cpp
 )
 
 target_link_libraries(common_tests PRIVATE
