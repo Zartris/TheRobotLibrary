@@ -6,10 +6,17 @@
 
 using namespace robotlib;
 
+TEST_CASE("MPC reports correct backend", "[mpc]") {
+    MPCController mpc;
+    std::string be = mpc.backend();
+    // Should be "eigen" in CI (no acados) or "acados" when installed
+    REQUIRE((be == "eigen" || be == "acados"));
+}
+
 TEST_CASE("MPC tracks straight reference", "[mpc]") {
     MPCConfig cfg;
     cfg.horizon = 10;
-    cfg.dt = 0.1;
+    cfg.predictionTime = 1.0;
     cfg.maxLinearVelocity = 1.0;
     MPCController mpc(cfg);
 
@@ -90,7 +97,7 @@ TEST_CASE("MPC logging and observability", "[mpc][logging]") {
     MPCController mpc;
 
     REQUIRE(mockLogger->hasMessageContaining(
-        robotlib::testing::LogEntry::Level::DEBUG, "initialized"));
+        robotlib::testing::LogEntry::Level::INFO, "initialized"));
 
     Pose2D current{0.0, 0.0, 0.0};
     Pose2D target{5.0, 0.0, 0.0};
