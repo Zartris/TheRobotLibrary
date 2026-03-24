@@ -37,7 +37,15 @@ Twist PurePursuitController::compute(const Pose2D& current, const Pose2D& target
         double dx = target.x - current.x;
         double dy = target.y - current.y;
         double dist = std::sqrt(dx * dx + dy * dy);
-        if (dist < m_config.goalTolerance) return {0.0, 0.0};
+        if (dist < m_config.goalTolerance) {
+            m_lastCommandedSpeed = 0.0;
+            auto end = std::chrono::high_resolution_clock::now();
+            auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+            std::ostringstream oss;
+            oss << "PurePursuit compute: " << us << " us (goal reached, no path)";
+            m_logger->trace(oss.str());
+            return {0.0, 0.0};
+        }
 
         double targetAngle = std::atan2(dy, dx);
         double headingError = normalizeAngle(targetAngle - current.theta);

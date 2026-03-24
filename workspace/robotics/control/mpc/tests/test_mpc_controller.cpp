@@ -97,7 +97,7 @@ TEST_CASE("MPC logging and observability", "[mpc][logging]") {
     MPCController mpc;
 
     REQUIRE(mockLogger->hasMessageContaining(
-        robotlib::testing::LogEntry::Level::INFO, "initialized"));
+        robotlib::testing::LogEntry::Level::DEBUG, "initialized"));
 
     Pose2D current{0.0, 0.0, 0.0};
     Pose2D target{5.0, 0.0, 0.0};
