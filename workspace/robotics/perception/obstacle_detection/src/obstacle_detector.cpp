@@ -73,7 +73,9 @@ std::vector<int> ObstacleDetector::dbscan(const std::vector<Eigen::Vector2d>& po
             int q = neighbors[k];
             if (!visited.count(q)) {
                 visited.insert(q);
-                labels[q] = clusterId;
+                if (labels[q] == -1) {
+                    labels[q] = clusterId;  // only assign if unassigned
+                }
 
                 // Find q's neighbors
                 std::vector<int> qNeighbors;

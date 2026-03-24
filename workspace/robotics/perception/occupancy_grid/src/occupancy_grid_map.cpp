@@ -113,7 +113,7 @@ OccupancyGrid OccupancyGridMap::inflate(double radiusMetres) const {
 
                     // Check if within circular radius
                     double dist =
-                        std::sqrt(static_cast<double>(dx * dx + dy * dy)) * m_grid.resolution;
+                        std::sqrt(static_cast<double>(dx) * dx + static_cast<double>(dy) * dy) * m_grid.resolution;
                     if (dist <= radiusMetres) {
                         int idx = ny * inflated.width + nx;
                         if (inflated.cells[idx] <= 0) {
