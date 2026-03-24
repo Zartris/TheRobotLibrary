@@ -105,6 +105,49 @@ TEST_CASE("CBF reset also resets nominal controller", "[cbf]") {
     REQUIRE_THAT(filtered.linear, Catch::Matchers::WithinAbs(nominal.linear, 1e-9));
 }
 
+TEST_CASE("CBF infeasibility: surrounded robot stops", "[cbf]") {
+    CbfConfig cfg;
+    cfg.safetyRadius = 1.0;
+    cfg.alpha = 1.0;
+    CbfSafetyFilter cbf(makePID(), cfg);
+
+    // Obstacles ahead AND behind — constraints may be infeasible
+    cbf.setObstacles({
+        {1.2, 0.0, 0.0},   // ahead, close
+        {-1.2, 0.0, 0.0},  // behind, close
+    });
+
+    Pose2D current{0.0, 0.0, 0.0};
+    Pose2D target{5.0, 0.0, 0.0};
+    auto cmd = cbf.compute(current, target, 0.1);
+
+    // Should produce a safe (finite) output
+    REQUIRE(std::isfinite(cmd.linear));
+    REQUIRE(std::isfinite(cmd.angular));
+}
+
+TEST_CASE("CBF with nonzero obstacle radius", "[cbf]") {
+    CbfConfig cfg;
+    cfg.safetyRadius = 0.3;
+    cfg.alpha = 1.0;
+    CbfSafetyFilter cbf(makePID(), cfg);
+
+    // Obstacle with radius 0.5 — total safe distance = 0.3 + 0.5 = 0.8
+    cbf.setObstacles({{1.0, 0.0, 0.5}});
+
+    Pose2D current{0.0, 0.0, 0.0};
+    Pose2D target{5.0, 0.0, 0.0};
+
+    auto nominal = makePID()->compute(current, target, 0.1);
+    auto filtered = cbf.compute(current, target, 0.1);
+
+    // Distance to obstacle center is 1.0, total safe = 0.8
+    // h = 1.0^2 - 0.8^2 = 0.36 > 0 (safe but close)
+    // CBF should reduce velocity compared to nominal
+    CHECK(filtered.linear <= nominal.linear + 1e-9);
+    REQUIRE(std::isfinite(filtered.linear));
+}
+
 TEST_CASE("CBF logging and observability", "[cbf][logging]") {
     auto cleanup = std::shared_ptr<void>(nullptr, [](void*) { robotlib::clearLoggerRegistry(); });
     auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();

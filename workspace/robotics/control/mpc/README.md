@@ -9,10 +9,12 @@ accounts for the robot's dynamics and respects kinematic and actuator constraint
 
 ## What's in this module
 
-- `MPC` — nonlinear MPC for differential-drive robots (trajectory tracking)
-- Configurable prediction horizon $N$, timestep $\Delta t$, cost weights
-- Constraint support: max speed, max angular rate, max acceleration
-- Uses a simple QP solver (included) for the linear MPC case; pluggable for nonlinear
+- `MPCController` — receding-horizon MPC for differential-drive robots (trajectory tracking)
+- `MPCConfig` — configuration struct (horizon, prediction time, cost weights, velocity limits)
+- Dual backend: acados NMPC solver (when `ROBOTLIB_HAS_ACADOS` is defined) with automatic
+  fallback to an Eigen-based LTV-MPC condensed QP solver
+- Configurable prediction horizon $N$, prediction time $T$, state/control/terminal cost weights
+- Constraint support: max linear velocity, max angular rate
 
 ---
 
@@ -25,17 +27,32 @@ target_link_libraries(your_target PRIVATE mpc)
 ```
 
 ```cpp
-#include <mpc/mpc.hpp>
+#include <mpc/mpc_controller.hpp>
 
-mpc::Config cfg;
-cfg.horizon     = 10;
-cfg.dt          = 0.1;
-cfg.max_speed   = 1.0;   // m/s
-cfg.max_omega   = 1.0;   // rad/s
+robotlib::MPCConfig cfg;
+cfg.horizon          = 10;
+cfg.predictionTime   = 1.0;   // seconds
+cfg.maxLinearVelocity  = 1.0; // m/s
+cfg.maxAngularVelocity = 2.0; // rad/s
 
-mpc::MPC controller{cfg};
-common::Twist cmd = controller.solve(current_state, reference_trajectory);
+robotlib::MPCController controller{cfg};
+
+// Optional: provide a reference path for tracking
+controller.setReferencePath(path);
+
+robotlib::Twist cmd = controller.compute(current_pose, goal_pose, dt);
 ```
+
+---
+
+## Backends
+
+| Backend | Condition | Description |
+|---------|-----------|-------------|
+| acados NMPC | `ROBOTLIB_HAS_ACADOS` defined | Full nonlinear MPC via acados SQP-RTI solver; use `tools/generate_solver.py` to regenerate C code |
+| Eigen LTV-MPC | fallback (default) | Linearised time-varying MPC solved via Cholesky-factored condensed QP using Eigen |
+
+The active backend is reported at construction (debug log) and queryable via `controller.backend()`.
 
 ---
 

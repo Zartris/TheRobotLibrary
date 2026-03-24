@@ -24,6 +24,7 @@ void PurePursuitController::setPath(const Path& path) {
 void PurePursuitController::reset() {
     m_path.clear();
     m_lookaheadPoint = {};
+    m_lastCommandedSpeed = 0.0;
     m_logger->debug("PurePursuitController reset");
 }
 
@@ -50,6 +51,7 @@ Twist PurePursuitController::compute(const Pose2D& current, const Pose2D& target
             std::ostringstream ossRot;
             ossRot << "PurePursuit compute: " << us << " us (no path, rotating in place)";
             m_logger->trace(ossRot.str());
+            m_lastCommandedSpeed = 0.0;
             return {0.0, omega};
         }
 
@@ -65,12 +67,12 @@ Twist PurePursuitController::compute(const Pose2D& current, const Pose2D& target
         oss << "PurePursuit compute: " << us << " us (no path, direct to target)";
         m_logger->trace(oss.str());
 
+        m_lastCommandedSpeed = v;
         return {v, omega};
     }
 
-    // Compute adaptive lookahead distance
-    // (we don't have current speed from IController, so use base lookahead)
-    double lookaheadDist = m_config.lookaheadDistance;
+    // Compute adaptive lookahead distance: L = base + gain * |v_last|
+    double lookaheadDist = m_config.lookaheadDistance + m_config.lookaheadGain * std::abs(m_lastCommandedSpeed);
 
     // Find lookahead point
     m_lookaheadPoint = findLookaheadPoint(current, lookaheadDist);
@@ -84,6 +86,7 @@ Twist PurePursuitController::compute(const Pose2D& current, const Pose2D& target
         std::ostringstream ossGoal;
         ossGoal << "PurePursuit compute: " << us << " us (goal reached)";
         m_logger->trace(ossGoal.str());
+        m_lastCommandedSpeed = 0.0;
         return {0.0, 0.0};
     }
 
@@ -106,6 +109,7 @@ Twist PurePursuitController::compute(const Pose2D& current, const Pose2D& target
     oss << "PurePursuit compute: " << us << " us, curvature=" << curvature;
     m_logger->trace(oss.str());
 
+    m_lastCommandedSpeed = v;
     return {v, omega};
 }
 

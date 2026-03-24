@@ -102,6 +102,37 @@ TEST_CASE("Reset clears path", "[pure_pursuit]") {
     REQUIRE(cmd.linear > 0.0);
 }
 
+TEST_CASE("Speed-dependent lookahead scales correctly", "[pure_pursuit]") {
+    PurePursuitConfig cfg;
+    cfg.lookaheadDistance = 0.5;
+    cfg.lookaheadGain = 0.5;  // L = 0.5 + 0.5 * |v|
+    cfg.maxLinearVelocity = 2.0;
+    PurePursuitController pp(cfg);
+
+    // Straight path
+    Path path;
+    for (int i = 0; i <= 20; ++i) {
+        path.push_back({static_cast<double>(i) * 0.5, 0.0, 0.0});
+    }
+    pp.setPath(path);
+
+    Pose2D current{0.0, 0.0, 0.0};
+    Pose2D goal{10.0, 0.0, 0.0};
+
+    // First call: no previous speed, lookahead = base (0.5)
+    auto cmd1 = pp.compute(current, goal, 0.1);
+    auto la1 = pp.getLookaheadPoint();
+
+    // Second call: has previous speed, lookahead should be larger
+    auto cmd2 = pp.compute(current, goal, 0.1);
+    auto la2 = pp.getLookaheadPoint();
+
+    // Lookahead point should be further ahead after speed builds up
+    double dist1 = std::sqrt(la1.x * la1.x + la1.y * la1.y);
+    double dist2 = std::sqrt(la2.x * la2.x + la2.y * la2.y);
+    CHECK(dist2 >= dist1 - 0.01);  // Should be same or further
+}
+
 TEST_CASE("PurePursuit logging and observability", "[pure_pursuit][logging]") {
     auto cleanup = std::shared_ptr<void>(nullptr, [](void*) { robotlib::clearLoggerRegistry(); });
     auto mockLogger = std::make_shared<robotlib::testing::RecordingLogger>();

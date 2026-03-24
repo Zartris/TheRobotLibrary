@@ -123,13 +123,13 @@ MPCController::MPCController(const MPCConfig& config) : m_config(config), m_logg
 #ifdef ROBOTLIB_HAS_ACADOS
     m_acados = std::make_unique<AcadosSolver>(config.horizon);
     if (m_acados->valid) {
-        m_logger->info("MPCController initialized with acados NMPC backend");
+        m_logger->debug("MPCController initialized with acados NMPC backend");
     } else {
         m_logger->warn("acados solver creation failed -- falling back to Eigen LTV-MPC");
         m_acados.reset();
     }
 #else
-    m_logger->info("MPCController initialized with Eigen LTV-MPC backend (acados not available)");
+    m_logger->debug("MPCController initialized with Eigen LTV-MPC backend (acados not available)");
 #endif
 }
 

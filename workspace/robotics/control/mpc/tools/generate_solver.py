@@ -22,7 +22,7 @@ import numpy as np
 
 # Attempt to import CASAdi and acados
 try:
-    from casadi import SX, vertcat, sin, cos, tan, Function
+    from casadi import SX, vertcat, sin, cos, Function
     from acados_template import AcadosOcp, AcadosOcpSolver, AcadosModel
 except ImportError as e:
     print(f"Error: {e}")
