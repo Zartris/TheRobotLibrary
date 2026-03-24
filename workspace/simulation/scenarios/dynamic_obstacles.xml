@@ -59,7 +59,7 @@
   <actuator>
     <velocity name="left_motor" joint="left_wheel_joint" kv="1"/>
     <velocity name="right_motor" joint="right_wheel_joint" kv="1"/>
-    <!-- Sinusoidal motion for dynamic obstacles via position actuators -->
+    <!-- Position actuators for dynamic obstacles (driven by simulation code) -->
     <position name="dyn_act_1" joint="dyn_obs_1_slide" kp="100"/>
     <position name="dyn_act_2" joint="dyn_obs_2_slide" kp="100"/>
   </actuator>

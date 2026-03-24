@@ -3,6 +3,7 @@
 #include <obstacle_detection/obstacle_detector.hpp>
 #include <testing/recording_logger.hpp>
 #include <logging/get_logger.hpp>
+#include <algorithm>
 #include <cmath>
 #include <numbers>
 

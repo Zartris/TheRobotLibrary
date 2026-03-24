@@ -95,8 +95,9 @@ void OccupancyGridMap::reset() {
 OccupancyGrid OccupancyGridMap::inflate(double radiusMetres) const {
     auto start = std::chrono::high_resolution_clock::now();
 
+    double radius = std::max(0.0, radiusMetres);
     OccupancyGrid inflated = m_grid;  // copy
-    int radiusCells = static_cast<int>(std::ceil(radiusMetres / m_grid.resolution));
+    int radiusCells = static_cast<int>(std::ceil(radius / m_grid.resolution));
 
     // For each occupied cell, mark cells within radius as occupied
     for (int y = 0; y < m_grid.height; ++y) {
@@ -127,7 +128,7 @@ OccupancyGrid OccupancyGridMap::inflate(double radiusMetres) const {
     auto end = std::chrono::high_resolution_clock::now();
     auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::ostringstream oss;
-    oss << "Inflate: " << us << " us, radius=" << radiusMetres << "m (" << radiusCells
+    oss << "Inflate: " << us << " us, radius=" << radius << "m (" << radiusCells
         << " cells)";
     m_logger->trace(oss.str());
 

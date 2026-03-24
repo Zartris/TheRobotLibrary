@@ -1,6 +1,7 @@
 #include <lidar_processing/line_extractor.hpp>
 #include <cmath>
 #include <algorithm>
+#include <limits>
 #include <random>
 #include <sstream>
 #include <chrono>
@@ -84,13 +85,16 @@ std::vector<ExtractedLine> LineExtractor::extractLines(
 
         if (static_cast<int>(bestInliers.size()) < m_config.minInliers) break;
 
+        // Point on line closest to origin: p0 = (-a*c, -b*c) (since a^2+b^2=1)
+        Eigen::Vector2d p0{-bestA * bestC, -bestB * bestC};
+
         // Find line segment endpoints (project inliers onto line)
         double minProj = std::numeric_limits<double>::max();
         double maxProj = std::numeric_limits<double>::lowest();
         Eigen::Vector2d lineDir{bestB, -bestA};  // direction along line
 
         for (int idx : bestInliers) {
-            double proj = lineDir.dot(points[idx]);
+            double proj = lineDir.dot(points[idx] - p0);
             minProj = std::min(minProj, proj);
             maxProj = std::max(maxProj, proj);
         }
@@ -101,8 +105,6 @@ std::vector<ExtractedLine> LineExtractor::extractLines(
         line.c = bestC;
         line.inlierCount = static_cast<int>(bestInliers.size());
         // Reconstruct endpoints from projection
-        // Point on line closest to origin: p0 = (-a*c, -b*c) (since a^2+b^2=1)
-        Eigen::Vector2d p0{-bestA * bestC, -bestB * bestC};
         line.start = p0 + minProj * lineDir;
         line.end = p0 + maxProj * lineDir;
 
