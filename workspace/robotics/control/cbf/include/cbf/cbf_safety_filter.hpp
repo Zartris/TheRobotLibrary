@@ -32,8 +32,8 @@ public:
     /// Update obstacle list each tick
     void setObstacles(const std::vector<Obstacle2D>& obstacles);
 
-    /// Access the wrapped controller
-    IController& nominalController() { return *m_nominal; }
+    /// Access the wrapped controller (may be nullptr if constructed with null)
+    IController* nominalController() { return m_nominal.get(); }
 
     /// Get the safety radius
     double safetyRadius() const { return m_config.safetyRadius; }

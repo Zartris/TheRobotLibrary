@@ -39,6 +39,19 @@ Twist PurePursuitController::compute(const Pose2D& current, const Pose2D& target
 
         double targetAngle = std::atan2(dy, dx);
         double headingError = normalizeAngle(targetAngle - current.theta);
+
+        // If facing away from target, rotate in place rather than driving backward
+        if (std::abs(headingError) > M_PI / 2.0) {
+            double omega = std::copysign(m_config.maxAngularVelocity * 0.5, headingError);
+            omega = std::clamp(omega, -m_config.maxAngularVelocity, m_config.maxAngularVelocity);
+            auto end = std::chrono::high_resolution_clock::now();
+            auto us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+            std::ostringstream ossRot;
+            ossRot << "PurePursuit compute: " << us << " us (no path, rotating in place)";
+            m_logger->trace(ossRot.str());
+            return {0.0, omega};
+        }
+
         double curvature = 2.0 * std::sin(headingError) / std::max(dist, 0.01);
         double v = m_config.maxLinearVelocity * std::cos(headingError);
         v = std::clamp(v, 0.0, m_config.maxLinearVelocity);

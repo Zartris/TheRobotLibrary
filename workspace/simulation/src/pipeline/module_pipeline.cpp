@@ -18,6 +18,7 @@ ModulePipeline::ModulePipeline()
 
 void ModulePipeline::setController(std::unique_ptr<IController> controller) {
     m_controller = std::move(controller);
+    m_controllerName = "custom";
     m_logger->debug("Controller set");
 }
 

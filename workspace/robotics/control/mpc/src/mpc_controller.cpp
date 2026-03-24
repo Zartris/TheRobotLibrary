@@ -77,8 +77,13 @@ Eigen::Vector2d MPCController::solveQP(const Pose2D& current, const Pose2D& targ
         }
     }
 
-    // Linearize around current state with zero velocity reference
-    double v_ref = 0.0;
+    // Derive v_ref from reference trajectory to maintain heading-position coupling
+    double v_ref = 0.1;  // minimum to keep coupling
+    if (!xRef.empty() && xRef.size() > 1) {
+        Eigen::Vector2d delta = (xRef[1] - xRef[0]).head<2>();
+        double dist = delta.norm();
+        v_ref = std::max(dist / m_config.dt, 0.1);
+    }
     Eigen::Matrix3d A;
     Eigen::Matrix<double, 3, 2> B;
     linearize(current, v_ref, m_config.dt, A, B);

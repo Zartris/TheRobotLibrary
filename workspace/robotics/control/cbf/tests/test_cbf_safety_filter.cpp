@@ -17,15 +17,21 @@ static std::unique_ptr<IController> makePID() {
 TEST_CASE("No obstacles: CBF output equals nominal", "[cbf]") {
     CbfConfig cfg;
     cfg.safetyRadius = 0.5;
-    CbfSafetyFilter cbf(makePID(), cfg);
 
-    // No obstacles set
+    // Create two identical controllers
+    auto pid1 = makePID();
+    auto pid2 = makePID();
+
+    // Compute nominal command from the standalone PID
     Pose2D current{0.0, 0.0, 0.0};
     Pose2D target{5.0, 0.0, 0.0};
-    auto nominal = makePID()->compute(current, target, 0.1);
+    auto nominal = pid1->compute(current, target, 0.1);
+
+    // Create CBF with the other PID (no obstacles)
+    CbfSafetyFilter cbf(std::move(pid2), cfg);
     auto filtered = cbf.compute(current, target, 0.1);
 
-    // Should be identical (no filtering)
+    // First call from identical initial state should match
     REQUIRE_THAT(filtered.linear, Catch::Matchers::WithinAbs(nominal.linear, 1e-9));
     REQUIRE_THAT(filtered.angular, Catch::Matchers::WithinAbs(nominal.angular, 1e-9));
 }

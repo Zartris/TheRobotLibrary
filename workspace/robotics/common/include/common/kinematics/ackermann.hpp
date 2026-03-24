@@ -4,6 +4,15 @@
 
 namespace robotlib {
 
+/// Ackermann (bicycle model) kinematics.
+///
+/// IMPORTANT: Unlike other IKinematicModel implementations where Twist.angular
+/// is yaw rate (omega), Ackermann uses Twist.angular as the **steering angle (delta)**
+/// in radians. This matches the natural bicycle model parameterization:
+///   - Twist.linear = forward speed (v) in m/s
+///   - Twist.angular = front-wheel steering angle (delta) in radians
+///
+/// Conversion: omega = v * tan(delta) / wheelbase
 class Ackermann : public IKinematicModel {
 public:
     Ackermann(double wheelbase, double maxSteeringAngle);
