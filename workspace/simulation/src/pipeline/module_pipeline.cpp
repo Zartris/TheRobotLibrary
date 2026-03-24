@@ -189,8 +189,18 @@ bool ModulePipeline::selectController(const std::string& name) {
 }
 
 bool ModulePipeline::selectKinematicModel(const std::string& name) {
-    // Kinematic model selection is informational — the pipeline stores the name
-    // for ImGui display. The sim bridge handles actual kinematics.
+    auto models = availableKinematicModels();
+    bool found = false;
+    for (const auto& m : models) {
+        if (m == name) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        m_logger->warn("Unknown kinematic model: " + name);
+        return false;
+    }
     m_kinematicModelName = name;
     std::ostringstream oss;
     oss << "Kinematic model selected: " << name;

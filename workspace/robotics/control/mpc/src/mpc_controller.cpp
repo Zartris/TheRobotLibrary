@@ -45,6 +45,10 @@ void MPCController::linearize(const Pose2D& state, double v_ref, double dt,
 
 Eigen::Vector2d MPCController::solveQP(const Pose2D& current, const Pose2D& target) {
     const int N = m_config.horizon;
+    if (N <= 0) {
+        m_logger->error("MPC horizon must be >= 1");
+        return Eigen::Vector2d::Zero();
+    }
     const int nx = 3;  // state dim
     const int nu = 2;  // control dim
 
@@ -134,7 +138,14 @@ Eigen::Vector2d MPCController::solveQP(const Pose2D& current, const Pose2D& targ
     H = 0.5 * (H + H.transpose());
 
     // Solve unconstrained QP: U* = -H^-1 f via Cholesky decomposition
-    Eigen::VectorXd Ustar = H.llt().solve(-f);
+    Eigen::LLT<Eigen::MatrixXd> llt(H);
+    Eigen::VectorXd Ustar;
+    if (llt.info() == Eigen::Success) {
+        Ustar = llt.solve(-f);
+    } else {
+        m_logger->error("MPC QP solve failed: H not positive definite");
+        return Eigen::Vector2d::Zero();
+    }
 
     // Clamp all controls to box limits
     for (int k = 0; k < N; ++k) {

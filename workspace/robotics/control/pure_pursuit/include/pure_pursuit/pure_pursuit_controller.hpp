@@ -8,7 +8,7 @@ namespace robotlib {
 
 struct PurePursuitConfig {
     double lookaheadDistance{0.5};   ///< Base lookahead distance (m)
-    double lookaheadGain{0.1};       ///< Speed-dependent gain: L = base + gain * |v|
+    double lookaheadGain{0.1};       ///< Reserved for future speed-adaptive lookahead: L = base + gain * |v|
     double maxLinearVelocity{1.0};   ///< Max forward speed (m/s)
     double maxAngularVelocity{3.0};  ///< Max turning rate (rad/s)
     double goalTolerance{0.1};       ///< Distance to goal to stop (m)

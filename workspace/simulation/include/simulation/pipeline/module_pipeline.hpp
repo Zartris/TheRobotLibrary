@@ -39,7 +39,8 @@ public:
     /// Create and set a controller by name. Returns false if name unknown.
     bool selectController(const std::string& name);
 
-    /// Create and set a kinematic model by name. Returns false if name unknown.
+    /// Select kinematic model by name (UI state only — the simulation bridge
+    /// uses MJCF-defined kinematics directly). Returns false if name is unknown.
     bool selectKinematicModel(const std::string& name);
 
     /// Get available controller names

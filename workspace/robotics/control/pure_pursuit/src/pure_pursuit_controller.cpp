@@ -2,6 +2,7 @@
 #include <common/geometry.hpp>
 #include <cmath>
 #include <algorithm>
+#include <limits>
 #include <sstream>
 #include <chrono>
 
@@ -27,6 +28,7 @@ void PurePursuitController::reset() {
 
 Twist PurePursuitController::compute(const Pose2D& current, const Pose2D& target, double dt) {
     auto start = std::chrono::high_resolution_clock::now();
+    (void)dt;  // dt unused: pure pursuit uses geometry, not time-integration
 
     // If no path, go directly to target (degenerate case)
     if (m_path.empty()) {
